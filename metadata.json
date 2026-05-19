@@ -1,0 +1,8 @@
+{
+  "name": "Sistem Manajemen Absensi Mahasantri",
+  "description": "Sistem informasi manajemen absensi mahasantri dengan React, Tailwind, dan integrasi Google Apps Script + Google Sheets.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

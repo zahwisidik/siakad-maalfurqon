@@ -1,0 +1,130 @@
+import { useState } from 'react';
+import { Navigate, Outlet, useLocation } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import { LayoutDashboard, Users, UserSquare2, BookOpen, Clock, CalendarDays, ClipboardCheck, LogOut, FileText, Menu, X } from 'lucide-react';
+import { NavLink } from 'react-router-dom';
+
+export default function DashboardLayout() {
+  const { user, logout } = useAuth();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const location = useLocation();
+
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  const adminMenus = [
+    { name: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },
+    { name: 'Mahasantri', icon: Users, path: '/mahasantri' },
+    { name: 'Pengajar', icon: UserSquare2, path: '/pengajar' },
+    { name: 'Mata Kuliah', icon: BookOpen, path: '/matakuliah' },
+    { name: 'Kelas', icon: CalendarDays, path: '/kelas' },
+    { name: 'Jadwal', icon: Clock, path: '/jadwal' },
+    { name: 'Rekap Absensi', icon: FileText, path: '/rekap' },
+  ];
+
+  const pengajarMenus = [
+    { name: 'Dashboard', icon: LayoutDashboard, path: '/dashboard-pengajar' },
+    { name: 'Mata Kuliah', icon: BookOpen, path: '/matakuliah-pengajar' },
+    { name: 'Jadwal Saya', icon: Clock, path: '/jadwal-pengajar' },
+    { name: 'Input Absensi', icon: ClipboardCheck, path: '/absensi-pengajar' },
+    { name: 'Rekap Absensi', icon: FileText, path: '/rekap-pengajar' },
+  ];
+
+  const menus = user.role === 'admin' ? adminMenus : pengajarMenus;
+  const activeMenu = menus.find(m => location.pathname.startsWith(m.path));
+  const pageTitle = activeMenu ? activeMenu.name : 'Sistem Absensi';
+
+  return (
+    <div className="h-screen w-full bg-[#F8FAFC] font-sans text-slate-800 overflow-hidden flex">
+      
+      {/* Mobile Sidebar Overlay */}
+      {isSidebarOpen && (
+        <div 
+          className="lg:hidden fixed inset-0 z-40 bg-slate-900/80 backdrop-blur-sm"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
+      {/* Sidebar */}
+      <aside className={`fixed lg:static inset-y-0 left-0 z-50 w-64 bg-[#0F172A] flex flex-col transform transition-transform duration-300 ease-in-out ${
+        isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+      }`}>
+        <div className="p-6 border-b border-slate-700/50 flex justify-between items-center">
+          <div className="flex items-center gap-3">
+            <div className="h-8 w-8 bg-emerald-500 rounded-lg flex items-center justify-center font-bold text-white">M</div>
+            <span className="text-white font-bold tracking-tight text-lg">MA'HAD ALY</span>
+          </div>
+          <button 
+            className="lg:hidden text-slate-400 hover:text-white"
+            onClick={() => setIsSidebarOpen(false)}
+          >
+            <X className="h-6 w-6" />
+          </button>
+        </div>
+        <div className="flex-1 overflow-y-auto">
+          <nav className="p-4 space-y-1">
+            {menus.map((menu) => (
+              <NavLink
+                key={menu.name}
+                to={menu.path}
+                onClick={() => setIsSidebarOpen(false)} // Close sidebar on click mobile
+                className={({ isActive }) =>
+                  `px-4 py-3 rounded-xl flex items-center gap-3 font-medium transition-colors cursor-pointer ${
+                    isActive
+                      ? 'bg-emerald-500/10 text-emerald-400'
+                      : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
+                  }`
+                }
+              >
+                <menu.icon className="w-5 h-5 flex-shrink-0" />
+                {menu.name}
+              </NavLink>
+            ))}
+          </nav>
+        </div>
+        <div className="p-6 mt-auto border-t border-slate-700/50">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 bg-slate-700 rounded-full flex items-center justify-center text-xs font-bold text-white uppercase flex-shrink-0">
+              {(user.nama || 'US').substring(0, 2)}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-white text-sm font-semibold truncate">{user.nama || 'User'}</p>
+              <p className="text-slate-400 text-xs truncate capitalize">{user.role}</p>
+            </div>
+            <button
+              onClick={logout}
+              className="text-slate-400 hover:text-red-400 transition-colors p-1"
+              title="Logout"
+            >
+              <LogOut className="h-5 w-5" />
+            </button>
+          </div>
+        </div>
+      </aside>
+
+      {/* Main Content */}
+      <main className="flex-1 flex flex-col overflow-hidden w-full">
+        <header className="h-16 flex-shrink-0 bg-white border-b border-slate-200 flex items-center justify-between px-4 sm:px-8">
+          <div className="flex items-center gap-3">
+            <button 
+              className="lg:hidden p-2 -ml-2 text-slate-600 hover:bg-slate-100 rounded-md"
+              onClick={() => setIsSidebarOpen(true)}
+            >
+              <Menu className="h-5 w-5" />
+            </button>
+            <h1 className="text-lg sm:text-xl font-bold text-slate-800 truncate">{pageTitle}</h1>
+          </div>
+          <div className="flex items-center gap-2 sm:gap-4">
+            <div className="relative hidden xs:block">
+              <input type="text" placeholder="Cari data..." className="bg-slate-100 border-none rounded-full px-4 py-2 text-sm w-32 sm:w-48 lg:w-64 focus:ring-2 focus:ring-emerald-500 transition-all outline-none" />
+            </div>
+          </div>
+        </header>
+        <div className="flex-1 overflow-y-auto p-4 sm:p-8">
+          <Outlet />
+        </div>
+      </main>
+    </div>
+  );
+}
