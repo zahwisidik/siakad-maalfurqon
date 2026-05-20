@@ -283,12 +283,12 @@ export default function AbsensiPengajar() {
 
       {isDataShown && (
         <div className="bg-white shadow rounded-lg border border-slate-200">
-          <div className="bg-slate-50 px-6 py-4 flex justify-between items-center border-b border-slate-200 sticky top-0 z-20">
+          <div className="bg-slate-50 px-6 py-4 flex justify-between items-center border-b border-slate-200">
             <h3 className="font-bold text-slate-700">Daftar Mahasantri ({mahasantri.length} orang) - {formatDateIndonesian(selectedTanggal)}</h3>
           </div>
           <div className="overflow-x-auto w-full">
             <table className="min-w-[700px] w-full divide-y divide-slate-200">
-              <thead className="bg-white sticky top-[60px] z-10 shadow-sm border-b">
+              <thead className="bg-white sticky top-0 z-10 shadow-sm border-b">
                 <tr>
                   <th className="px-4 sm:px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider bg-white">No / NIM</th>
                   <th className="px-4 sm:px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider bg-white">Nama Lengkap</th>

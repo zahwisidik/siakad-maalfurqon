@@ -47,8 +47,18 @@ Aplikasi Sistem Manajemen Absensi Mahasantri ini dibangun menggunakan React (Vit
 4. Pada bagian **Environment Variables**, tambahkan:
    - Key: `VITE_APPS_SCRIPT_URL`
    - Value: URL Web App Anda dari Google Apps Script.
-5. Biarkan Build Command menggunakan mode Vite.
+5. Biarkan Build Command menggunakan `npm run build` dan Output Directory `dist`.
 6. Klik **Deploy**.
+
+### Tips Troubleshooting:
+- **Deploy Terlalu Lama (> 5 Menit):** 
+  - Batalkan deployment dan coba lagi.
+  - Cek **Build Logs** di dasbor Vercel untuk melihat jika ada error spesifik atau proses yang terhenti.
+  - Pastikan versi Node.js di Vercel (Project Settings > General) sesuai dengan versi LTS (misal 20.x atau 22.x).
+- **Halaman 404 saat Refresh:** 
+  - Pastikan file `vercel.json` ada di root project dengan konfigurasi rewrites ke `index.html` (sudah saya tambahkan).
+- **Error TypeScript:**
+  - Jika Vercel gagal karena error linting/TypeScript, pastikan semua file import sudah benar atau matikan pengecekan di script build jika mendesak (tapi tidak disarankan).
 
 ## Info Login Akun Bawaan (Bila Menggunakan Mode Mock/Local Data):
 Aplikasi ini sudah dipasang Mock Data untuk preview jika Anda belum punya URL backend.

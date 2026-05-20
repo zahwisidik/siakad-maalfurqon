@@ -44,8 +44,8 @@ export default function JadwalPengajar() {
       </div>
 
       <div className="bg-white shadow rounded-lg border border-slate-200 overflow-hidden">
-        <div className="overflow-x-auto min-w-[700px]">
-          <table className="min-w-full divide-y divide-slate-200 text-left">
+        <div className="overflow-x-auto">
+          <table className="min-w-[800px] w-full divide-y divide-slate-200 text-left">
             <thead className="bg-slate-50 sticky top-0 z-10 shadow-sm">
               <tr>
                 <th className="px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider bg-slate-50">Hari</th>

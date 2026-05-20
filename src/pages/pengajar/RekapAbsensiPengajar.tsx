@@ -285,7 +285,7 @@ export default function RekapAbsensiPengajar() {
       </div>
 
       <div className="overflow-x-auto border border-slate-200 rounded-md">
-        <table className="min-w-[600px] w-full divide-y divide-slate-200">
+        <table className="min-w-[900px] w-full divide-y divide-slate-200">
           <thead className="bg-slate-50 sticky top-0 z-10 shadow-sm">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider bg-slate-50">NIM</th>
