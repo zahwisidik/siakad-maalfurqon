@@ -51,13 +51,13 @@ export default function DashboardLayout() {
         isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
       }`}>
         <div className="p-6 border-b border-slate-700/50 flex justify-between items-center">
-          <div className="flex items-center gap-3">
-            <div className="flex w-12 h-12 sm:w-14 sm:h-14 mr-2 flex-shrink-0">
+          <div className="flex items-center gap-2.5">
+            <div className="flex w-14 h-14 flex-shrink-0 items-center justify-center rounded-xl border border-slate-700 bg-slate-800/50 p-1 shadow-inner">
                <img src="/logo.png" alt="Logo" className="w-full h-full object-contain" />
             </div>
             <div className="flex flex-col">
-              <span className="text-white font-bold tracking-tight text-3xl leading-none">MAA</span>
-              <span className="text-emerald-400 font-medium tracking-tight text-sm leading-tight">Magelang</span>
+              <span className="text-white font-bold tracking-tight text-[14px] leading-tight whitespace-nowrap">Ma'had Aly</span>
+              <span className="text-emerald-400 font-semibold tracking-tight text-[12px] leading-tight uppercase whitespace-nowrap">Al-furqon</span>
             </div>
           </div>
           <button 
