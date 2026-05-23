@@ -32,6 +32,8 @@ let mockKelas = [
   { id: 'k2', nama_kelas: 'Syariah', angkatan: '2023' },
 ];
 
+let mockNilai: any[] = [];
+
 export const isUsingMock = !APPS_SCRIPT_URL;
 
 export const api = {
@@ -44,6 +46,7 @@ export const api = {
           if (action === 'getPengajar') resolve({ data: mockPengajar });
           if (action === 'getMatakuliah') resolve({ data: mockMatakuliah });
           if (action === 'getKelas') resolve({ data: mockKelas });
+          if (action === 'getNilai') resolve({ data: mockNilai });
           resolve({ data: [] });
         }, 500);
       });
@@ -64,6 +67,14 @@ export const api = {
             else reject(new Error('Invalid credentials'));
           } else if (action === 'saveAbsensi') {
             resolve({ data: { message: 'Absensi simulated save.'} });
+          } else if (action === 'saveNilai') {
+            const index = mockNilai.findIndex((n: any) => n.mahasiswa_id === payload.mahasiswa_id && n.nama_mk === payload.nama_mk && n.kelas === payload.kelas);
+            if (index > -1) {
+              mockNilai[index] = { ...mockNilai[index], ...payload };
+            } else {
+              mockNilai.push({ id: Date.now().toString(), ...payload });
+            }
+            resolve({ data: { message: 'Nilai tersimpan (mock).' } });
           } else if (action.startsWith('add') || action.startsWith('update') || action.startsWith('delete')) {
              resolve({ data: { message: 'Aksi disimulasikan berhasil.' }});
           }

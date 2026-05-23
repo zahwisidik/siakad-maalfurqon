@@ -27,8 +27,8 @@ export default function DashboardLayout() {
     { name: 'Dashboard', icon: LayoutDashboard, path: '/dashboard-pengajar' },
     { name: 'Mata Kuliah', icon: BookOpen, path: '/matakuliah-pengajar' },
     { name: 'Jadwal Saya', icon: Clock, path: '/jadwal-pengajar' },
-    { name: 'Input Absensi', icon: ClipboardCheck, path: '/absensi-pengajar' },
-    { name: 'Rekap Absensi', icon: FileText, path: '/rekap-pengajar' },
+    { name: 'Absensi', icon: ClipboardCheck, path: '/absensi-pengajar' },
+    { name: 'Penilaian', icon: ClipboardCheck, path: '/penilaian-pengajar' },
   ];
 
   const menus = user.role === 'admin' ? adminMenus : pengajarMenus;

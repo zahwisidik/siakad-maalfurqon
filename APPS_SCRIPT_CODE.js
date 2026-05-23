@@ -11,6 +11,7 @@
  *    - KELAS
  *    - JADWAL
  *    - ABSENSI
+ *    - NILAI
  * 3. Isi header (baris 1) di Sheet masing-masing sebagai berikut:
  *    - USERS: id, nama, email, password, role, status
  *      (Lalu tambahkan 1 baris untuk admin: id: 1, nama: Admin, email: admin@admin.com, password: password123, role: admin, status: aktif)
@@ -20,6 +21,7 @@
  *    - KELAS: id, program, nama_kelas
  *    - JADWAL: id, hari, jam_ke, jam_mulai, jam_berakhir, program, kelas, nama_mk, pengajar
  *    - ABSENSI: id, tanggal, jam_ke, program, kelas, mahasiswa_id, status, pembahasan, timestamp
+ *    - NILAI: id, mahasiswa_id, program, kelas, nama_mk, presensi, tugas, uts, uas, total, tahun_akademik, semester
  * 4. Klik menu Extensions (Ekstensi) > Apps Script.
  * 5. Hapus script bawaan, lalu copy-paste semua kode di bawah ini.
  * 6. Klik tombol Deploy > New deployment (Penerapan baru).
@@ -49,7 +51,8 @@ const SHEET_SCHEMAS = {
   'MATAKULIAH': ['id', 'kode', 'nama_mk', 'program', 'kelas', 'pengajar'],
   'KELAS': ['id', 'program', 'nama_kelas'],
   'JADWAL': ['id', 'hari', 'jam_ke', 'jam_mulai', 'jam_berakhir', 'program', 'kelas', 'nama_mk', 'pengajar'],
-  'ABSENSI': ['id', 'tanggal', 'jam_ke', 'program', 'kelas', 'nama_mk', 'mahasiswa_id', 'status', 'pembahasan', 'timestamp']
+  'ABSENSI': ['id', 'tanggal', 'jam_ke', 'program', 'kelas', 'nama_mk', 'mahasiswa_id', 'status', 'pembahasan', 'timestamp'],
+  'NILAI': ['id', 'mahasiswa_id', 'program', 'kelas', 'nama_mk', 'presensi', 'tugas', 'uts', 'uas', 'total', 'tahun_akademik', 'semester']
 };
 
 function getSheetCaseInsensitive(ss, name) {
@@ -197,6 +200,8 @@ function doGet(e) {
         return successResponse(getData('JADWAL'));
       case 'getAbsensi':
         return successResponse(getData('ABSENSI'));
+      case 'getNilai':
+        return successResponse(getData('NILAI'));
       default:
         return errorResponse("Unknown action");
     }
@@ -279,6 +284,9 @@ function doPost(e) {
         return updateData('ABSENSI', body.id, body.data);
       case 'deleteAbsensi':
         return deleteData('ABSENSI', body.id);
+        
+      case 'saveNilai':
+        return upsertNilai(body);
         
       default:
         return errorResponse("Unknown POST action");
@@ -469,6 +477,58 @@ function saveAbsensiBatch(absensiArr) {
   }
   
   return successResponse({ message: "Absensi saved successfully" });
+}
+
+function upsertNilai(item) {
+  const sheet = ensureSheetHeaders('NILAI');
+  const data = sheet.getDataRange().getValues();
+  if (data.length === 0) return errorResponse("Sheet NILAI is empty or uninitialized");
+  
+  const headers = data[0];
+  const normalizedHeaders = headers.map(h => h ? h.toString().toLowerCase().trim() : '');
+  
+  const idxMhs = normalizedHeaders.indexOf('mahasiswa_id');
+  const idxMk = normalizedHeaders.indexOf('nama_mk');
+  const idxKelas = normalizedHeaders.indexOf('kelas');
+  
+  if (idxMhs === -1 || idxMk === -1 || idxKelas === -1) {
+    return errorResponse("Missing required columns in NILAI sheet for upsert matching");
+  }
+  
+  let foundRowIndex = -1;
+  // Start from 1 to skip headers
+  for (let i = 1; i < data.length; i++) {
+    let mhsId = data[i][idxMhs];
+    let mk = data[i][idxMk];
+    let kelas = data[i][idxKelas];
+    
+    if (mhsId == item.mahasiswa_id && mk == item.nama_mk && kelas == item.kelas) {
+      foundRowIndex = i;
+      break;
+    }
+  }
+  
+  if (foundRowIndex > -1) {
+    // Update existing row
+    for (let j = 0; j < headers.length; j++) {
+      const headerName = normalizedHeaders[j];
+      // update only provided fields except id
+      if (item.hasOwnProperty(headerName) && headerName !== 'id') {
+        sheet.getRange(foundRowIndex + 1, j + 1).setValue(item[headerName] !== undefined ? item[headerName] : "");
+      }
+    }
+    return successResponse({ message: "Nilai updated successfully" });
+  } else {
+    // Add new row
+    item.id = generateId();
+    const newRow = [];
+    for (let j = 0; j < headers.length; j++) {
+      const headerName = normalizedHeaders[j];
+      newRow.push(item[headerName] !== undefined ? item[headerName] : "");
+    }
+    sheet.appendRow(newRow);
+    return successResponse({ id: item.id, message: "Nilai created successfully" });
+  }
 }
 
 function generateId() {

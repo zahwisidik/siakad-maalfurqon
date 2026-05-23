@@ -63,3 +63,18 @@ export interface Absensi {
   pembahasan?: string;
   timestamp: string;
 }
+
+export interface Nilai {
+  id: string;
+  mahasiswa_id: string;
+  program: string;
+  kelas: string;
+  nama_mk: string;
+  presensi: number; // Max 10
+  tugas: number; // Max 20
+  uts: number; // Max 30
+  uas: number; // Max 40
+  total: number;
+  tahun_akademik?: string;
+  semester?: string;
+}

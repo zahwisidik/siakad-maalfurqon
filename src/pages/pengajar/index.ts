@@ -1,11 +1,13 @@
 import DashboardPengajar from './DashboardPengajar';
 import MatakuliahPengajar from './MatakuliahPengajar';
 import JadwalPengajar from './JadwalPengajar';
-import RekapAbsensiPengajar from './RekapAbsensiPengajar';
+import AbsensiPengajar from './AbsensiPengajar';
+import PenilaianPengajar from './PenilaianPengajar';
 
 export {
   DashboardPengajar,
   MatakuliahPengajar,
   JadwalPengajar,
-  RekapAbsensiPengajar
+  AbsensiPengajar,
+  PenilaianPengajar
 };

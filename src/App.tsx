@@ -15,7 +15,7 @@ import AbsensiPengajar from './pages/pengajar/AbsensiPengajar';
 import DashboardPengajar from './pages/pengajar/DashboardPengajar';
 import MatakuliahPengajar from './pages/pengajar/MatakuliahPengajar';
 import JadwalPengajar from './pages/pengajar/JadwalPengajar';
-import RekapAbsensiPengajar from './pages/pengajar/RekapAbsensiPengajar';
+import PenilaianPengajar from './pages/pengajar/PenilaianPengajar';
 import SetupGuide from './pages/SetupGuide';
 
 function AppRoot() {
@@ -50,7 +50,7 @@ export default function App() {
             <Route path="/matakuliah-pengajar" element={<MatakuliahPengajar />} />
             <Route path="/jadwal-pengajar" element={<JadwalPengajar />} />
             <Route path="/absensi-pengajar" element={<AbsensiPengajar />} />
-            <Route path="/rekap-pengajar" element={<RekapAbsensiPengajar />} />
+            <Route path="/penilaian-pengajar" element={<PenilaianPengajar />} />
           </Route>
         </Routes>
       </AuthProvider>
