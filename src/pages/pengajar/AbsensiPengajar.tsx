@@ -101,14 +101,16 @@ export default function AbsensiPengajar() {
   const fetchInitialData = async () => {
     if (!user?.nama) return;
     try {
-      const [resMhs, resJdwl, resMk, resKls] = await Promise.all([
+      const [resMhs, resJdwl, resMk, resKls, resAbs] = await Promise.all([
         api.get('getMahasantri'),
         api.get('getJadwal'),
         api.get('getMatakuliah'),
-        api.get('getKelas')
+        api.get('getKelas'),
+        api.get('getAbsensi')
       ]);
       
       setMahasantri(resMhs.data || []);
+      setAbsensiData(resAbs.data || []);
       
       const myMk = (resMk.data || []).filter((m: any) => {
         const mp = String(m.pengajar || '').trim().toLowerCase();
@@ -134,12 +136,37 @@ export default function AbsensiPengajar() {
       
       const sortedKelas = Array.from(uniqueKelasNames);
       if (sortedKelas.length > 0) setSelectedKelas(sortedKelas[0]);
+
+      setHasQueried(true);
     } catch (err) {
       toast.error('Gagal mengambil data referensi');
     } finally {
       setIsFetchingInitial(false);
     }
   };
+
+  // Main dropdown filters automatic synchronization
+  useEffect(() => {
+    if (selectedProgram) {
+      const availableMK = Array.from(new Set(matakuliahList.filter(m => m.program === selectedProgram).map(m => m.nama_mk)));
+      if (availableMK.length > 0 && !availableMK.includes(selectedMatkul)) {
+        setSelectedMatkul(availableMK[0]);
+      } else if (availableMK.length === 0) {
+        setSelectedMatkul('');
+      }
+    }
+  }, [selectedProgram, matakuliahList]);
+
+  useEffect(() => {
+    if (selectedMatkul) {
+      const availableKelas = Array.from(new Set(matakuliahList.filter(m => m.program === selectedProgram && m.nama_mk === selectedMatkul).map(m => m.kelas)));
+      if (availableKelas.length > 0 && !availableKelas.includes(selectedKelas)) {
+        setSelectedKelas(availableKelas[0]);
+      } else if (availableKelas.length === 0) {
+        setSelectedKelas('');
+      }
+    }
+  }, [selectedMatkul, selectedProgram, matakuliahList]);
 
   // derived options for MAIN view based on program
   const mainAvailableMatkuls = Array.from(new Set(
@@ -634,7 +661,7 @@ export default function AbsensiPengajar() {
       </div>
 
       {/* FILTER SECTION */}
-      <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
+      <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
         <div className="w-full">
           <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Program</label>
           <div className="relative">
@@ -696,16 +723,6 @@ export default function AbsensiPengajar() {
               className="pl-10 block w-full rounded-md border-slate-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm p-2.5 border bg-white"
             />
           </div>
-        </div>
-
-        <div className="w-full flex">
-          <button 
-            onClick={tampilkanRekap}
-            disabled={loading || isFetchingInitial}
-            className="w-full inline-flex items-center justify-center rounded-md border border-transparent bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 disabled:opacity-50 cursor-pointer text-center font-bold"
-          >
-            {loading ? 'Memproses...' : 'Tampilkan Laporan'}
-          </button>
         </div>
       </div>
 
@@ -784,7 +801,7 @@ export default function AbsensiPengajar() {
             ) : !hasQueried ? (
               <tr>
                 <td colSpan={totalColumnsCount + 2 || 3} className="px-6 py-12 text-center text-sm text-slate-500">
-                  Silakan pilih filter di atas kemudian klik tombol <b>Tampilkan Laporan</b> untuk melihat data.
+                  Memuat data absensi...
                 </td>
               </tr>
             ) : studentsInClass.length === 0 ? (

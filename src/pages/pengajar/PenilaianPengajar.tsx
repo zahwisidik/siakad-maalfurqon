@@ -459,15 +459,6 @@ export default function PenilaianPengajar() {
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center h-48 text-emerald-600">
-        <RefreshCw className="animate-spin mr-2" />
-        Loading data...
-      </div>
-    );
-  }
-
   // Get unique programs, matakuliah from jadwal
   const uniqueProgramsOptions = Array.from(new Set(jadwals.map(j => j.program)));
   const uniqueMKOptions = selectedProgram ? Array.from(new Set(jadwals.filter(j => j.program === selectedProgram).map(j => j.nama_mk))) : [];
@@ -583,7 +574,54 @@ export default function PenilaianPengajar() {
       </div>
 
       {(selectedMK && selectedKelas) ? (
-        activeMhsList.length === 0 ? (
+        isLoading ? (
+          <div className="overflow-x-auto animate-pulse">
+            <table className="min-w-full divide-y divide-slate-200">
+              <thead className="bg-slate-50">
+                <tr>
+                  <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider w-[5%] bg-slate-100">
+                    No
+                  </th>
+                  <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider w-[30%]">
+                    Nama Mahasantri / NIM
+                  </th>
+                  <th scope="col" className="px-4 py-4 text-center text-xs font-semibold text-emerald-700 uppercase tracking-wider bg-emerald-50/50">
+                    Presensi<br/><span className="text-[10px] text-emerald-600 font-normal block mt-0.5">(Maks. 10)</span>
+                  </th>
+                  <th scope="col" className="px-4 py-4 text-center text-xs font-semibold text-blue-700 uppercase tracking-wider bg-blue-50/50">
+                    Tugas<br/><span className="text-[10px] text-blue-600 font-normal block mt-0.5">(Maks. 20)</span>
+                  </th>
+                  <th scope="col" className="px-4 py-4 text-center text-xs font-semibold text-amber-700 uppercase tracking-wider bg-amber-50/50">
+                    UTS<br/><span className="text-[10px] text-amber-600 font-normal block mt-0.5">(Maks. 30)</span>
+                  </th>
+                  <th scope="col" className="px-4 py-4 text-center text-xs font-semibold text-indigo-700 uppercase tracking-wider bg-indigo-50/50">
+                    UAS<br/><span className="text-[10px] text-indigo-600 font-normal block mt-0.5">(Maks. 40)</span>
+                  </th>
+                  <th scope="col" className="px-6 py-4 text-center text-xs font-semibold text-slate-700 uppercase tracking-wider bg-slate-100 border-l border-slate-200">
+                    Total
+                  </th>
+                  <th scope="col" className="px-6 py-4 text-center text-xs font-semibold text-slate-700 uppercase tracking-wider bg-slate-100">
+                    Aksi
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-slate-100">
+                {[1, 2, 3].map((i) => (
+                  <tr key={i} className="animate-pulse">
+                    <td className="px-6 py-4 bg-slate-50/30"><div className="h-4 bg-slate-200 rounded w-4"></div></td>
+                    <td className="px-6 py-4"><div className="h-4 bg-slate-200 rounded w-40"></div><div className="h-3 bg-slate-100 rounded w-24 mt-2"></div></td>
+                    <td className="px-2 py-4 bg-emerald-50/10"><div className="h-4 bg-slate-200 rounded w-8 mx-auto"></div></td>
+                    <td className="px-2 py-4 bg-blue-50/10"><div className="h-4 bg-slate-200 rounded w-8 mx-auto"></div></td>
+                    <td className="px-2 py-4 bg-amber-50/10"><div className="h-4 bg-slate-200 rounded w-8 mx-auto"></div></td>
+                    <td className="px-2 py-4 bg-indigo-50/10"><div className="h-4 bg-slate-200 rounded w-8 mx-auto"></div></td>
+                    <td className="px-6 py-4 bg-slate-50 border-l border-slate-200"><div className="h-4 bg-slate-200 rounded w-8 mx-auto"></div></td>
+                    <td className="px-6 py-4 text-center"><div className="h-8 bg-slate-200 rounded w-16 mx-auto"></div></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : activeMhsList.length === 0 ? (
           <div className="p-12 text-center text-slate-500">
             <AlertCircle className="w-12 h-12 text-slate-300 mx-auto mb-3" />
             <p className="text-lg font-medium text-slate-600">Belum ada data mahasantri</p>
