@@ -12,7 +12,9 @@ let mockMahasantri = [
 ];
 
 let mockJadwal = [
-  { id: 'j1', hari: 'Senin', jam_mulai: '08:00', jam_selesai: '10:00', kelas: 'Syariah', matakuliah: 'Fiqih Munakahat', pengajar: 'Ust. Ahmad' }
+  { id: 'j1', hari: 'Senin', jam_ke: '1', jam_mulai: '08:00', jam_berakhir: '10:00', jam_selesai: '10:00', program: 'I\'dad Lughowi', kelas: 'Semester 2 - Putra', nama_mk: 'Fiqih Munakahat', matakuliah: 'Fiqih Munakahat', pengajar: 'Ust. Ahmad' },
+  { id: 'j2', hari: 'Senin', jam_ke: '2', jam_mulai: '10:15', jam_berakhir: '12:00', jam_selesai: '12:00', program: 'Syariah', kelas: 'Semester 1 - Putra', nama_mk: 'Aqidah Dasar', matakuliah: 'Aqidah Dasar', pengajar: 'Ust. Ahmad' },
+  { id: 'j3', hari: 'Selasa', jam_ke: '1', jam_mulai: '08:00', jam_berakhir: '10:00', jam_selesai: '10:00', program: 'I\'dad Lughowi', kelas: 'Semester 2 - Putra', nama_mk: 'Bahasa Arab', matakuliah: 'Bahasa Arab', pengajar: 'Ust. Ahmad' }
 ];
 
 let mockPengajar = [

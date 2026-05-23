@@ -60,5 +60,6 @@ export interface Absensi {
   kelas: string;
   mahasiswa_id: string; // referensi id mahasantri
   status: 'hadir' | 'izin' | 'sakit' | 'alpa' | 'terlambat' | string;
+  pembahasan?: string;
   timestamp: string;
 }

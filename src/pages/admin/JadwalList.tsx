@@ -5,6 +5,7 @@ import { Jadwal, Matakuliah, Pengajar } from '../../types';
 import { Pen, Trash2, Plus, Search } from 'lucide-react';
 import Swal from 'sweetalert2';
 import { PROGRAM_OPTIONS, KELAS_OPTIONS } from '../../constants';
+import { formatTimeDisplay } from '../../utils/time';
 
 export default function JadwalList() {
   const [_data, _setData] = useState<Jadwal[]>([]);
@@ -183,12 +184,12 @@ export default function JadwalList() {
                     <div className="text-sm text-slate-500">{item.pengajar}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-slate-900">{item.program}</div>
-                    <div className="text-sm text-slate-500">{item.kelas}</div>
+                    <div className="text-sm text-slate-900 font-semibold">{item.program}</div>
+                    <div className="text-xs text-slate-500 mt-1">{item.kelas}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
                     <span className="font-semibold text-slate-700">{item.hari} (Jam ke-{item.jam_ke})</span><br />
-                    {item.jam_mulai} - {item.jam_berakhir}
+                    {formatTimeDisplay(item.jam_mulai)} - {formatTimeDisplay(item.jam_berakhir)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
                     <button onClick={() => openEditModal(item)} className="text-indigo-600 hover:text-indigo-900 bg-indigo-50 p-1.5 rounded-md"><Pen className="h-4 w-4" /></button>

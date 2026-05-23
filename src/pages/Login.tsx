@@ -50,7 +50,6 @@ export default function Login() {
       <div className="flex-1 flex flex-col justify-center py-12 px-4 sm:px-6 lg:flex-none lg:px-20 xl:px-24">
         <div className="mx-auto w-full max-w-sm lg:w-96">
           <div>
-            <h2 className="text-3xl font-extrabold text-emerald-600">Sista Ma'had</h2>
             <h2 className="mt-6 text-3xl font-bold tracking-tight text-slate-900">Sign in to your account</h2>
             <p className="mt-2 text-sm text-slate-600">
               Sistem Manajemen Absensi Mahasantri
@@ -118,8 +117,8 @@ export default function Login() {
       </div>
       <div className="relative hidden w-0 flex-1 lg:block bg-emerald-900 border-l border-emerald-800">
         <div className="absolute inset-0 h-full w-full object-cover p-12 flex flex-col justify-center items-center text-center text-white">
-          <h1 className="text-5xl font-bold mb-4 font-sans tracking-tight">Ma'had Aly Institute</h1>
-          <p className="text-emerald-100 text-lg max-w-lg">Sistem digitalisasi presensi dan perkuliahan. Tingkatkan kedisiplinan dan transparansi data melalui platform modern.</p>
+          <h1 className="text-5xl font-bold mb-4 font-sans tracking-tight">Ma'had Aly Al-Furqon Magelang</h1>
+          <p className="text-emerald-100 text-lg max-w-lg">Platform digital absensi perkuliahan untuk memudahkan monitoring kehadiran mahasantri dan pengajar secara real-time.</p>
         </div>
       </div>
     </div>

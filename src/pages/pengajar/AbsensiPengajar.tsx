@@ -22,6 +22,7 @@ export default function AbsensiPengajar() {
 
   const [mahasantri, setMahasantri] = useState<Mahasantri[]>([]);
   const [absensi, setAbsensi] = useState<Record<string, string>>({});
+  const [pembahasan, setPembahasan] = useState('');
   const [loadingForm, setLoadingForm] = useState(true);
   const [loadingData, setLoadingData] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -38,8 +39,16 @@ export default function AbsensiPengajar() {
         api.get('getJadwal'),
         api.get('getMatakuliah')
       ]);
-      const myMk = (resMk.data || []).filter((m: any) => m.pengajar === user.nama);
-      const myJdwl = (resJdwl.data || []).filter((j: any) => j.pengajar === user.nama);
+      const myMk = (resMk.data || []).filter((m: any) => {
+        const mp = String(m.pengajar || '').trim().toLowerCase();
+        const un = String(user.nama || '').trim().toLowerCase();
+        return mp === un && mp !== '';
+      });
+      const myJdwl = (resJdwl.data || []).filter((j: any) => {
+        const jp = String(j.pengajar || '').trim().toLowerCase();
+        const un = String(user.nama || '').trim().toLowerCase();
+        return jp === un && jp !== '';
+      });
       
       setMatakuliahList(myMk);
       setJadwalList(myJdwl);
@@ -118,6 +127,7 @@ export default function AbsensiPengajar() {
       );
       
       setMahasantri(filtered);
+      setPembahasan('');
       
       const initAbs: Record<string, string> = {};
       filtered.forEach((m: Mahasantri) => {
@@ -153,7 +163,8 @@ export default function AbsensiPengajar() {
       program: selectedProgram,
       kelas: selectedKelas,
       mahasiswa_id: mId,
-      status: absensi[mId]
+      status: absensi[mId],
+      pembahasan: pembahasan
     }));
 
     try {
@@ -328,6 +339,18 @@ export default function AbsensiPengajar() {
                 ))}
               </tbody>
             </table>
+          </div>
+          <div className="p-6 border-t border-slate-200 bg-slate-50/50">
+            <label className="block text-sm font-semibold text-slate-700 mb-2">
+              Jurnal Pembahasan / Materi Perkuliahan
+            </label>
+            <textarea
+              rows={3}
+              value={pembahasan}
+              onChange={(e) => setPembahasan(e.target.value)}
+              placeholder="Tuliskan pokok pembahasan, submateri, atau catatan khusus perkuliahan hari ini..."
+              className="block w-full rounded-md border-slate-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm p-3 border bg-white"
+            />
           </div>
           <div className="bg-slate-50 px-6 py-4 border-t border-slate-200 flex justify-end">
             <button 

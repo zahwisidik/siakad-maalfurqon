@@ -52,8 +52,13 @@ export default function DashboardLayout() {
       }`}>
         <div className="p-6 border-b border-slate-700/50 flex justify-between items-center">
           <div className="flex items-center gap-3">
-            <div className="h-8 w-8 bg-emerald-500 rounded-lg flex items-center justify-center font-bold text-white">M</div>
-            <span className="text-white font-bold tracking-tight text-lg">MA'HAD ALY</span>
+            <div className="flex w-12 h-12 sm:w-14 sm:h-14 mr-2 flex-shrink-0">
+               <img src="/logo.png" alt="Logo" className="w-full h-full object-contain" />
+            </div>
+            <div className="flex flex-col">
+              <span className="text-white font-bold tracking-tight text-3xl leading-none">MAA</span>
+              <span className="text-emerald-400 font-medium tracking-tight text-sm leading-tight">Magelang</span>
+            </div>
           </div>
           <button 
             className="lg:hidden text-slate-400 hover:text-white"
@@ -85,9 +90,6 @@ export default function DashboardLayout() {
         </div>
         <div className="p-6 mt-auto border-t border-slate-700/50">
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 bg-slate-700 rounded-full flex items-center justify-center text-xs font-bold text-white uppercase flex-shrink-0">
-              {(user.nama || 'US').substring(0, 2)}
-            </div>
             <div className="flex-1 min-w-0">
               <p className="text-white text-sm font-semibold truncate">{user.nama || 'User'}</p>
               <p className="text-slate-400 text-xs truncate capitalize">{user.role}</p>

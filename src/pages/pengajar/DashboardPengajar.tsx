@@ -3,6 +3,7 @@ import { api } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 import { BookOpen, Clock, Users, CalendarDays } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { formatTimeDisplay } from '../../utils/time';
 
 export default function DashboardPengajar() {
   const { user } = useAuth();
@@ -12,7 +13,7 @@ export default function DashboardPengajar() {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [user]);
 
   const fetchData = async () => {
     if (!user?.nama) return;
@@ -22,8 +23,16 @@ export default function DashboardPengajar() {
         api.get('getMatakuliah')
       ]);
 
-      const myMk = (mk.data || []).filter((m: any) => m.pengajar === user.nama);
-      const myJadwal = (jd.data || []).filter((j: any) => j.pengajar === user.nama);
+      const myMk = (mk.data || []).filter((m: any) => {
+        const mp = String(m.pengajar || '').trim().toLowerCase();
+        const un = String(user.nama || '').trim().toLowerCase();
+        return mp === un && mp !== '';
+      });
+      const myJadwal = (jd.data || []).filter((j: any) => {
+        const jp = String(j.pengajar || '').trim().toLowerCase();
+        const un = String(user.nama || '').trim().toLowerCase();
+        return jp === un && jp !== '';
+      });
 
       const uniqueKelas = new Set(myMk.map((m: any) => m.kelas));
       
@@ -39,8 +48,8 @@ export default function DashboardPengajar() {
       const todayName = daysMap[new Date().getDay()];
       
       const todayJdwl = myJadwal
-        .filter((j: any) => j.hari === todayName)
-        .sort((a: any, b: any) => (a.jam_mulai || '').localeCompare(b.jam_mulai || ''));
+        .filter((j: any) => String(j.hari || '').trim().toLowerCase() === todayName.toLowerCase())
+        .sort((a: any, b: any) => String(a.jam_mulai || '').localeCompare(String(b.jam_mulai || '')));
         
       setTodayJadwal(todayJdwl);
     } catch (err) {
@@ -94,10 +103,15 @@ export default function DashboardPengajar() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         <div className="lg:col-span-8 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
           <div className="flex items-center justify-between mb-6">
-            <h3 className="font-bold text-slate-700 flex items-center gap-2">
-              <CalendarDays className="w-5 h-5 text-slate-400" />
-              Jadwal Mengajar Hari Ini
-            </h3>
+            <div>
+              <h3 className="font-bold text-slate-700 flex items-center gap-2">
+                <CalendarDays className="w-5 h-5 text-slate-400" />
+                Jadwal Mengajar Hari Ini
+              </h3>
+              <p className="text-sm text-slate-500 mt-1 pl-7">
+                {new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+              </p>
+            </div>
             <Link to="/jadwal-pengajar" className="text-sm font-semibold text-emerald-600 hover:text-emerald-700">Lihat Semua</Link>
           </div>
           
@@ -105,9 +119,9 @@ export default function DashboardPengajar() {
             {todayJadwal.length > 0 ? todayJadwal.map(j => (
               <div key={j.id} className="flex flex-col sm:flex-row gap-4 sm:items-center justify-between p-4 rounded-xl border border-slate-100 bg-slate-50 hover:bg-emerald-50 transition-colors">
                 <div>
-                  <div className="text-xs font-bold text-emerald-600 mb-1">{j.jam_mulai} - {j.jam_berakhir}</div>
+                  <div className="text-xs font-bold text-emerald-600 mb-1">{formatTimeDisplay(j.jam_mulai)} - {formatTimeDisplay(j.jam_berakhir)}</div>
                   <h4 className="font-bold text-slate-800">{j.nama_mk}</h4>
-                  <p className="text-sm text-slate-500 mt-1">Kelas: {j.kelas} ({j.program})</p>
+                  <p className="text-sm text-slate-500 mt-1">{j.program} - {j.kelas}</p>
                 </div>
                 <Link to="/absensi-pengajar" className="shrink-0 px-4 py-2 bg-white text-emerald-600 font-semibold text-sm rounded-lg border border-emerald-200 hover:bg-emerald-600 hover:text-white transition-colors">
                   Isi Absensi

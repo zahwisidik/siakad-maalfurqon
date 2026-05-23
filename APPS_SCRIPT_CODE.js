@@ -19,7 +19,7 @@
  *    - MATAKULIAH: id, kode, nama_mk, program, kelas, pengajar
  *    - KELAS: id, program, nama_kelas
  *    - JADWAL: id, hari, jam_ke, jam_mulai, jam_berakhir, program, kelas, nama_mk, pengajar
- *    - ABSENSI: id, tanggal, jam_ke, program, kelas, mahasiswa_id, status, timestamp
+ *    - ABSENSI: id, tanggal, jam_ke, program, kelas, mahasiswa_id, status, pembahasan, timestamp
  * 4. Klik menu Extensions (Ekstensi) > Apps Script.
  * 5. Hapus script bawaan, lalu copy-paste semua kode di bawah ini.
  * 6. Klik tombol Deploy > New deployment (Penerapan baru).
@@ -41,6 +41,126 @@ function getSpreadsheet() {
     return SpreadsheetApp.getActiveSpreadsheet();
   }
   return SpreadsheetApp.openById(SPREADSHEET_ID);
+}
+
+const SHEET_SCHEMAS = {
+  'MAHASANTRI': ['id', 'nim', 'nama', 'jenis_kelamin', 'kelas', 'semester', 'status'],
+  'PENGAJAR': ['id', 'nama', 'mapel', 'status'],
+  'MATAKULIAH': ['id', 'kode', 'nama_mk', 'program', 'kelas', 'pengajar'],
+  'KELAS': ['id', 'program', 'nama_kelas'],
+  'JADWAL': ['id', 'hari', 'jam_ke', 'jam_mulai', 'jam_berakhir', 'program', 'kelas', 'nama_mk', 'pengajar'],
+  'ABSENSI': ['id', 'tanggal', 'jam_ke', 'program', 'kelas', 'nama_mk', 'mahasiswa_id', 'status', 'pembahasan', 'timestamp']
+};
+
+function getSheetCaseInsensitive(ss, name) {
+  const sheets = ss.getSheets();
+  const targetLower = name.toLowerCase().trim();
+  for (let i = 0; i < sheets.length; i++) {
+    if (sheets[i].getName().toLowerCase().trim() === targetLower) {
+      return sheets[i];
+    }
+  }
+  return null;
+}
+
+function cleanupEmptyRows(sheet) {
+  const data = sheet.getDataRange().getValues();
+  if (data.length <= 1) return;
+  const headers = data[0];
+  const normalizedHeaders = headers.map(h => h ? h.toString().toLowerCase().trim() : '');
+  const idIndex = normalizedHeaders.indexOf('id');
+  
+  const rangesToDelete = []; // Array of {start: rowNum, count: num}
+  let currentStart = -1;
+  let currentCount = 0;
+  
+  for (let i = data.length - 1; i >= 1; i--) {
+    let isRowEmpty = true;
+    for (let j = 0; j < headers.length; j++) {
+      if (j !== idIndex) {
+        const val = data[i][j];
+        if (val !== "" && val !== null && val !== undefined) {
+          isRowEmpty = false;
+          break;
+        }
+      }
+    }
+    
+    if (isRowEmpty) {
+      const rowNum = i + 1;
+      if (currentStart === -1) {
+        currentStart = rowNum;
+        currentCount = 1;
+      } else if (rowNum === currentStart - 1) {
+        currentStart = rowNum;
+        currentCount++;
+      } else {
+        rangesToDelete.push({ start: currentStart, count: currentCount });
+        currentStart = rowNum;
+        currentCount = 1;
+      }
+    } else {
+      if (currentStart !== -1) {
+        rangesToDelete.push({ start: currentStart, count: currentCount });
+        currentStart = -1;
+        currentCount = 0;
+      }
+    }
+  }
+  
+  if (currentStart !== -1) {
+    rangesToDelete.push({ start: currentStart, count: currentCount });
+  }
+  
+  if (rangesToDelete.length > 0) {
+    // Delete ranges from bottom to top to preserve correct row indexing
+    rangesToDelete.forEach(range => {
+      sheet.deleteRows(range.start, range.count);
+    });
+    SpreadsheetApp.flush();
+  }
+}
+
+function ensureSheetHeaders(sheetName) {
+  const ss = getSpreadsheet();
+  let sheet = getSheetCaseInsensitive(ss, sheetName);
+  if (!sheet) {
+    sheet = ss.insertSheet(sheetName);
+  }
+  
+  const expectedCols = SHEET_SCHEMAS[sheetName] || [];
+  if (expectedCols.length === 0) return sheet;
+  
+  let lastCol = sheet.getLastColumn();
+  let headers = [];
+  if (lastCol > 0) {
+    headers = sheet.getRange(1, 1, 1, lastCol).getValues()[0];
+  }
+  
+  let normalizedHeaders = headers.map(h => h ? h.toString().toLowerCase().trim() : '');
+  let added = false;
+  
+  expectedCols.forEach(col => {
+    let index = normalizedHeaders.indexOf(col.toLowerCase().trim());
+    if (index === -1) {
+      let currentLastCol = sheet.getLastColumn();
+      if (currentLastCol === 0) {
+        sheet.getRange(1, 1).setValue(col);
+      } else {
+        sheet.getRange(1, currentLastCol + 1).setValue(col);
+      }
+      added = true;
+    }
+  });
+  
+  if (added) {
+    SpreadsheetApp.flush();
+  }
+  
+  // Clean up any empty/ghost rows containing only automatic ID or blank entries
+  cleanupEmptyRows(sheet);
+  
+  return sheet;
 }
 
 // ------------------- RESPONSE HELPER -------------------
@@ -192,10 +312,7 @@ function login(email, password) {
 }
 
 function getData(sheetName) {
-  const ss = getSpreadsheet();
-  const sheet = ss.getSheetByName(sheetName);
-  if (!sheet) throw new Error("Sheet " + sheetName + " not found");
-  
+  const sheet = ensureSheetHeaders(sheetName);
   const rawData = sheet.getDataRange().getValues();
   if (rawData.length <= 1) return []; // Only headers or empty
   
@@ -203,41 +320,41 @@ function getData(sheetName) {
   const idIndex = headers.indexOf('id');
   const items = [];
   
-  let hasMissingIds = false;
-  
   for (let i = 1; i < rawData.length; i++) {
     const row = rawData[i];
+    
+    // Check if row is completely empty
+    let isRowEmpty = true;
+    for (let j = 0; j < row.length; j++) {
+      if (row[j] !== "" && row[j] !== null && row[j] !== undefined) {
+        isRowEmpty = false;
+        break;
+      }
+    }
+    if (isRowEmpty) continue; // Skip completely empty rows
+    
     const item = {};
     for (let j = 0; j < headers.length; j++) {
       item[headers[j]] = row[j] !== undefined ? row[j] : null;
     }
     
-    // Auto-generate missing IDs for manual sheet entries
+    // Auto-generate missing IDs for manual sheet entries (only if has actual body content)
     if (idIndex !== -1 && (!item.id || item.id.toString().trim() === '')) {
       const newId = generateId();
       item.id = newId;
-      rawData[i][idIndex] = newId;
-      hasMissingIds = true;
+      sheet.getRange(i + 1, idIndex + 1).setValue(newId);
     }
     
     items.push(item);
-  }
-  
-  if (hasMissingIds && idIndex !== -1) {
-    const idsColumnValues = [];
-    for (let i = 1; i < rawData.length; i++) {
-      idsColumnValues.push([rawData[i][idIndex]]);
-    }
-    sheet.getRange(2, idIndex + 1, idsColumnValues.length, 1).setValues(idsColumnValues);
   }
   
   return items;
 }
 
 function addData(sheetName, item) {
-  const ss = getSpreadsheet();
-  const sheet = ss.getSheetByName(sheetName);
+  const sheet = ensureSheetHeaders(sheetName);
   const headers = sheet.getDataRange().getValues()[0];
+  const normalizedHeaders = headers.map(h => h ? h.toString().toLowerCase().trim() : '');
   
   // Create id
   item.id = generateId();
@@ -245,7 +362,8 @@ function addData(sheetName, item) {
   
   const newRow = [];
   for (let j = 0; j < headers.length; j++) {
-    newRow.push(item[headers[j]] || "");
+    const headerName = normalizedHeaders[j];
+    newRow.push(item[headerName] !== undefined ? item[headerName] : "");
   }
   
   sheet.appendRow(newRow);
@@ -253,9 +371,9 @@ function addData(sheetName, item) {
 }
 
 function bulkAddData(sheetName, items) {
-  const ss = getSpreadsheet();
-  const sheet = ss.getSheetByName(sheetName);
+  const sheet = ensureSheetHeaders(sheetName);
   const headers = sheet.getDataRange().getValues()[0];
+  const normalizedHeaders = headers.map(h => h ? h.toString().toLowerCase().trim() : '');
   
   if (!items || !Array.isArray(items) || items.length === 0) {
     return errorResponse("No data provided");
@@ -270,7 +388,8 @@ function bulkAddData(sheetName, items) {
     
     const row = [];
     for (let j = 0; j < headers.length; j++) {
-      row.push(item[headers[j]] || "");
+      const headerName = normalizedHeaders[j];
+      row.push(item[headerName] !== undefined ? item[headerName] : "");
     }
     newRows.push(row);
   });
@@ -283,8 +402,7 @@ function bulkAddData(sheetName, items) {
 }
 
 function updateData(sheetName, id, updatedItem) {
-  const ss = getSpreadsheet();
-  const sheet = ss.getSheetByName(sheetName);
+  const sheet = ensureSheetHeaders(sheetName);
   const data = sheet.getDataRange().getValues();
   const headers = data[0];
   const normalizedHeaders = headers.map(h => h ? h.toString().toLowerCase().trim() : '');
@@ -298,7 +416,7 @@ function updateData(sheetName, id, updatedItem) {
       for (let j = 0; j < headers.length; j++) {
         const headerName = normalizedHeaders[j];
         if (updatedItem.hasOwnProperty(headerName) && headerName !== 'id') {
-          sheet.getRange(i + 1, j + 1).setValue(updatedItem[headerName]);
+          sheet.getRange(i + 1, j + 1).setValue(updatedItem[headerName] !== undefined ? updatedItem[headerName] : "");
         }
       }
       return successResponse({ message: "Updated successfully" });
@@ -308,8 +426,7 @@ function updateData(sheetName, id, updatedItem) {
 }
 
 function deleteData(sheetName, id) {
-  const ss = getSpreadsheet();
-  const sheet = ss.getSheetByName(sheetName);
+  const sheet = ensureSheetHeaders(sheetName);
   const data = sheet.getDataRange().getValues();
   const headers = data[0];
   const normalizedHeaders = headers.map(h => h ? h.toString().toLowerCase().trim() : '');
@@ -328,9 +445,9 @@ function deleteData(sheetName, id) {
 }
 
 function saveAbsensiBatch(absensiArr) {
-  const ss = getSpreadsheet();
-  const sheet = ss.getSheetByName('ABSENSI');
+  const sheet = ensureSheetHeaders('ABSENSI');
   const headers = sheet.getDataRange().getValues()[0];
+  const normalizedHeaders = headers.map(h => h ? h.toString().toLowerCase().trim() : '');
   
   const newRows = [];
   const timestamp = new Date().toISOString();
@@ -341,7 +458,8 @@ function saveAbsensiBatch(absensiArr) {
     
     const row = [];
     for (let j = 0; j < headers.length; j++) {
-      row.push(item[headers[j]] || "");
+      const headerName = normalizedHeaders[j];
+      row.push(item[headerName] !== undefined ? item[headerName] : "");
     }
     newRows.push(row);
   });

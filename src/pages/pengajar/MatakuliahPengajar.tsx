@@ -10,13 +10,17 @@ export default function MatakuliahPengajar() {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [user]);
 
   const fetchData = async () => {
     if (!user?.nama) return;
     try {
       const res = await api.get('getMatakuliah');
-      const myMk = (res.data || []).filter((m: any) => m.pengajar === user.nama);
+      const myMk = (res.data || []).filter((m: any) => {
+        const mp = String(m.pengajar || '').trim().toLowerCase();
+        const un = String(user.nama || '').trim().toLowerCase();
+        return mp === un && mp !== '';
+      });
       setData(myMk);
     } catch (err) {
       console.error(err);

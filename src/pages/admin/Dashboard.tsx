@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { api } from '../../services/api';
 import { Users, UserSquare2, BookOpen, Clock, RefreshCw } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { formatTimeDisplay } from '../../utils/time';
 
 export default function Dashboard() {
   const [stats, setStats] = useState({
@@ -89,7 +90,7 @@ export default function Dashboard() {
       const todayName = daysMap[new Date().getDay()];
       const todayJdwl = jadwalData
         .filter((j: any) => j.hari === todayName)
-        .sort((a: any, b: any) => (a.jam_mulai || '').localeCompare(b.jam_mulai || ''));
+        .sort((a: any, b: any) => String(a.jam_mulai || '').localeCompare(String(b.jam_mulai || '')));
       
       setTodayJadwal(todayJdwl);
 
@@ -218,7 +219,7 @@ export default function Dashboard() {
         <div className="space-y-4 overflow-y-auto pr-2 flex-1 scrollbar-thin scrollbar-thumb-slate-700">
           {todayJadwal.length > 0 ? todayJadwal.map((j: any) => (
             <div key={j.id} className="p-3 bg-white/10 rounded-xl border border-white/10">
-              <p className="text-emerald-400 text-[10px] font-bold uppercase tracking-widest">{j.jam_mulai} - {j.jam_berakhir}</p>
+              <p className="text-emerald-400 text-[10px] font-bold uppercase tracking-widest">{formatTimeDisplay(j.jam_mulai)} - {formatTimeDisplay(j.jam_berakhir)}</p>
               <p className="font-bold text-sm mt-1">{j.nama_mk} ({j.program} - {j.kelas})</p>
               <p className="text-xs text-slate-400 mt-0.5">{j.pengajar}</p>
             </div>
