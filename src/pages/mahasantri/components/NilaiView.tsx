@@ -104,6 +104,46 @@ export default function NilaiView({ gradeList, courseList }: NilaiViewProps) {
     return { text: 'E', label: 'Rasib (Gagal)', color: 'text-rose-700 bg-rose-50 border-rose-200' };
   };
 
+  const parseYearNum = (y: string): number => {
+    const cleaned = (y || '').toString().replace(/\s+/g, '').trim();
+    const parts = cleaned.split('/');
+    if (parts.length > 0) {
+      const num = parseInt(parts[0], 10);
+      if (!isNaN(num)) return num;
+    }
+    return 0;
+  };
+
+  const getSemesterScore = (yearStr: string, semStr: string): number => {
+    const yearNum = parseYearNum(yearStr);
+    const semLower = (semStr || 'Genap').toString().toLowerCase().trim();
+    const semOffset = semLower === 'ganjil' ? 1 : 2;
+    return yearNum * 10 + semOffset;
+  };
+
+  const findField = (obj: any, keysToSearch: string[]): any => {
+    if (!obj) return undefined;
+    for (const k of keysToSearch) {
+      if (obj[k] !== undefined && obj[k] !== null && obj[k] !== '') {
+        return obj[k];
+      }
+    }
+    const objKeys = Object.keys(obj);
+    for (const k of keysToSearch) {
+      const normSearch = k.toLowerCase().replace(/[^a-z0-9]/g, '');
+      if (!normSearch) continue;
+      for (const ok of objKeys) {
+        const normKey = ok.toLowerCase().replace(/[^a-z0-9]/g, '');
+        if (normKey === normSearch || normKey.includes(normSearch) || normSearch.includes(normKey)) {
+          if (obj[ok] !== undefined && obj[ok] !== null && obj[ok] !== '') {
+            return obj[ok];
+          }
+        }
+      }
+    }
+    return undefined;
+  };
+
   const getGradeInfo = (g: any) => {
     const normalizedGName = (g.nama_mk || '').toString().trim().toLowerCase();
     const matched = allMatakuliah.find(m => 
@@ -113,12 +153,11 @@ export default function NilaiView({ gradeList, courseList }: NilaiViewProps) {
     const kode_mk = (g.kode || g.kode_mk || '').toString().trim() || matched?.kode || `MK-${(g.nama_mk || 'XXX').slice(0, 3).toUpperCase()}`;
     const sks = parseIndoNumber(g.sks) || parseIndoNumber(matched?.sks) || 3;
     
-    // Robust calculation fallback in case g.total is missing
     const numericAngka = parseIndoNumber(g.total) || (parseIndoNumber(g.presensi) + parseIndoNumber(g.tugas) + parseIndoNumber(g.uts) + parseIndoNumber(g.uas));
     const angka = numericAngka.toFixed(2);
 
-    // Retrieve database provided huruf mutu (hm) if available, or fall back to calculation
-    let huruf = (g.hm || g.huruf || g.huruf_mutu || g["huruf mutu"] || g.grade || g.nilai_huruf || g["nilai huruf"] || '').toString().trim().toUpperCase();
+    const dbHuruf = findField(g, ['hm', 'huruf', 'grade', 'hurufmutu', 'nilaihuruf']);
+    let huruf = dbHuruf !== undefined ? dbHuruf.toString().trim().toUpperCase() : '';
     if (!huruf) {
       if (numericAngka >= 95) huruf = 'A+';
       else if (numericAngka >= 90) huruf = 'A';
@@ -130,11 +169,10 @@ export default function NilaiView({ gradeList, courseList }: NilaiViewProps) {
       else huruf = 'E';
     }
 
-    // New "bobot nilai" logic based on database column am or bobot, or letters mapping, or fallback
     let bobot = 0.0;
-    const rawBobot = g.am !== undefined && g.am !== null && g.am !== '' ? g.am : (g.bobot || g.bobot_nilai || g["bobot nilai"] || g.konversi || g.bobot_mutu || g["bobot mutu"]);
-    if (rawBobot !== undefined && rawBobot !== null && rawBobot !== '') {
-      bobot = parseIndoNumber(rawBobot);
+    const dbBobot = findField(g, ['am', 'bobot', 'konversi', 'bobotnilai', 'bobotmutu', 'angkamutu']);
+    if (dbBobot !== undefined) {
+      bobot = parseIndoNumber(dbBobot);
     } else {
       const h = huruf.trim().toUpperCase();
       if (h === 'A+' || h === 'A') bobot = 4.0;
@@ -147,7 +185,6 @@ export default function NilaiView({ gradeList, courseList }: NilaiViewProps) {
       else if (h === 'D') bobot = 1.0;
       else if (h === 'E') bobot = 0.0;
       else {
-        // Fallback calculations based on numeric values
         if (numericAngka >= 95) bobot = 4.0;
         else if (numericAngka >= 90) bobot = 4.0;
         else if (numericAngka >= 85) bobot = 3.5;
@@ -183,14 +220,18 @@ export default function NilaiView({ gradeList, courseList }: NilaiViewProps) {
 
   const calculatedIPS = totalSKS > 0 ? (totalPoints / totalSKS).toFixed(2) : '0.00';
 
-  // IPK (Indeks Prestasi Kumulatif) calculation using all courses ever taken
+  // IPK (Indeks Prestasi Kumulatif) and cumulative SKS calculation (from semester 1 up to the filtered semester)
+  const selectedSemesterScore = getSemesterScore(selectedYear, selectedSemester);
   let cumulativeSKS = 0;
   let cumulativePoints = 0;
 
   gradeList.forEach(g => {
     const info = getGradeInfo(g);
-    cumulativeSKS += info.sks;
-    cumulativePoints += (info.bobot * info.sks);
+    const score = getSemesterScore(g.tahun_akademik, g.semester);
+    if (score <= selectedSemesterScore) {
+      cumulativeSKS += info.sks;
+      cumulativePoints += (info.bobot * info.sks);
+    }
   });
 
   const ipkValue = cumulativeSKS > 0 ? (cumulativePoints / cumulativeSKS).toFixed(2) : '0.00';
@@ -266,8 +307,8 @@ export default function NilaiView({ gradeList, courseList }: NilaiViewProps) {
             <BookOpen className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider leading-none">Total SKS Terhitung</p>
-            <p className="text-2xl font-black text-slate-805 mt-1.5 leading-none">{totalSKS} SKS</p>
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider leading-none">Total SKS Kumulatif</p>
+            <p className="text-2xl font-black text-slate-805 mt-1.5 leading-none">{cumulativeSKS} SKS</p>
           </div>
         </div>
       </div>
