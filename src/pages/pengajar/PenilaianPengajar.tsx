@@ -22,7 +22,7 @@ export default function PenilaianPengajar() {
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingMhs, setEditingMhs] = useState<Mahasantri | null>(null);
-  const [editData, setEditData] = useState({ presensi: '', tugas: '', uts: '', uas: '' });
+  const [editData, setEditData] = useState({ presensi: '', tugas: '', uts: '', uas: '', semester: 'Ganjil', tahunAkademik: new Date().getFullYear().toString() });
   const [isSaving, setIsSaving] = useState(false);
   
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -100,14 +100,31 @@ export default function PenilaianPengajar() {
         tugas: n.tugas.toString(),
         uts: n.uts.toString(),
         uas: n.uas.toString(),
+        semester: n.semester || 'Ganjil',
+        tahunAkademik: n.tahun_akademik || new Date().getFullYear().toString(),
       });
     } else {
-      setEditData({ presensi: '', tugas: '', uts: '', uas: '' });
+      setEditData({
+        presensi: '',
+        tugas: '',
+        uts: '',
+        uas: '',
+        semester: 'Ganjil',
+        tahunAkademik: new Date().getFullYear().toString(),
+      });
     }
     setIsEditModalOpen(true);
   };
 
-  const handleEditChange = (field: 'presensi' | 'tugas' | 'uts' | 'uas', value: string) => {
+  const handleEditChange = (field: 'presensi' | 'tugas' | 'uts' | 'uas' | 'semester' | 'tahunAkademik', value: string) => {
+    if (field === 'semester' || field === 'tahunAkademik') {
+      setEditData(prev => ({
+        ...prev,
+        [field]: value
+      }));
+      return;
+    }
+
     let numVal = parseInt(value || '0');
     if (field === 'presensi' && numVal > 10) numVal = 10;
     if (field === 'tugas' && numVal > 20) numVal = 20;
@@ -142,8 +159,8 @@ export default function PenilaianPengajar() {
         uts,
         uas,
         total,
-        tahun_akademik: new Date().getFullYear().toString(),
-        semester: 'Genap'
+        tahun_akademik: editData.tahunAkademik,
+        semester: editData.semester
       });
       
       toast.success('Nilai berhasil diperbarui!');
@@ -772,6 +789,30 @@ export default function PenilaianPengajar() {
                       onChange={(e) => handleEditChange('uas', e.target.value)}
                       className="block w-full rounded-md border-slate-300 bg-indigo-50/50 py-2 px-3 text-sm focus:border-indigo-500 focus:ring-indigo-500 shadow-sm font-medium tabular-nums"
                     />
+                  </div>
+                </div>
+
+                <div className="border-t border-slate-100 pt-4 grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-semibold tracking-wider text-slate-700 mb-1.5 uppercase">Tahun Akademik</label>
+                    <input
+                      type="text"
+                      value={editData.tahunAkademik}
+                      onChange={(e) => handleEditChange('tahunAkademik', e.target.value)}
+                      placeholder="Misal: 2024"
+                      className="block w-full rounded-md border-slate-300 bg-white py-2 px-3 text-sm focus:border-emerald-500 focus:ring-emerald-500 shadow-sm font-medium border"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold tracking-wider text-slate-700 mb-1.5 uppercase">Semester</label>
+                    <select
+                      value={editData.semester}
+                      onChange={(e) => handleEditChange('semester', e.target.value)}
+                      className="block w-full rounded-md border-slate-300 bg-white py-2 px-3 text-sm focus:border-emerald-500 focus:ring-emerald-500 shadow-sm font-medium border"
+                    >
+                      <option value="Ganjil">Ganjil</option>
+                      <option value="Genap">Genap</option>
+                    </select>
                   </div>
                 </div>
               </div>

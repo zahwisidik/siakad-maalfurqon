@@ -16,12 +16,15 @@ import DashboardPengajar from './pages/pengajar/DashboardPengajar';
 import MatakuliahPengajar from './pages/pengajar/MatakuliahPengajar';
 import JadwalPengajar from './pages/pengajar/JadwalPengajar';
 import PenilaianPengajar from './pages/pengajar/PenilaianPengajar';
+import DashboardMahasantri from './pages/mahasantri/DashboardMahasantri';
 import SetupGuide from './pages/SetupGuide';
 
 function AppRoot() {
   const { user } = useAuth();
   if (!user) return <Navigate to="/login" replace />;
-  return <Navigate to={user.role === 'admin' ? "/dashboard" : "/dashboard-pengajar"} replace />;
+  if (user.role === 'admin') return <Navigate to="/dashboard" replace />;
+  if (user.role === 'mahasantri') return <Navigate to="/dashboard-mahasantri" replace />;
+  return <Navigate to="/dashboard-pengajar" replace />;
 }
 
 export default function App() {
@@ -51,6 +54,14 @@ export default function App() {
             <Route path="/jadwal-pengajar" element={<JadwalPengajar />} />
             <Route path="/absensi-pengajar" element={<AbsensiPengajar />} />
             <Route path="/penilaian-pengajar" element={<PenilaianPengajar />} />
+
+            {/* Mahasantri Routes */}
+            <Route path="/dashboard-mahasantri" element={<DashboardMahasantri currentTab="beranda" />} />
+            <Route path="/absensi-mahasantri" element={<DashboardMahasantri currentTab="absensi" />} />
+            <Route path="/jadwal-mahasantri" element={<DashboardMahasantri currentTab="jadwal" />} />
+            <Route path="/nilai-mahasantri" element={<DashboardMahasantri currentTab="nilai" />} />
+            <Route path="/pengumuman-mahasantri" element={<DashboardMahasantri currentTab="pengumuman" />} />
+            <Route path="/profil-mahasantri" element={<DashboardMahasantri currentTab="profil" />} />
           </Route>
         </Routes>
       </AuthProvider>

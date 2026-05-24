@@ -46,6 +46,7 @@ function getSpreadsheet() {
 }
 
 const SHEET_SCHEMAS = {
+  'USERS': ['id', 'nama', 'email', 'password', 'role', 'status'],
   'MAHASANTRI': ['id', 'nim', 'nama', 'jenis_kelamin', 'kelas', 'semester', 'status'],
   'PENGAJAR': ['id', 'nama', 'mapel', 'status'],
   'MATAKULIAH': ['id', 'kode', 'nama_mk', 'program', 'kelas', 'pengajar'],
@@ -300,11 +301,11 @@ function doPost(e) {
 
 function login(email, password) {
   const users = getData('USERS');
-  const checkEmail = email ? email.toString().trim() : '';
+  const checkEmail = email ? email.toString().toLowerCase().trim() : '';
   const checkPassword = password ? password.toString() : '';
 
   const user = users.find(u => {
-    const uEmail = u.email ? u.email.toString().trim() : '';
+    const uEmail = u.email ? u.email.toString().toLowerCase().trim() : '';
     const uPassword = u.password ? u.password.toString() : '';
     return uEmail === checkEmail && uPassword === checkPassword;
   });
@@ -314,6 +315,31 @@ function login(email, password) {
     delete user.password;
     const status = user.status ? user.status.toString().toLowerCase().trim() : 'aktif';
     if (status !== 'active' && status !== 'aktif') return errorResponse("Account is not active (" + status + ")");
+    
+    // Dynamically retrieve mahasantri profile details if the role is mahasantri
+    if (user.role === 'mahasantri') {
+      const mahasantris = getData('MAHASANTRI');
+      const mRecord = mahasantris.find(m => 
+        m.nama && m.nama.toString().toLowerCase().trim() === user.nama.toString().toLowerCase().trim()
+      );
+      if (mRecord) {
+        user.nim = mRecord.nim ? mRecord.nim.toString() : '';
+        user.kelas = mRecord.kelas ? mRecord.kelas.toString() : '';
+        user.semester = mRecord.semester ? mRecord.semester.toString() : '';
+        
+        // Find program from KELAS sheet
+        const kelasList = getData('KELAS');
+        const kRecord = kelasList.find(k => 
+          k.nama_kelas && k.nama_kelas.toString().toLowerCase().trim() === user.kelas.toLowerCase().trim()
+        );
+        if (kRecord) {
+          user.program = kRecord.program ? kRecord.program.toString() : '';
+        } else {
+          user.program = '';
+        }
+      }
+    }
+    
     return successResponse({ user });
   }
   return errorResponse("Invalid email or password");

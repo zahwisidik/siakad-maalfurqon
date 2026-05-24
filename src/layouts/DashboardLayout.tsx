@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { LayoutDashboard, Users, UserSquare2, BookOpen, Clock, CalendarDays, ClipboardCheck, LogOut, FileText, Menu, X } from 'lucide-react';
+import { LayoutDashboard, Users, UserSquare2, BookOpen, Clock, CalendarDays, ClipboardCheck, LogOut, FileText, Menu, X, Award, Megaphone, User } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 
 export default function DashboardLayout() {
@@ -31,7 +31,20 @@ export default function DashboardLayout() {
     { name: 'Penilaian', icon: ClipboardCheck, path: '/penilaian-pengajar' },
   ];
 
-  const menus = user.role === 'admin' ? adminMenus : pengajarMenus;
+  const mahasantriMenus = [
+    { name: 'Dashboard', icon: LayoutDashboard, path: '/dashboard-mahasantri' },
+    { name: 'Absensi', icon: ClipboardCheck, path: '/absensi-mahasantri' },
+    { name: 'Jadwal', icon: Clock, path: '/jadwal-mahasantri' },
+    { name: 'Nilai', icon: Award, path: '/nilai-mahasantri' },
+    { name: 'Pengumuman', icon: Megaphone, path: '/pengumuman-mahasantri' },
+    { name: 'Profil', icon: User, path: '/profil-mahasantri' },
+  ];
+
+  const menus = user.role === 'admin' 
+    ? adminMenus 
+    : user.role === 'mahasantri'
+      ? mahasantriMenus
+      : pengajarMenus;
   const activeMenu = menus.find(m => location.pathname.startsWith(m.path));
   const pageTitle = activeMenu ? activeMenu.name : 'Sistem Absensi';
 

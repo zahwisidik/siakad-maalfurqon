@@ -2,8 +2,11 @@ export interface User {
   id: string;
   nama: string;
   email: string;
-  role: 'admin' | 'pengajar';
+  role: 'admin' | 'pengajar' | 'mahasantri';
   status: 'active' | 'inactive' | 'aktif' | 'nonaktif';
+  nim?: string;
+  program?: string;
+  kelas?: string;
 }
 
 export interface Mahasantri {

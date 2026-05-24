@@ -17,6 +17,8 @@ export default function Login() {
     if (user) {
       if (user.role === 'admin') {
         navigate('/dashboard', { replace: true });
+      } else if (user.role === 'mahasantri') {
+        navigate('/dashboard-mahasantri', { replace: true });
       } else {
         navigate('/dashboard-pengajar', { replace: true });
       }
@@ -26,15 +28,17 @@ export default function Login() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-
+    
     try {
       const response = await api.post('login', { email, password });
       login(response.data.user);
       
-      toast.success(`Selamat datang, ${response.data.user.nama || 'User'}!`);
+      toast.success(`Ahlan wa sahlan, ${response.data.user.nama || 'User'}!`);
       
       if (response.data.user.role === 'admin') {
         navigate('/dashboard');
+      } else if (response.data.user.role === 'mahasantri') {
+        navigate('/dashboard-mahasantri');
       } else {
         navigate('/dashboard-pengajar');
       }
@@ -57,27 +61,32 @@ export default function Login() {
           </div>
 
           <div className="mt-8">
-            {isUsingMock && (
-              <div className="mb-4 bg-amber-50 border-l-4 border-amber-400 p-4">
-                <p className="text-sm text-amber-700">
-                  <b>Mode Offline/Mockup aktif.</b><br/> Gunakan <code>admin@admin.com</code> atau <code>ahmad@pengajar.com</code> dengan sembarang password (contoh: <code>password123</code>).
+             {isUsingMock && (
+              <div className="mb-4 bg-amber-50 border-l-4 border-amber-400 p-4 rounded-lg">
+                <p className="text-xs text-amber-800 leading-relaxed font-medium">
+                  <b className="text-amber-900 block mb-1">💡 Demo Mode / Mockup Aktif</b>
+                  Login Admin: <code className="bg-amber-100 px-1 rounded">admin@admin.com</code><br/>
+                  Login Pengajar: <code className="bg-amber-100 px-1 rounded">ahmad@pengajar.com</code><br/>
+                  Login Mahasantri: <code className="bg-amber-100 px-1 rounded">fulan@mahasantri.com</code> atau <code className="bg-amber-150 px-1 rounded">fulanah@mahasantri.com</code><br/>
+                  Password: <span className="italic">bebas (sembarang kata)</span>
                 </p>
                 <div className="mt-2 text-xs">
-                  <button onClick={() => navigate('/setup')} className="text-emerald-600 underline font-medium">Baca Panduan Setup G-Sheets</button>
+                  <button onClick={() => navigate('/setup')} className="text-emerald-700 underline font-semibold hover:text-emerald-800">Baca Panduan Setup G-Sheets</button>
                 </div>
               </div>
             )}
 
             <form onSubmit={handleLogin} className="space-y-6">
               <div>
-                <label className="block text-sm font-medium text-slate-700">Email address</label>
+                <label className="block text-sm font-medium text-slate-700">Email</label>
                 <div className="mt-1">
                   <input
                     type="email"
                     required
+                    placeholder="nama@domain.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="block w-full appearance-none rounded-md border border-slate-300 px-3 py-2 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-emerald-500 sm:text-sm"
+                    className="block w-full appearance-none rounded-md border border-slate-300 px-3 py-2 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-emerald-500 sm:text-sm bg-white"
                   />
                 </div>
               </div>

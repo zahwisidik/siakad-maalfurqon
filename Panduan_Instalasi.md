@@ -14,7 +14,7 @@ Aplikasi Sistem Manajemen Absensi Mahasantri ini dibangun menggunakan React (Vit
    - `JADWAL`
    - `ABSENSI`
 3. Di dalam Sheet `USERS`, buat header di baris pertama (A1, B1, dst):
-   - `id`, `nama`, `email`, `password`, `role`, `status`
+   - `id`, `nama`, `email`, `password`, `role`, `status`, `nim`, `program`, `kelas`
 4. Masukkan satu baris data admin di Sheet `USERS`:
    - id: `1`
    - nama: `Admin`
