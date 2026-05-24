@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { formatToIndonesianDate } from '../../../utils/time';
 import { 
   CheckCircle2, 
   BookOpen, 
@@ -34,7 +35,6 @@ export default function DashboardView({
   onTabChange,
   announcements 
 }: DashboardViewProps) {
-  const [showNotifications, setShowNotifications] = useState(false);
 
   // Calculate stats
   const totalPresence = attendanceList.filter(a => a.status === 'hadir' || a.status === 'terlambat').length;
@@ -140,51 +140,6 @@ export default function DashboardView({
             </div>
           </div>
         </div>
-
-        {/* Lonceng Notifikasi */}
-        <div className="relative shrink-0">
-          <button 
-            onClick={() => setShowNotifications(!showNotifications)}
-            className="p-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 transition-colors relative cursor-pointer"
-          >
-            <Bell className="w-5 h-5 text-slate-500" />
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-rose-500 border border-white"></span>
-          </button>
-
-          {/* Dropdown Notifikasi */}
-          <AnimatePresence>
-            {showNotifications && (
-              <>
-                <div className="fixed inset-0 z-30" onClick={() => setShowNotifications(false)}></div>
-                <motion.div 
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 10 }}
-                  className="absolute right-0 mt-2 w-80 bg-white rounded-xl border border-slate-150 shadow-xl overflow-hidden z-40 text-left"
-                >
-                  <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
-                    <span className="font-bold text-xs text-slate-800">Pusat Notifikasi</span>
-                    <span className="px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 text-[10px] font-bold">2 Baru</span>
-                  </div>
-                  <div className="divide-y divide-slate-100 max-h-72 overflow-y-auto">
-                    {notificationList.map((notif) => (
-                      <div key={notif.id} className={`p-4 hover:bg-slate-50/50 transition-colors ${notif.unread ? 'bg-emerald-50/10' : ''}`}>
-                        <div className="flex justify-between gap-2">
-                          <p className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
-                            {notif.unread && <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0"></span>}
-                            {notif.title}
-                          </p>
-                          <span className="text-[10px] text-slate-400 shrink-0">{notif.time}</span>
-                        </div>
-                        <p className="text-slate-500 text-[11px] mt-1 line-clamp-2">{notif.desc}</p>
-                      </div>
-                    ))}
-                  </div>
-                </motion.div>
-              </>
-            )}
-          </AnimatePresence>
-        </div>
       </div>
 
       {/* Main Grid: Jadwal Hari ini & Pengumuman */}
@@ -278,8 +233,11 @@ export default function DashboardView({
                     <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse"></span>
                   )}
                 </div>
-                <h4 className="font-semibold text-slate-800 text-xs line-clamp-1">{item.judul}</h4>
-                <p className="text-[10px] text-slate-400 mt-1 font-medium">{item.tanggal}</p>
+                <h4 className="font-bold text-slate-800 text-xs line-clamp-1">{item.judul}</h4>
+                <p className="text-[11px] text-slate-500 mt-1 line-clamp-2 font-normal leading-relaxed">
+                  {item.isi_lengkap}
+                </p>
+                <p className="text-[10px] text-slate-400 mt-1.5 font-medium">{formatToIndonesianDate(item.tanggal)}</p>
               </div>
             ))}
           </div>

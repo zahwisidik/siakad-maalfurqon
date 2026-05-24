@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { api } from '../../services/api';
+import { api, isUsingMock } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 import { 
   BookOpen, 
@@ -39,7 +39,7 @@ export default function DashboardMahasantri({ currentTab = 'beranda' }: Dashboar
     setActiveTab(currentTab);
   }, [currentTab]);
 
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   
   // Data State
   const [scheduleList, setScheduleList] = useState<any[]>([]);
@@ -48,48 +48,7 @@ export default function DashboardMahasantri({ currentTab = 'beranda' }: Dashboar
   const [courseList, setCourseList] = useState<any[]>([]);
 
   // Announcements State
-  const [announcements] = useState<any[]>([
-    { 
-      id: 'p1', 
-      kategori: 'Ujian', 
-      judul: 'Jadwal Ujian Akhir Semester (UAS) Genap', 
-      tanggal: '22 Mei 2026', 
-      isi_lengkap: 'Diberitahukan kepada seluruh mahasantri tingkat I dan II bahwa pelaksanaan Ujian Akhir Semester Genap Tahun Akademik 2025/2026 akan diselenggarakan mulai tanggal 22 Juni s.d 27 Juni 2026. Harap menyelesaikan administrasi syahriah asrama sebelum tanggal 15 Juni 2026.', 
-      penting: true 
-    },
-    { 
-      id: 'p2', 
-      kategori: 'Asrama', 
-      judul: 'Pengisian Libur Semester Ganjil & Ketentuan Perpulangan', 
-      tanggal: '20 Mei 2026', 
-      isi_lengkap: 'Sesuai keputusan mudir asrama Ma’had Aly, pintu gerbang perpulangan thullab akan resmi dibuka semenjak pelaksanaan UAS usai. Seluruh thullab diwajibkan melakukan rukhsoh perpulangan lisan maupun tulisan ke pengawas kamar sebelum check-out.', 
-      penting: false 
-    },
-    { 
-      id: 'p3', 
-      kategori: 'Akademik', 
-      judul: 'Edaran Kewajiban Setoran Hafalan Mutun Syar’iyyah', 
-      tanggal: '18 Mei 2026', 
-      isi_lengkap: 'Bagi seluruh thullab penerima beasiswa, batas akhir ujian lisan hafalan Kitab Tuhfatul Athfal dan Jazariyyah diundur hingga tanggal 10 Juni 2026 pukul 15.00 WIB bersama dewan pembina masing-masing kamar.', 
-      penting: true 
-    },
-    { 
-      id: 'p4', 
-      kategori: 'Administrasi', 
-      judul: 'Pendaftaran Re-Registrasi Syahadah Ma’had Aly', 
-      tanggal: '15 Mei 2026', 
-      isi_lengkap: 'Formulir re-registrasi thullab tholibah dapat diakses melalui portal administrasi atau langsung menghadap amil bagian kesekretariatan keuangan utama.', 
-      penting: false 
-    },
-    { 
-      id: 'p5', 
-      kategori: 'Umum', 
-      judul: 'Kajian Kitab Umum bersama Syekh Tamim Al-Mishri', 
-      tanggal: '10 Mei 2026', 
-      isi_lengkap: 'Hadirilah kajian ilmiah bedah Kitab At-Taudhih Al-Asma wa Al-Shifat bertempat di Aula Mesjid Utama Jami Baitul Atiq selepas sholat Ashar s.d Isya teruntuk seluruh thullab Ma’had.', 
-      penting: false 
-    }
-  ]);
+  const [announcements, setAnnouncements] = useState<any[]>([]);
 
   // Read Announcements state
   const [readList, setReadList] = useState<string[]>(() => {
@@ -113,12 +72,13 @@ export default function DashboardMahasantri({ currentTab = 'beranda' }: Dashboar
     if (!user) return;
     setLoading(true);
     try {
-      const [resJadwal, resNilai, resAbsensi, resMK, resMahasantri] = await Promise.all([
+      const [resJadwal, resNilai, resAbsensi, resMK, resMahasantri, resPengumuman] = await Promise.all([
         api.get('getJadwal'),
         api.get('getNilai'),
         api.get('getAbsensi'),
         api.get('getMatakuliah'),
-        api.get('getMahasantri')
+        api.get('getMahasantri'),
+        api.get('getPengumuman').catch(() => ({ data: [] }))
       ]);
 
       let studentProgram = user.program || '';
@@ -181,10 +141,34 @@ export default function DashboardMahasantri({ currentTab = 'beranda' }: Dashboar
         mk.program === studentProgram && mk.kelas === studentKelas
       );
 
+      let finalNilai = filteredNilai;
+      if (isUsingMock && filteredNilai.length === 0) {
+        // Generate beautiful sample grades for this student so they can preview the Lembar Hasil Studi
+        const sampleCourses = filteredCourses.length > 0 ? filteredCourses : filteredJadwal;
+        finalNilai = sampleCourses.map((c: any, index: number) => {
+          const baseScore = 75 + (index * 5) % 21; // 75, 80, 85, etc.
+          return {
+            id: 'mock_gen_' + index,
+            mahasiswa_id: user.nim || user.id,
+            program: studentProgram || "I'dad Lughowi",
+            kelas: studentKelas || "Semester 2 - Putra",
+            nama_mk: c.nama_mk || c.matakuliah || c.nama || 'Mata Kuliah',
+            presensi: 10,
+            tugas: 15 + (index % 5),
+            uts: 24 + (index % 4),
+            uas: 30 + (index % 8),
+            total: baseScore,
+            tahun_akademik: "2025/2026",
+            semester: "Genap"
+          };
+        });
+      }
+
       setScheduleList(filteredJadwal);
-      setGradeList(filteredNilai);
+      setGradeList(finalNilai);
       setAttendanceList(filteredAbsensi);
       setCourseList(filteredCourses.length > 0 ? filteredCourses : filteredJadwal);
+      setAnnouncements(resPengumuman.data || []);
 
     } catch (error: any) {
       toast.error('Gagal memuat data portal: ' + error.message);
@@ -229,15 +213,6 @@ export default function DashboardMahasantri({ currentTab = 'beranda' }: Dashboar
     toast.success('Berhasil keluar dari Portal Mahasantri.');
   };
 
-  if (loading) {
-    return (
-      <div className="flex flex-col justify-center items-center h-[70vh] text-emerald-600 gap-4">
-        <RefreshCw className="animate-spin w-8 h-8" />
-        <span className="text-slate-500 font-bold tracking-tight text-sm">Memuat modul Ma’had Aly Al-Furqon...</span>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-6">
 
@@ -272,6 +247,7 @@ export default function DashboardMahasantri({ currentTab = 'beranda' }: Dashboar
       {activeTab === 'nilai' && (
         <NilaiView 
           gradeList={gradeList}
+          courseList={courseList}
         />
       )}
 

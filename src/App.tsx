@@ -11,6 +11,7 @@ import MatakuliahList from './pages/admin/MatakuliahList';
 import KelasList from './pages/admin/KelasList';
 import JadwalList from './pages/admin/JadwalList';
 import RekapAbsensi from './pages/admin/RekapAbsensi';
+import PengumumanList from './pages/admin/PengumumanList';
 import AbsensiPengajar from './pages/pengajar/AbsensiPengajar';
 import DashboardPengajar from './pages/pengajar/DashboardPengajar';
 import MatakuliahPengajar from './pages/pengajar/MatakuliahPengajar';
@@ -47,6 +48,7 @@ export default function App() {
             <Route path="/kelas" element={<KelasList />} />
             <Route path="/jadwal" element={<JadwalList />} />
             <Route path="/rekap" element={<RekapAbsensi />} />
+            <Route path="/pengumuman" element={<PengumumanList />} />
             
             {/* Pengajar Routes */}
             <Route path="/dashboard-pengajar" element={<DashboardPengajar />} />

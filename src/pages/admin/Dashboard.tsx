@@ -11,7 +11,7 @@ export default function Dashboard() {
     kelas: 0,
     jadwal: 0
   });
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
   const [trendData, setTrendData] = useState<any[]>([]);
@@ -140,18 +140,6 @@ export default function Dashboard() {
       default: return <span className="px-2 py-0.5 bg-red-100 text-red-600 rounded-full text-[10px] font-bold uppercase">{status}</span>;
     }
   };
-
-  if (loading) {
-    return <div className="animate-pulse space-y-4 h-full">
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        {[1,2,3,4].map(i => <div key={i} className="h-24 bg-slate-200 rounded-2xl"></div>)}
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-6 h-64">
-        <div className="md:col-span-8 bg-slate-200 rounded-2xl"></div>
-        <div className="md:col-span-4 bg-slate-200 rounded-2xl"></div>
-      </div>
-    </div>;
-  }
 
   return (
     <div className="flex flex-col lg:grid lg:gap-6 lg:grid-cols-12 lg:grid-rows-[auto_1fr_auto] h-auto lg:h-full min-h-0 lg:min-h-[600px] mb-8 lg:mb-0 space-y-6 lg:space-y-0">

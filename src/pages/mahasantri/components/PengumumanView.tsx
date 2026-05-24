@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { formatToIndonesianDate } from '../../../utils/time';
 import { 
   Megaphone, 
   Search, 
@@ -176,7 +177,7 @@ export default function PengumumanView({
                 <div className="flex items-center justify-between border-t border-slate-100 pt-3 text-[10px] text-slate-400 font-semibold select-none">
                   <span className="flex items-center gap-1">
                     <Calendar className="w-3.5 h-3.5" />
-                    {item.tanggal}
+                    {formatToIndonesianDate(item.tanggal)}
                   </span>
                   <span className="text-emerald-700 hover:text-emerald-800 font-bold flex items-center gap-0.5">
                     Baca Selengkapnya
@@ -217,7 +218,7 @@ export default function PengumumanView({
                   <span className="px-2 py-0.5 rounded text-[9px] uppercase font-bold tracking-wider bg-slate-100 text-slate-650 border border-slate-200">
                     {selectedAnnouncement.kategori}
                   </span>
-                  <span className="text-slate-400 font-semibold font-mono">{selectedAnnouncement.tanggal}</span>
+                  <span className="text-slate-400 font-semibold font-mono">{formatToIndonesianDate(selectedAnnouncement.tanggal)}</span>
                 </div>
 
                 <h3 className="font-black text-[15px] text-slate-800 leading-tight select-text">

@@ -81,3 +81,13 @@ export interface Nilai {
   tahun_akademik?: string;
   semester?: string;
 }
+
+export interface Pengumuman {
+  id: string;
+  kategori: string;
+  judul: string;
+  tanggal: string; // DD MMM YYYY or YYYY-MM-DD
+  isi_lengkap: string;
+  penting: boolean | string;
+}
+

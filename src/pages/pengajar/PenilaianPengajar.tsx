@@ -702,7 +702,7 @@ export default function PenilaianPengajar() {
                         {data?.uas ?? '-'}
                       </td>
                       <td className="px-6 py-3 whitespace-nowrap text-center bg-slate-50 border-l border-slate-200">
-                        <span className="font-bold text-slate-800 tabular-nums">{total}</span>
+                        <span className="font-bold text-slate-800 tabular-nums">{Number(total).toFixed(2)}</span>
                       </td>
                       <td className="px-6 py-3 whitespace-nowrap text-center bg-slate-50">
                         <button

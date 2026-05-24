@@ -9,7 +9,7 @@ export default function DashboardPengajar() {
   const { user } = useAuth();
   const [stats, setStats] = useState({ matakuliah: 0, kelas: 0, sks: 0 });
   const [todayJadwal, setTodayJadwal] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -58,8 +58,6 @@ export default function DashboardPengajar() {
       setLoading(false);
     }
   };
-
-  if (loading) return <div className="animate-pulse p-4 sm:p-8 space-y-4 max-w-7xl mx-auto"><div className="h-8 bg-slate-200 rounded w-1/4"></div><div className="grid grid-cols-1 sm:grid-cols-3 gap-4"><div className="h-24 bg-slate-200 rounded"></div><div className="h-24 bg-slate-200 rounded"></div><div className="h-24 bg-slate-200 rounded"></div></div></div>;
 
   return (
     <div className="max-w-7xl mx-auto flex flex-col gap-6">

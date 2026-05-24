@@ -21,6 +21,7 @@ export default function DashboardLayout() {
     { name: 'Kelas', icon: CalendarDays, path: '/kelas' },
     { name: 'Jadwal', icon: Clock, path: '/jadwal' },
     { name: 'Rekap Absensi', icon: FileText, path: '/rekap' },
+    { name: 'Pengumuman', icon: Megaphone, path: '/pengumuman' },
   ];
 
   const pengajarMenus = [

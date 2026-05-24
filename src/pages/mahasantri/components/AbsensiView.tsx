@@ -48,7 +48,13 @@ export default function AbsensiView({
   const [isScanning, setIsScanning] = useState(false);
   const [gpsVerified, setGpsVerified] = useState(false);
 
-  const uniqueCourses = Array.from(new Set(scheduleList.map(item => item.nama_mk)));
+  const uniqueCourses = Array.from(
+    new Set(
+      scheduleList
+        .map(item => (item.nama_mk || item.matakuliah || '').trim())
+        .filter(Boolean)
+    )
+  );
 
   // Filter attendance
   const filteredAttendance = attendanceList.filter((att) => {

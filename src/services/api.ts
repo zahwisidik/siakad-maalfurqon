@@ -10,6 +10,7 @@ let mockMahasantri = [
   { id: 'm1', nim: '1001', nama: 'Fulan', jenis_kelamin: 'laki-laki', program: "I'dad Lughowi", kelas: "Semester 2 - Putra", status: 'aktif' },
   { id: 'm2', nim: '1002', nama: 'Fulanah', jenis_kelamin: 'perempuan', program: "Syariah", kelas: "Semester 1 - Putri", status: 'aktif' },
   { id: 'm3', nim: '529.01.05.25', nama: 'Adnan', jenis_kelamin: 'laki-laki', program: "I'dad Lughowi", kelas: "Semester 2 - Putra", status: 'aktif' },
+  { id: 'm4', nim: '2022.01.01.028', nama: 'Muhammad Imron', jenis_kelamin: 'laki-laki', program: "I'dad Du'at", kelas: "Semester 2 - Putra", status: 'aktif' },
 ];
 
 let mockJadwal = [
@@ -27,26 +28,88 @@ let mockMatakuliah = [
   { id: 'mk1', kode: 'MK-01', nama: 'Fiqih Munakahat', nama_mk: 'Fiqih Munakahat', program: "I'dad Lughowi", kelas: "Semester 2 - Putra", sks: 3, pengajar: 'Ust. Ahmad' },
   { id: 'mk2', kode: 'MK-02', nama: 'Aqidah Dasar', nama_mk: 'Aqidah Dasar', program: "Syariah", kelas: "Semester 1 - Putri", sks: 2, pengajar: 'Ust. Ahmad' },
   { id: 'mk3', kode: 'MK-03', nama: 'Bahasa Arab', nama_mk: 'Bahasa Arab', program: "I'dad Lughowi", kelas: "Semester 2 - Putra", sks: 4, pengajar: 'Ust. Ahmad' },
+  { id: 'im_mk1', kode: 'ID201', nama: 'AKIDAH 2', nama_mk: 'AKIDAH 2', program: "I'dad Du'at", kelas: "Semester 2 - Putra", sks: 3, pengajar: 'Ust. Ahmad' },
+  { id: 'im_mk2', kode: 'ID202', nama: 'TAFSIR 1', nama_mk: 'TAFSIR 1', program: "I'dad Du'at", kelas: "Semester 2 - Putra", sks: 2, pengajar: 'Ust. Ahmad' },
+  { id: 'im_mk3', kode: 'ID203', nama: 'HADITS 1', nama_mk: 'HADITS 1', program: "I'dad Du'at", kelas: "Semester 2 - Putra", sks: 3, pengajar: 'Ust. Ahmad' },
+  { id: 'im_mk4', kode: 'ID204', nama: 'FIKIH 2', nama_mk: 'FIKIH 2', program: "I'dad Du'at", kelas: "Semester 2 - Putra", sks: 5, pengajar: 'Ust. Ahmad' },
+  { id: 'im_mk5', kode: 'ID205', nama: 'USHUL FIKIH 2', nama_mk: 'USHUL FIKIH 2', program: "I'dad Du'at", kelas: "Semester 2 - Putra", sks: 3, pengajar: 'Ust. Ahmad' },
+  { id: 'im_mk6', kode: 'ID206', nama: 'NAHWU 2', nama_mk: 'NAHWU 2', program: "I'dad Du'at", kelas: "Semester 2 - Putra", sks: 2, pengajar: 'Ust. Ahmad' },
+  { id: 'im_mk7', kode: 'ID207', nama: 'PEMIKIRAN ISLAM 2', nama_mk: 'PEMIKIRAN ISLAM 2', program: "I'dad Du'at", kelas: "Semester 2 - Putra", sks: 2, pengajar: 'Ust. Ahmad' },
+  { id: 'im_mk8', kode: 'ID208', nama: 'TARBIYAH ISLAMIYAH 2', nama_mk: 'TARBIYAH ISLAMIYAH 2', program: "I'dad Du'at", kelas: "Semester 2 - Putra", sks: 2, pengajar: 'Ust. Ahmad' },
+  { id: 'im_mk9', kode: 'ID209', nama: 'TAHFIDZ 2', nama_mk: 'TAHFIDZ 2', program: "I'dad Du'at", kelas: "Semester 2 - Putra", sks: 2, pengajar: 'Ust. Ahmad' },
 ];
 
 let mockKelas = [
   { id: 'k1', nama_kelas: "Semester 2 - Putra", program: "I'dad Lughowi" },
   { id: 'k2', nama_kelas: "Semester 1 - Putri", program: "Syariah" },
+  { id: 'k3', nama_kelas: "Semester 2 - Putra", program: "I'dad Du'at" },
 ];
 
 let mockNilai = [
-  { id: 'n1', mahasiswa_id: 'm1', program: "I'dad Lughowi", kelas: "Semester 2 - Putra", nama_mk: "Fiqih Munakahat", presensi: 10, tugas: 18, uts: 28, uas: 38, total: 94, tahun_akademik: "2025/2026", semester: "Genap" },
-  { id: 'n2', mahasiswa_id: 'm1', program: "I'dad Lughowi", kelas: "Semester 2 - Putra", nama_mk: "Bahasa Arab", presensi: 9, tugas: 17, uts: 25, uas: 35, total: 86, tahun_akademik: "2025/2026", semester: "Genap" },
-  { id: 'n3', mahasiswa_id: 'm3', program: "I'dad Lughowi", kelas: "Semester 2 - Putra", nama_mk: "Fiqih Munakahat", presensi: 10, tugas: 19, uts: 27, uas: 36, total: 92, tahun_akademik: "2025/2026", semester: "Genap" },
-  { id: 'n4', mahasiswa_id: 'm3', program: "I'dad Lughowi", kelas: "Semester 2 - Putra", nama_mk: "Bahasa Arab", presensi: 10, tugas: 18, uts: 29, uas: 37, total: 94, tahun_akademik: "2025/2026", semester: "Genap" },
+  { id: 'n1', mahasiswa_id: '1001', program: "I'dad Lughowi", kelas: "Semester 2 - Putra", nama_mk: "Fiqih Munakahat", presensi: 10, tugas: 18, uts: 28, uas: 38, total: 94, tahun_akademik: "2025/2026", semester: "Genap" },
+  { id: 'n2', mahasiswa_id: '1001', program: "I'dad Lughowi", kelas: "Semester 2 - Putra", nama_mk: "Bahasa Arab", presensi: 9, tugas: 17, uts: 25, uas: 35, total: 86, tahun_akademik: "2025/2026", semester: "Genap" },
+  { id: 'n3', mahasiswa_id: '529.01.05.25', program: "I'dad Lughowi", kelas: "Semester 2 - Putra", nama_mk: "Fiqih Munakahat", presensi: 10, tugas: 19, uts: 27, uas: 36, total: 92, tahun_akademik: "2025/2026", semester: "Genap" },
+  { id: 'n4', mahasiswa_id: '529.01.05.25', program: "I'dad Lughowi", kelas: "Semester 2 - Putra", nama_mk: "Bahasa Arab", presensi: 10, tugas: 18, uts: 29, uas: 37, total: 94, tahun_akademik: "2025/2026", semester: "Genap" },
+  { id: 'im1', mahasiswa_id: '2022.01.01.028', program: "I'dad Du'at", kelas: "Semester 2 - Putra", nama_mk: "AKIDAH 2", presensi: 10, tugas: 10, uts: 20, uas: 20, total: 60, tahun_akademik: "2022/2023", semester: "Genap" },
+  { id: 'im2', mahasiswa_id: '2022.01.01.028', program: "I'dad Du'at", kelas: "Semester 2 - Putra", nama_mk: "TAFSIR 1", presensi: 10, tugas: 15, uts: 26, uas: 30, total: 81, tahun_akademik: "2022/2023", semester: "Genap" },
+  { id: 'im3', mahasiswa_id: '2022.01.01.028', program: "I'dad Du'at", kelas: "Semester 2 - Putra", nama_mk: "HADITS 1", presensi: 10, tugas: 10, uts: 18, uas: 20, total: 58, tahun_akademik: "2022/2023", semester: "Genap" },
+  { id: 'im4', mahasiswa_id: '2022.01.01.028', program: "I'dad Du'at", kelas: "Semester 2 - Putra", nama_mk: "FIKIH 2", presensi: 10, tugas: 10, uts: 15, uas: 18, total: 53, tahun_akademik: "2022/2023", semester: "Genap" },
+  { id: 'im5', mahasiswa_id: '2022.01.01.028', program: "I'dad Du'at", kelas: "Semester 2 - Putra", nama_mk: "USHUL FIKIH 2", presensi: 10, tugas: 15, uts: 30, uas: 30, total: 85, tahun_akademik: "2022/2023", semester: "Genap" },
+  { id: 'im6', mahasiswa_id: '2022.01.01.028', program: "I'dad Du'at", kelas: "Semester 2 - Putra", nama_mk: "NAHWU 2", presensi: 10, tugas: 12, uts: 23, uas: 25, total: 70, tahun_akademik: "2022/2023", semester: "Genap" },
+  { id: 'im7', mahasiswa_id: '2022.01.01.028', program: "I'dad Du'at", kelas: "Semester 2 - Putra", nama_mk: "PEMIKIRAN ISLAM 2", presensi: 10, tugas: 16, uts: 30, uas: 30, total: 86, tahun_akademik: "2022/2023", semester: "Genap" },
+  { id: 'im8', mahasiswa_id: '2022.01.01.028', program: "I'dad Du'at", kelas: "Semester 2 - Putra", nama_mk: "TARBIYAH ISLAMIYAH 2", presensi: 10, tugas: 20, uts: 30, uas: 38, total: 98, tahun_akademik: "2022/2023", semester: "Genap" },
+  { id: 'im9', mahasiswa_id: '2022.01.01.028', program: "I'dad Du'at", kelas: "Semester 2 - Putra", nama_mk: "TAFHIDZ 2", presensi: 10, tugas: 14, uts: 26, uas: 30, total: 80, tahun_akademik: "2022/2023", semester: "Genap" }
 ];
 
 let mockAbsensi: Absensi[] = [
-  { id: 'a1', tanggal: '2026-05-18', jam_ke: '1', nama_mk: 'Fiqih Munakahat', program: "I'dad Lughowi", kelas: "Semester 2 - Putra", mahasiswa_id: 'm1', status: 'hadir', timestamp: '2026-05-18T08:05:00Z' },
+  { id: 'a1', tanggal: '2026-05-18', jam_ke: '1', nama_mk: 'Fiqih Munakahat', program: "I'dad Lughowi", kelas: "Semester 2 - Putra", mahasiswa_id: '1001', status: 'hadir', timestamp: '2026-05-18T08:05:00Z' },
   { id: 'a2', tanggal: '2026-05-18', jam_ke: '2', nama_mk: 'Aqidah Dasar', program: "Syariah", kelas: "Semester 1 - Putri", mahasiswa_id: 'm2', status: 'hadir', timestamp: '2026-05-18T10:20:00Z' },
   { id: 'a3', tanggal: '2026-05-19', jam_ke: '1', nama_mk: 'Bahasa Arab', program: "I'dad Lughowi", kelas: "Semester 2 - Putra", mahasiswa_id: 'm1', status: 'hadir', timestamp: '2026-05-19T08:03:00Z' },
   { id: 'a4', tanggal: '2026-05-18', jam_ke: '1', nama_mk: 'Fiqih Munakahat', program: "I'dad Lughowi", kelas: "Semester 2 - Putra", mahasiswa_id: 'm3', status: 'hadir', timestamp: '2026-05-18T08:04:00Z' },
   { id: 'a5', tanggal: '2026-05-19', jam_ke: '1', nama_mk: 'Bahasa Arab', program: "I'dad Lughowi", kelas: "Semester 2 - Putra", mahasiswa_id: 'm3', status: 'hadir', timestamp: '2026-05-19T08:02:00Z' }
+];
+
+let mockPengumuman = [
+  { 
+    id: 'p1', 
+    kategori: 'Ujian', 
+    judul: 'Jadwal Ujian Akhir Semester (UAS) Genap', 
+    tanggal: '20 Juni 2026', 
+    isi_lengkap: 'Diberitahukan kepada seluruh mahasantri tingkat I dan II bahwa pelaksanaan Ujian Akhir Semester Genap Tahun Akademik 2025/2026 akan diselenggarakan mulai tanggal 22 Juni s.d 27 Juni 2026. Harap menyelesaikan administrasi syahriah asrama sebelum tanggal 15 Juni 2026.', 
+    penting: true 
+  },
+  { 
+    id: 'p2', 
+    kategori: 'Asrama', 
+    judul: 'Pengisian Libur Semester Ganjil & Ketentuan Perpulangan', 
+    tanggal: '18 Juni 2026', 
+    isi_lengkap: 'Sesuai keputusan mudir asrama Ma’had Aly, pintu gerbang perpulangan thullab akan resmi dibuka semenjak pelaksanaan UAS usai. Seluruh thullab diwajibkan melakukan rukhsoh perpulangan lisan maupun tulisan ke pengawas kamar sebelum check-out.', 
+    penting: false 
+  },
+  { 
+    id: 'p3', 
+    kategori: 'Akademik', 
+    judul: 'Edaran Kewajiban Setoran Hafalan Mutun Syar’iyyah', 
+    tanggal: '15 Juni 2026', 
+    isi_lengkap: 'Bagi seluruh thullab penerima beasiswa, batas akhir ujian lisan hafalan Kitab Tuhfatul Athfal dan Jazariyyah diundur hingga tanggal 10 Juni 2026 pukul 15.00 WIB bersama dewan pembina masing-masing kamar.', 
+    penting: true 
+  },
+  { 
+    id: 'p4', 
+    kategori: 'Administrasi', 
+    judul: 'Pendaftaran Re-Registrasi Syahadah Ma’had Aly', 
+    tanggal: '12 Juni 2026', 
+    isi_lengkap: 'Formulir re-registrasi thullab tholibah dapat diakses melalui portal administrasi atau langsung menghadap amil bagian kesekretariatan keuangan utama.', 
+    penting: false 
+  },
+  { 
+    id: 'p5', 
+    kategori: 'Umum', 
+    judul: 'Kajian Kitab Umum bersama Syekh Tamim Al-Mishri', 
+    tanggal: '10 Juni 2026', 
+    isi_lengkap: 'Hadirilah kajian ilmiah bedah Kitab At-Taudhih Al-Asma wa Al-Shifat bertempat di Aula Mesjid Utama Jami Baitul Atiq selepas sholat Ashar s.d Isya teruntuk seluruh thullab Ma’had.', 
+    penting: false 
+  }
 ];
 
 export const isUsingMock = !APPS_SCRIPT_URL;
@@ -63,6 +126,7 @@ export const api = {
           if (action === 'getKelas') resolve({ data: mockKelas });
           if (action === 'getNilai') resolve({ data: mockNilai });
           if (action === 'getAbsensi') resolve({ data: mockAbsensi });
+          if (action === 'getPengumuman') resolve({ data: mockPengumuman });
           resolve({ data: [] });
         }, 500);
       });
@@ -122,6 +186,19 @@ export const api = {
               mockNilai.push({ id: Date.now().toString(), ...payload });
             }
             resolve({ data: { message: 'Nilai tersimpan (mock).' } });
+          } else if (action === 'addPengumuman') {
+            const newItem = { id: 'p_' + Date.now(), ...payload.data };
+            mockPengumuman.push(newItem);
+            resolve({ data: newItem });
+          } else if (action === 'updatePengumuman') {
+            const index = mockPengumuman.findIndex(p => p.id === payload.id);
+            if (index > -1) {
+              mockPengumuman[index] = { ...mockPengumuman[index], ...payload.data };
+            }
+            resolve({ data: mockPengumuman[index] });
+          } else if (action === 'deletePengumuman') {
+            mockPengumuman = mockPengumuman.filter(p => p.id !== payload.id);
+            resolve({ data: { success: true } });
           } else if (action.startsWith('add') || action.startsWith('update') || action.startsWith('delete')) {
              resolve({ data: { message: 'Aksi disimulasikan berhasil.' }});
           }

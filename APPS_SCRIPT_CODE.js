@@ -53,7 +53,8 @@ const SHEET_SCHEMAS = {
   'KELAS': ['id', 'program', 'nama_kelas'],
   'JADWAL': ['id', 'hari', 'jam_ke', 'jam_mulai', 'jam_berakhir', 'program', 'kelas', 'nama_mk', 'pengajar'],
   'ABSENSI': ['id', 'tanggal', 'jam_ke', 'program', 'kelas', 'nama_mk', 'mahasiswa_id', 'status', 'pembahasan', 'timestamp'],
-  'NILAI': ['id', 'mahasiswa_id', 'program', 'kelas', 'nama_mk', 'presensi', 'tugas', 'uts', 'uas', 'total', 'tahun_akademik', 'semester']
+  'NILAI': ['id', 'mahasiswa_id', 'program', 'kelas', 'nama_mk', 'presensi', 'tugas', 'uts', 'uas', 'total', 'tahun_akademik', 'semester'],
+  'PENGUMUMAN': ['id', 'kategori', 'judul', 'tanggal', 'isi_lengkap', 'penting']
 };
 
 function getSheetCaseInsensitive(ss, name) {
@@ -203,6 +204,8 @@ function doGet(e) {
         return successResponse(getData('ABSENSI'));
       case 'getNilai':
         return successResponse(getData('NILAI'));
+      case 'getPengumuman':
+        return successResponse(getData('PENGUMUMAN'));
       default:
         return errorResponse("Unknown action");
     }
@@ -288,6 +291,13 @@ function doPost(e) {
         
       case 'saveNilai':
         return upsertNilai(body);
+        
+      case 'addPengumuman':
+        return addData('PENGUMUMAN', body.data);
+      case 'updatePengumuman':
+        return updateData('PENGUMUMAN', body.id, body.data);
+      case 'deletePengumuman':
+        return deleteData('PENGUMUMAN', body.id);
         
       default:
         return errorResponse("Unknown POST action");
