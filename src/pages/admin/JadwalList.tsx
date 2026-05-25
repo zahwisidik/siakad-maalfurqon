@@ -105,7 +105,9 @@ export default function JadwalList() {
       program: PROGRAM_OPTIONS[0], 
       kelas: KELAS_OPTIONS[0], 
       nama_mk: matakuliahs[0]?.nama_mk || '', 
-      pengajar: pengajars[0]?.nama || '' 
+      pengajar: pengajars[0]?.nama || '',
+      lokasi: '',
+      deskripsi: ''
     });
     setIsModalOpen(true);
   };
@@ -269,6 +271,14 @@ export default function JadwalList() {
                         <label className="block text-sm font-medium text-slate-700">Jam Selesai</label>
                         <input type="time" required value={formData.jam_berakhir || ''} onChange={e => setFormData({...formData, jam_berakhir: e.target.value})} className="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm p-2 border" />
                       </div>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700">Lokasi Kuliah (Opsional, bawaan: Lantai 2 - Ruang Maudi)</label>
+                      <input type="text" placeholder="Contoh: Lantai 2 - Ruang Ghazali" value={formData.lokasi || ''} onChange={e => setFormData({...formData, lokasi: e.target.value})} className="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm p-2 border" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700">Deskripsi Mata Kuliah (Opsional)</label>
+                      <textarea placeholder="Masukkan ringkasan materi, metodologi, kitab maraji rujukan, dsb." rows={3} value={formData.deskripsi || ''} onChange={e => setFormData({...formData, deskripsi: e.target.value})} className="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm p-2 border" />
                     </div>
                   </div>
                 </div>

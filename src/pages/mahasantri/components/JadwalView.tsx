@@ -130,7 +130,7 @@ export default function JadwalView({ scheduleList }: JadwalViewProps) {
                         <div className="flex items-center gap-3 text-[11px] text-slate-450 font-medium">
                           <span className="flex items-center gap-1"><User className="w-3.5 h-3.5 text-slate-400" /> {item.pengajar}</span>
                           <span>•</span>
-                          <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5 text-slate-400" /> {getRuangClass(item.nama_mk)}</span>
+                          <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5 text-slate-400" /> {item.lokasi || getRuangClass(item.nama_mk)}</span>
                         </div>
                       </div>
                       <div className="flex items-center justify-between sm:justify-end gap-2.5 border-t sm:border-0 pt-2 sm:pt-0 border-slate-100 font-mono text-xs font-bold text-slate-700">
@@ -295,14 +295,14 @@ export default function JadwalView({ scheduleList }: JadwalViewProps) {
                   </div>
                   <div>
                     <span className="text-slate-400 font-semibold block">LOKASI KULIAH</span>
-                    <span className="text-slate-800 font-bold">{getRuangClass(selectedJadwal.nama_mk)}</span>
+                    <span className="text-slate-800 font-bold">{selectedJadwal.lokasi || getRuangClass(selectedJadwal.nama_mk)}</span>
                   </div>
                 </div>
 
                 <div className="space-y-2 border-t border-slate-100 pt-3">
                   <span className="text-slate-450 font-bold block">DESKRIPSI KULIAH</span>
                   <p className="text-slate-600 leading-relaxed text-[11px]">
-                    Mata kuliah ini membahas pengantar kaidah & metodologi ilmiah kitab-kitab maraji mu'tabaroh, melatih kemampuan thullab dalam menganalisis kaul ulama salafus sholeh secara terperinci.
+                    {selectedJadwal.deskripsi || "Mata kuliah ini membahas pengantar kaidah & metodologi ilmiah kitab-kitab maraji mu'tabaroh, melatih kemampuan thullab dalam menganalisis kaul ulama salafus sholeh secara terperinci."}
                   </p>
                 </div>
 

@@ -52,6 +52,8 @@ export interface Jadwal {
   kelas: string;
   nama_mk: string;
   pengajar: string;
+  lokasi?: string;
+  deskripsi?: string;
 }
 
 export interface Absensi {
