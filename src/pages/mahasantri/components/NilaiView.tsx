@@ -84,6 +84,10 @@ export default function NilaiView({ gradeList, courseList }: NilaiViewProps) {
     return isNaN(parsed) ? fallback : parsed;
   };
 
+  const formatDecimal = (num: number): string => {
+    return (Math.round((num + Number.EPSILON) * 100) / 100).toFixed(2);
+  };
+
   const getPredikat = (total: number, explicitHuruf?: string) => {
     const h = (explicitHuruf || '').toString().trim().toUpperCase();
     if (h) {
@@ -150,7 +154,7 @@ export default function NilaiView({ gradeList, courseList }: NilaiViewProps) {
     const sks = parseIndoNumber(g.sks) || parseIndoNumber(matched?.sks) || 3;
     
     const numericAngka = parseIndoNumber(g.total) || (parseIndoNumber(g.presensi) + parseIndoNumber(g.tugas) + parseIndoNumber(g.uts) + parseIndoNumber(g.uas));
-    const angka = numericAngka.toFixed(2);
+    const angka = formatDecimal(numericAngka);
 
     const dbHuruf = findField(g, ['hm', 'huruf', 'grade', 'hurufmutu', 'nilaihuruf']);
     let huruf = dbHuruf !== undefined ? dbHuruf.toString().trim().toUpperCase() : '';
@@ -214,7 +218,7 @@ export default function NilaiView({ gradeList, courseList }: NilaiViewProps) {
     totalPoints += (info.bobot * info.sks);
   });
 
-  const calculatedIPS = totalSKS > 0 ? (totalPoints / totalSKS).toFixed(2) : '0.00';
+  const calculatedIPS = totalSKS > 0 ? formatDecimal(totalPoints / totalSKS) : '0.00';
 
   // IPK (Indeks Prestasi Kumulatif) and cumulative SKS calculation (from semester 1 up to the filtered semester)
   const selectedSemesterScore = getSemesterScore(selectedYear, selectedSemester);
@@ -230,7 +234,7 @@ export default function NilaiView({ gradeList, courseList }: NilaiViewProps) {
     }
   });
 
-  const ipkValue = cumulativeSKS > 0 ? (cumulativePoints / cumulativeSKS).toFixed(2) : '0.00';
+  const ipkValue = cumulativeSKS > 0 ? formatDecimal(cumulativePoints / cumulativeSKS) : '0.00';
 
   // Comments / Notes mock
   const getGradeComment = (mk: string, total: number) => {
@@ -335,7 +339,7 @@ export default function NilaiView({ gradeList, courseList }: NilaiViewProps) {
                   <div key={idx} className="space-y-1.5">
                     <div className="flex justify-between items-center text-xs font-semibold">
                       <span className="text-slate-700 truncate max-w-[150px]">{g.nama_mk}</span>
-                      <span className="font-mono text-slate-800 font-bold">{numericAngka.toFixed(2)} / 100</span>
+                      <span className="font-mono text-slate-800 font-bold">{formatDecimal(numericAngka)} / 100</span>
                     </div>
                     {/* Visual bar tracker */}
                     <div className="h-4 bg-slate-100 rounded-lg overflow-hidden flex items-stretch">
@@ -396,7 +400,7 @@ export default function NilaiView({ gradeList, courseList }: NilaiViewProps) {
                         <td className="px-3 py-3 text-center whitespace-nowrap text-xs font-semibold text-slate-800 font-mono bg-slate-50/20">{info.angka}</td>
                         <td className="px-3 py-3 text-center whitespace-nowrap text-xs font-extrabold text-slate-700 font-mono">{info.huruf}</td>
                         <td className="px-4 py-3 text-center whitespace-nowrap text-xs font-bold text-emerald-700 font-mono">
-                          {info.konversi.toFixed(2).replace('.', ',')}
+                          {formatDecimal(info.konversi).replace('.', ',')}
                         </td>
                       </tr>
                     );
