@@ -56,7 +56,7 @@ export default function Login() {
           <div>
             <h2 className="mt-6 text-3xl font-bold tracking-tight text-slate-900">Sign in to your account</h2>
             <p className="mt-2 text-sm text-slate-600">
-              Sistem Manajemen Absensi Mahasantri
+              Sistem Administrasi Akademik Ma'had Aly Al-Furqon
             </p>
           </div>
 
@@ -127,7 +127,7 @@ export default function Login() {
       <div className="relative hidden w-0 flex-1 lg:block bg-emerald-900 border-l border-emerald-800">
         <div className="absolute inset-0 h-full w-full object-cover p-12 flex flex-col justify-center items-center text-center text-white">
           <h1 className="text-5xl font-bold mb-4 font-sans tracking-tight">Ma'had Aly Al-Furqon Magelang</h1>
-          <p className="text-emerald-100 text-lg max-w-lg">Platform digital absensi perkuliahan untuk memudahkan monitoring kehadiran mahasantri dan pengajar secara real-time.</p>
+          <p className="text-emerald-100 text-lg max-w-lg">Platform digital untuk memudahkan pengelolaan administrasi akademik, pemantauan absensi, dan penilaian mahasantri secara terintegrasi.</p>
         </div>
       </div>
     </div>

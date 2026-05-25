@@ -47,7 +47,7 @@ export default function DashboardLayout() {
       ? mahasantriMenus
       : pengajarMenus;
   const activeMenu = menus.find(m => location.pathname.startsWith(m.path));
-  const pageTitle = activeMenu ? activeMenu.name : 'Sistem Absensi';
+  const pageTitle = activeMenu ? activeMenu.name : 'Sistem Akademik';
 
   return (
     <div className="h-screen w-full bg-[#F8FAFC] font-sans text-slate-800 overflow-hidden flex">

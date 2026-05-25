@@ -276,7 +276,7 @@ export default function AbsensiView({
         <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-5">
           <div>
             <h3 className="font-bold text-slate-850 text-sm">Persentase Kehadiran Per Mata Kuliah</h3>
-            <p className="text-[11px] text-slate-400 mt-1">Syarat wajib kelulusan kelas / akses UAS minimal adalah 75%.</p>
+            <p className="text-[11px] text-slate-400 mt-1">Syarat wajib kelulusan kelas / akses UAS minimal adalah 70%.</p>
           </div>
 
           <div className="space-y-4">
@@ -303,10 +303,7 @@ export default function AbsensiView({
             })}
           </div>
 
-          <div className="p-3.5 rounded-xl bg-amber-50/50 border border-amber-100/70 text-[11px] text-amber-855 flex items-start gap-2 leading-relaxed">
-            <Info className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
-            <span>Jika kehadiran di bawah 75%, modul ujian (KHS) akan tertangguhkan otomatis hingga memperoleh izin khusus dewan mahad.</span>
-          </div>
+
         </div>
 
         {/* Filters and Table List of Presensi */}

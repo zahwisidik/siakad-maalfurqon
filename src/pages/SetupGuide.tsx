@@ -8,7 +8,7 @@ export default function SetupGuide() {
         
         <div className="prose prose-emerald max-w-none">
           <p>
-            Sistem Manajemen Absensi Mahasantri ini memiliki backend API berbasis Google Apps Script dengan database Google Sheets. 
+            Sistem Administrasi Akademik Ma'had Aly Al-Furqon ini memiliki backend API berbasis Google Apps Script dengan database Google Sheets. 
             Ikuti panduan berikut untuk menyiapkan database Anda sendiri:
           </p>
 
