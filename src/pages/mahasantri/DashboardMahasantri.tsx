@@ -247,6 +247,7 @@ export default function DashboardMahasantri({ currentTab = 'beranda' }: Dashboar
       {activeTab === 'jadwal' && (
         <JadwalView 
           scheduleList={scheduleList}
+          announcements={announcements}
         />
       )}
 
