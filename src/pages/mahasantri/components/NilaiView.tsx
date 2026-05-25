@@ -5,13 +5,10 @@ import {
   Filter, 
   TrendingUp, 
   BookOpen, 
-  CheckCircle2, 
   HelpCircle,
   BarChart3,
-  X,
   FileText
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
 import toast from 'react-hot-toast';
 import { api } from '../../../services/api';
 
@@ -23,7 +20,6 @@ interface NilaiViewProps {
 export default function NilaiView({ gradeList, courseList }: NilaiViewProps) {
   const [selectedSemester, setSelectedSemester] = useState('Genap');
   const [selectedYear, setSelectedYear] = useState('2025/2026');
-  const [selectedGrade, setSelectedGrade] = useState<any | null>(null);
   const [allMatakuliah, setAllMatakuliah] = useState<any[]>(courseList || []);
 
   // Generate dynamic, robust year options list starting from 2020/2021 as requested
@@ -359,7 +355,7 @@ export default function NilaiView({ gradeList, courseList }: NilaiViewProps) {
         <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-4">
           <div>
             <h3 className="font-bold text-slate-805 text-sm">Lembar Hasil Studi</h3>
-            <p className="text-[11px] text-slate-400 mt-1">Klik pada baris pelajaran untuk melihat struktur rincian penilaian & rekomendasi dosen.</p>
+            <p className="text-[11px] text-slate-400 mt-1">Lembar hasil studi nilai mata kuliah semester berjalan.</p>
           </div>
 
           <div className="overflow-x-auto">
@@ -391,8 +387,7 @@ export default function NilaiView({ gradeList, courseList }: NilaiViewProps) {
                     return (
                       <tr 
                         key={g.id || i}
-                        className="hover:bg-slate-50/50 transition-colors cursor-pointer divide-x divide-slate-200/40"
-                        onClick={() => setSelectedGrade(g)}
+                        className="hover:bg-slate-50/50 transition-colors divide-x divide-slate-200/40"
                       >
                         <td className="px-3 py-3 text-center whitespace-nowrap text-xs text-slate-400 font-mono font-bold bg-slate-50/10">{i + 1}</td>
                         <td className="px-4 py-3 whitespace-nowrap text-xs font-semibold text-slate-600 font-mono">{info.kode_mk}</td>
@@ -413,88 +408,7 @@ export default function NilaiView({ gradeList, courseList }: NilaiViewProps) {
         </div>
       </div>
 
-      {/* Detail Grading Modal */}
-      <AnimatePresence>
-        {selectedGrade && (() => {
-          const info = getGradeInfo(selectedGrade);
-          const numericTotal = parseIndoNumber(selectedGrade.total) || (parseIndoNumber(selectedGrade.presensi) + parseIndoNumber(selectedGrade.tugas) + parseIndoNumber(selectedGrade.uts) + parseIndoNumber(selectedGrade.uas));
-          return (
-            <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-              <motion.div 
-                initial={{ scale: 0.95, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.95, opacity: 0 }}
-                className="bg-white rounded-2xl border border-slate-200 shadow-2xl w-full max-w-sm overflow-hidden"
-              >
-                <div className="p-5 border-b border-slate-150 flex justify-between items-center bg-slate-50">
-                  <span className="font-bold text-xs text-slate-800">Komponen Penilaian Nilai Akhir</span>
-                  <button 
-                    onClick={() => setSelectedGrade(null)}
-                    className="p-1 rounded-lg hover:bg-slate-205 text-slate-400 cursor-pointer"
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
-                </div>
 
-                <div className="p-5 space-y-4 text-xs">
-                  <div>
-                    <span className="text-[10px] text-slate-400 font-bold block">NAMA MATA KULIAH</span>
-                    <p className="text-sm font-black text-slate-850 mt-1 leading-tight">{selectedGrade.nama_mk}</p>
-                  </div>
-
-                  {/* Score Summary Metrics */}
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="p-3 bg-slate-55 border border-slate-150 rounded-xl">
-                      <span className="text-slate-450 font-bold block text-[10px]">PREDIKAT HURUF</span>
-                      <span className="text-base font-black text-emerald-700 mt-1 block uppercase">
-                        {info.huruf}
-                      </span>
-                    </div>
-                    <div className="p-3 bg-slate-55 border border-slate-150 rounded-xl">
-                      <span className="text-slate-455 font-bold block text-[10px]">STATUS EVALUASI</span>
-                      <span className="text-xs font-bold text-slate-700 mt-1 block flex items-center gap-1">
-                        <CheckCircle2 className="w-4 h-4 text-emerald-600 inline shrink-0" />
-                        {numericTotal >= 50 ? 'Lulus' : 'Munaqosyah'}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Weights details breakdown */}
-                  <div className="space-y-2 pt-2 border-t border-slate-100">
-                    <span className="text-[10px] text-slate-450 font-bold block uppercase tracking-wider">Aspek Bobot & Pencapaian</span>
-                    <div className="space-y-1.5 font-mono text-[11px]">
-                      <div className="flex justify-between">
-                        <span className="text-slate-500">Presensi (Maks 10)</span>
-                        <span className="text-slate-805 font-bold">{parseIndoNumber(selectedGrade.presensi).toFixed(2)} Poin</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-slate-500">Tugas (Maks 20)</span>
-                        <span className="text-slate-805 font-bold">{parseIndoNumber(selectedGrade.tugas).toFixed(2)} Poin</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-slate-500">UTS (Maks 30)</span>
-                        <span className="text-slate-805 font-bold">{parseIndoNumber(selectedGrade.uts).toFixed(2)} Poin</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-slate-500">UAS (Maks 40)</span>
-                        <span className="text-slate-805 font-bold">{parseIndoNumber(selectedGrade.uas).toFixed(2)} Poin</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Feedback or Dosen Recommendations */}
-                  <div className="space-y-1.5 pt-3 border-t border-slate-100">
-                    <span className="text-[10px] text-slate-450 font-bold block uppercase tracking-wider">Catatan & Komentar Dosen</span>
-                    <blockquote className="p-2.5 bg-indigo-50/10 border-l-4 border-indigo-500 text-slate-650 leading-relaxed font-sans text-[11px] rounded-r-lg">
-                      "{getGradeComment(selectedGrade.nama_mk, numericTotal)}"
-                    </blockquote>
-                  </div>
-                </div>
-              </motion.div>
-            </div>
-          );
-        })()}
-      </AnimatePresence>
 
     </div>
   );

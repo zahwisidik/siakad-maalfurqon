@@ -188,8 +188,14 @@ export default function DashboardMahasantri({ currentTab = 'beranda' }: Dashboar
         kelas: newRecord.kelas,
         pembahasan: newRecord.pembahasan,
         data: [{
+          tanggal: newRecord.tanggal,
+          jam_ke: newRecord.jam_ke,
+          nama_mk: newRecord.nama_mk,
+          program: newRecord.program,
+          kelas: newRecord.kelas,
           mahasiswa_id: newRecord.mahasiswa_id,
-          status: newRecord.status
+          status: newRecord.status,
+          pembahasan: newRecord.pembahasan
         }]
       });
       toast.success('Kehadiran berhasil didaftarkan!');

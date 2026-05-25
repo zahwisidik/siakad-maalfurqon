@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import toast from 'react-hot-toast';
+import { formatTimeDisplay } from '../../../utils/time';
 
 interface JadwalViewProps {
   scheduleList: any[];
@@ -134,7 +135,7 @@ export default function JadwalView({ scheduleList }: JadwalViewProps) {
                       </div>
                       <div className="flex items-center justify-between sm:justify-end gap-2.5 border-t sm:border-0 pt-2 sm:pt-0 border-slate-100 font-mono text-xs font-bold text-slate-700">
                         <span className="p-1 px-2.5 bg-slate-50 border border-slate-150 rounded-lg">
-                          {item.jam_mulai} - {item.jam_berakhir}
+                          {formatTimeDisplay(item.jam_mulai)} - {formatTimeDisplay(item.jam_berakhir)}
                         </span>
                         <ChevronRight className="w-4 h-4 text-slate-350" />
                       </div>
@@ -204,7 +205,7 @@ export default function JadwalView({ scheduleList }: JadwalViewProps) {
                           <p className="text-slate-450 text-[10px] truncate">{item.pengajar}</p>
                           <div className="flex justify-between items-center text-[9px] text-slate-400 font-mono pt-1 border-t border-slate-100">
                             <span>Jam {item.jam_ke}</span>
-                            <span className="font-semibold text-slate-600">{item.jam_mulai}</span>
+                            <span className="font-semibold text-slate-600">{formatTimeDisplay(item.jam_mulai)}</span>
                           </div>
                         </div>
                       ))}
@@ -290,7 +291,7 @@ export default function JadwalView({ scheduleList }: JadwalViewProps) {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <span className="text-slate-400 font-semibold block">JAM BELAJAR</span>
-                    <span className="text-slate-800 font-bold font-mono">{selectedJadwal.jam_mulai} - {selectedJadwal.jam_berakhir}</span>
+                    <span className="text-slate-800 font-bold font-mono">{formatTimeDisplay(selectedJadwal.jam_mulai)} - {formatTimeDisplay(selectedJadwal.jam_berakhir)}</span>
                   </div>
                   <div>
                     <span className="text-slate-400 font-semibold block">LOKASI KULIAH</span>

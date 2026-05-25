@@ -165,14 +165,14 @@ export const api = {
               payload.data.forEach((item: any) => {
                 mockAbsensi.push({
                   id: 'a_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
-                  tanggal: payload.tanggal || new Date().toISOString().split('T')[0],
-                  jam_ke: payload.jam_ke || '1',
-                  nama_mk: payload.nama_mk || '',
-                  program: payload.program || '',
-                  kelas: payload.kelas || '',
+                  tanggal: item.tanggal || payload.tanggal || new Date().toISOString().split('T')[0],
+                  jam_ke: item.jam_ke || payload.jam_ke || '1',
+                  nama_mk: item.nama_mk || payload.nama_mk || '',
+                  program: item.program || payload.program || '',
+                  kelas: item.kelas || payload.kelas || '',
                   mahasiswa_id: item.mahasiswa_id,
                   status: item.status,
-                  pembahasan: payload.pembahasan || '',
+                  pembahasan: item.pembahasan || payload.pembahasan || '',
                   timestamp: new Date().toISOString()
                 });
               });

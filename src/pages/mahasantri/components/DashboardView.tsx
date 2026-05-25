@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { formatToIndonesianDate } from '../../../utils/time';
+import { formatToIndonesianDate, formatTimeDisplay } from '../../../utils/time';
 import { 
   CheckCircle2, 
   BookOpen, 
@@ -79,10 +79,11 @@ export default function DashboardView({
   const todaySchedules = scheduleList.filter(s => s.hari?.toLowerCase() === currentDay.toLowerCase());
 
   // Check if student has already checked in today for each course
-  const checkAttendanceStatus = (courseName: string) => {
+  const checkAttendanceStatus = (courseName: string, jamKe: string) => {
     const todayStr = new Date().toISOString().split('T')[0];
     const attended = attendanceList.find(a => 
       a.nama_mk === courseName && 
+      String(a.jam_ke) === String(jamKe) &&
       (a.tanggal === todayStr || a.tanggal?.startsWith(todayStr))
     );
     if (attended) {
@@ -164,7 +165,7 @@ export default function DashboardView({
           ) : (
             <div className="space-y-3.5 pt-1">
               {todaySchedules.map((item) => {
-                const status = checkAttendanceStatus(item.nama_mk);
+                const status = checkAttendanceStatus(item.nama_mk, item.jam_ke);
                 return (
                   <div key={item.id} className="p-4 rounded-xl border border-slate-150 bg-slate-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-slate-50 transition-colors">
                     <div className="space-y-1">
@@ -179,7 +180,7 @@ export default function DashboardView({
                     </div>
                     <div className="flex items-center justify-between sm:justify-end gap-3 border-t sm:border-0 pt-2 sm:pt-0 border-slate-100">
                       <div className="font-mono text-xs font-bold bg-white text-slate-700 py-1 px-2 border border-slate-150 rounded-lg shadow-sm">
-                        {item.jam_mulai} - {item.jam_berakhir}
+                        {formatTimeDisplay(item.jam_mulai)} - {formatTimeDisplay(item.jam_berakhir)}
                       </div>
 
                       {status.text === 'Belum Absen' && (
