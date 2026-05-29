@@ -22,7 +22,7 @@ export default function DashboardPengajar() {
   const [showWarningAlasan, setShowWarningAlasan] = useState(false);
 
   const [showModalDatang, setShowModalDatang] = useState(false);
-  const [datangData, setDatangData] = useState({ lokasi: '' });
+  const [datangData, setDatangData] = useState({ lokasi: '', alasan_terlambat: '' });
   const [showWarningAlasanDatang, setShowWarningAlasanDatang] = useState(false);
 
   useEffect(() => {
@@ -53,6 +53,10 @@ export default function DashboardPengajar() {
       toast.error('Pilih lokasi anda');
       return;
     }
+    if (showWarningAlasanDatang && !datangData.alasan_terlambat.trim()) {
+      toast.error('Sila isi alasan keterlambatan anda');
+      return;
+    }
 
     const now = new Date();
     const today = now.toLocaleDateString('en-CA');
@@ -67,7 +71,8 @@ export default function DashboardPengajar() {
          tanggal: today,
          waktu_datang: time,
          waktu_pulang: newState.waktu_pulang,
-         lokasi_datang: datangData.lokasi
+         lokasi_datang: datangData.lokasi,
+         alasan_terlambat: datangData.alasan_terlambat
        });
        toast.success('Berhasil Absen Datang');
     } catch (e) {
@@ -92,7 +97,7 @@ export default function DashboardPengajar() {
         // Lokasi terverifikasi
         toast.success('Lokasi terverifikasi sesuai.');
         setShowModalDatang(true);
-        setDatangData({ lokasi: '' });
+        setDatangData({ lokasi: '', alasan_terlambat: '' });
         const now = new Date();
         // Assuming work starts around 08:00
         if (now.getHours() >= 8 && (now.getHours() > 8 || now.getMinutes() > 0)) {
@@ -364,6 +369,17 @@ export default function DashboardPengajar() {
                    <div className="flex gap-3">
                      <AlertCircle className="w-5 h-5 text-amber-600 shrink-0" />
                      <p className="text-sm text-amber-800 italic">"Setiap muslim harus menyesuaikan diri dengan kesepakatan yang dia setujui. Kecuali kesepakatan yang mengharamkan yang halal atau menghalalkan yang haram." <br className="hidden sm:block"/> <span className="font-semibold text-amber-900">(HR. at-Thabrani dalam al-Mu'jam al-Kabir)</span></p>
+                   </div>
+                   
+                   <div className="pt-2">
+                     <label className="block text-sm font-semibold text-amber-900 mb-2">Anda datang melewati batas waktu, silahkan isi alasan keterlambatan Anda:</label>
+                     <textarea 
+                       className="w-full border border-amber-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-amber-500 outline-none bg-white"
+                       rows={3}
+                       placeholder="Alasan terlambat datang..."
+                       value={datangData.alasan_terlambat}
+                       onChange={(e) => setDatangData({ ...datangData, alasan_terlambat: e.target.value })}
+                     ></textarea>
                    </div>
                 </div>
               )}
