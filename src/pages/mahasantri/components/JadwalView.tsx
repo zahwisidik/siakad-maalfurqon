@@ -35,9 +35,6 @@ export default function JadwalView({ scheduleList, announcements = [] }: JadwalV
   };
   const currentDay = todayIndo();
 
-  const latestNotification = announcements.length > 0 
-    ? announcements[0] 
-    : { judul: 'Pemberitahuan', isi_lengkap: 'Ruang kelas luring dapat berubah sewaktu-waktu tergantung koordinasi dari Pengawas Asrama.' };
 
   // Academic Calendar dates mockup
   const academicEvents = [
@@ -166,9 +163,7 @@ export default function JadwalView({ scheduleList, announcements = [] }: JadwalV
               </p>
             </div>
 
-            <div className="bg-white/5 border border-white/10 rounded-xl p-3 text-[11px] text-slate-300">
-              <span className="font-bold text-emerald-400">{latestNotification.judul}:</span> {latestNotification.isi_lengkap}
-            </div>
+
           </div>
         </div>
       )}

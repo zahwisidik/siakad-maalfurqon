@@ -95,13 +95,15 @@ export default function DashboardMahasantri({ currentTab = 'beranda' }: Dashboar
         studentKelas = foundMahasantri.kelas || studentKelas;
 
         // If the attributes in the current session are outdated or missing, update the auth session state
-        if (user.program !== studentProgram || user.kelas !== studentKelas || user.nama !== foundMahasantri.nama || user.nim !== foundMahasantri.nim) {
+        if (user.program !== studentProgram || user.kelas !== studentKelas || user.nama !== foundMahasantri.nama || user.nim !== foundMahasantri.nim || user.tahun_masuk !== foundMahasantri.tahun_masuk || user.status !== foundMahasantri.status) {
           const updatedUser = { 
             ...user, 
             nama: foundMahasantri.nama || user.nama,
             nim: foundMahasantri.nim || user.nim,
-            program: studentProgram, 
-            kelas: studentKelas 
+            program: studentProgram,
+            kelas: studentKelas,
+            status: foundMahasantri.status || user.status,
+            tahun_masuk: foundMahasantri.tahun_masuk || user.tahun_masuk
           };
           updateSession(updatedUser);
         }
@@ -206,10 +208,18 @@ export default function DashboardMahasantri({ currentTab = 'beranda' }: Dashboar
   };
 
   // Profile fields dispatch
-  const handleUpdateProfile = (updatedData: any) => {
+  const handleUpdateProfile = async (updatedData: any) => {
     if (user) {
-      const updatedUser = { ...user, ...updatedData };
-      updateSession(updatedUser);
+      try {
+        await api.post('updateMahasantri', {
+          id: user.id,
+          data: updatedData
+        });
+        const updatedUser = { ...user, ...updatedData };
+        updateSession(updatedUser);
+      } catch (error: any) {
+        toast.error('Gagal menyimpan profil: ' + error.message);
+      }
     }
   };
 

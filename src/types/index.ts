@@ -3,10 +3,11 @@ export interface User {
   nama: string;
   email: string;
   role: 'admin' | 'pengajar' | 'mahasantri';
-  status: 'active' | 'inactive' | 'aktif' | 'nonaktif';
+  status: 'active' | 'inactive' | 'aktif' | 'nonaktif' | string;
   nim?: string;
   program?: string;
   kelas?: string;
+  tahun_masuk?: string;
 }
 
 export interface Mahasantri {
@@ -16,7 +17,8 @@ export interface Mahasantri {
   jenis_kelamin?: 'laki-laki' | 'perempuan' | string;
   program: string;
   kelas: string;
-  status: 'aktif' | 'nonaktif' | 'lulus';
+  status: 'aktif' | 'nonaktif' | 'lulus' | string;
+  tahun_masuk?: string;
 }
 
 export interface Pengajar {

@@ -7,10 +7,10 @@ const APPS_SCRIPT_URL = import.meta.env.VITE_APPS_SCRIPT_URL || '';
 // --- MOCK DATA --- 
 // Dipakai jika belum terkoneksi dengan G-Sheets
 let mockMahasantri = [
-  { id: 'm1', nim: '1001', nama: 'Fulan', jenis_kelamin: 'laki-laki', program: "I'dad Lughowi", kelas: "Semester 2 - Putra", status: 'aktif' },
-  { id: 'm2', nim: '1002', nama: 'Fulanah', jenis_kelamin: 'perempuan', program: "Syariah", kelas: "Semester 1 - Putri", status: 'aktif' },
-  { id: 'm3', nim: '529.01.05.25', nama: 'Adnan', jenis_kelamin: 'laki-laki', program: "I'dad Lughowi", kelas: "Semester 2 - Putra", status: 'aktif' },
-  { id: 'm4', nim: '2022.01.01.028', nama: 'Muhammad Imron', jenis_kelamin: 'laki-laki', program: "I'dad Du'at", kelas: "Semester 2 - Putra", status: 'aktif' },
+  { id: 'm1', nim: '1001', nama: 'Fulan', jenis_kelamin: 'laki-laki', program: "I'dad Lughowi", kelas: "Semester 2 - Putra", status: 'aktif', tahun_masuk: 2025 },
+  { id: 'm2', nim: '1002', nama: 'Fulanah', jenis_kelamin: 'perempuan', program: "Syariah", kelas: "Semester 1 - Putri", status: 'aktif', tahun_masuk: 2025 },
+  { id: 'm3', nim: '529.01.05.25', nama: 'Adnan', jenis_kelamin: 'laki-laki', program: "I'dad Lughowi", kelas: "Semester 2 - Putra", status: 'aktif', tahun_masuk: 2025 },
+  { id: 'm4', nim: '2022.01.01.028', nama: 'Muhammad Imron', jenis_kelamin: 'laki-laki', program: "I'dad Du'at", kelas: "Semester 2 - Putra", status: 'aktif', tahun_masuk: 2022 },
 ];
 
 let mockJadwal = [
@@ -71,11 +71,11 @@ let mockAbsensi: Absensi[] = [
 
 let mockPengumuman = [
   { 
-    id: 'p1', 
-    kategori: 'Ujian', 
-    judul: 'Jadwal Ujian Akhir Semester (UAS) Genap', 
-    tanggal: '20 Juni 2026', 
-    isi_lengkap: 'Diberitahukan kepada seluruh mahasantri tingkat I dan II bahwa pelaksanaan Ujian Akhir Semester Genap Tahun Akademik 2025/2026 akan diselenggarakan mulai tanggal 22 Juni s.d 27 Juni 2026. Harap menyelesaikan administrasi syahriah asrama sebelum tanggal 15 Juni 2026.', 
+    id: 'p0', 
+    kategori: 'Akademik', 
+    judul: 'Pemberitahuan', 
+    tanggal: 'Sekarang', 
+    isi_lengkap: 'Ruang kelas luring dapat berubah sewaktu-waktu tergantung koordinasi dari Pengawas Asrama.', 
     penting: true 
   },
   { 
@@ -114,6 +114,8 @@ let mockPengumuman = [
 
 export const isUsingMock = !APPS_SCRIPT_URL;
 
+let mockAbsensiPengajar: any[] = [];
+
 export const api = {
   get: async (action: string) => {
     if (isUsingMock) {
@@ -126,15 +128,28 @@ export const api = {
           if (action === 'getKelas') resolve({ data: mockKelas });
           if (action === 'getNilai') resolve({ data: mockNilai });
           if (action === 'getAbsensi') resolve({ data: mockAbsensi });
+          if (action === 'getAbsensiPengajar') resolve({ data: mockAbsensiPengajar });
           if (action === 'getPengumuman') resolve({ data: mockPengumuman });
           resolve({ data: [] });
         }, 500);
       });
     }
 
-    const { data } = await axios.get(`${APPS_SCRIPT_URL}?action=${action}`);
-    if (!data.success) throw new Error(data.message);
-    return data;
+    try {
+      const { data } = await axios.get(`${APPS_SCRIPT_URL}?action=${action}`);
+      if (!data.success) {
+        if (action === 'getAbsensiPengajar' && data.message === 'Unknown action') {
+          return { data: mockAbsensiPengajar };
+        }
+        throw new Error(data.message);
+      }
+      return data;
+    } catch (error: any) {
+      if (action === 'getAbsensiPengajar') {
+         return { data: mockAbsensiPengajar };
+      }
+      throw error;
+    }
   },
 
   post: async (action: string, payload: any) => {
@@ -148,14 +163,14 @@ export const api = {
             } else if (emailLower === 'ahmad@pengajar.com') {
               resolve({ data: { user: { id: '2', nama: 'Ust. Ahmad', email: 'ahmad@pengajar.com', role: 'pengajar', status: 'active' } } });
             } else if (emailLower === 'fulan@mahasantri.com' || payload.email === '1001') {
-              resolve({ data: { user: { id: 'm1', nama: 'Fulan', email: 'fulan@mahasantri.com', nim: '1001', role: 'mahasantri', status: 'aktif', program: "I'dad Lughowi", kelas: "Semester 2 - Putra" } } });
+              resolve({ data: { user: { id: 'm1', nama: 'Fulan', email: 'fulan@mahasantri.com', nim: '1001', role: 'mahasantri', status: 'aktif', program: "I'dad Lughowi", kelas: "Semester 2 - Putra", tahun_masuk: 2025 } } });
             } else if (emailLower === 'fulanah@mahasantri.com' || payload.email === '1002') {
-              resolve({ data: { user: { id: 'm2', nama: 'Fulanah', email: 'fulanah@mahasantri.com', nim: '1002', role: 'mahasantri', status: 'aktif', program: "Syariah", kelas: "Semester 1 - Putri" } } });
+              resolve({ data: { user: { id: 'm2', nama: 'Fulanah', email: 'fulanah@mahasantri.com', nim: '1002', role: 'mahasantri', status: 'aktif', program: "Syariah", kelas: "Semester 1 - Putri", tahun_masuk: 2025 } } });
             } else {
               // check if it's dynamic
               const found = mockMahasantri.find(m => m.nim === payload.email || m.nama.toLowerCase() === emailLower);
               if (found) {
-                resolve({ data: { user: { id: found.id, nama: found.nama, email: found.nim + '@mahasantri.com', nim: found.nim, role: 'mahasantri', status: 'aktif', program: found.program, kelas: found.kelas } } });
+                resolve({ data: { user: { id: found.id, nama: found.nama, email: found.nim + '@mahasantri.com', nim: found.nim, role: 'mahasantri', status: found.status, program: found.program, kelas: found.kelas, tahun_masuk: found.tahun_masuk } } });
               } else {
                 reject(new Error('User tidak ditemukan. Gunakan admin@admin.com, ahmad@pengajar.com, atau 1001/1002'));
               }
@@ -178,6 +193,14 @@ export const api = {
               });
             }
             resolve({ data: { message: 'Absensi simulated save.'} });
+          } else if (action === 'saveAbsensiPengajar') {
+            const index = mockAbsensiPengajar.findIndex((a: any) => a.pengajar_id === payload.pengajar_id && a.tanggal === payload.tanggal);
+            if (index > -1) {
+              mockAbsensiPengajar[index] = { ...mockAbsensiPengajar[index], ...payload };
+            } else {
+              mockAbsensiPengajar.push({ id: 'ap_' + Date.now(), ...payload });
+            }
+            resolve({ data: { message: 'Absensi pengajar tersimpan' } });
           } else if (action === 'saveNilai') {
             const index = mockNilai.findIndex((n: any) => n.mahasiswa_id === payload.mahasiswa_id && n.nama_mk === payload.nama_mk && n.kelas === payload.kelas);
             if (index > -1) {
@@ -206,12 +229,36 @@ export const api = {
       });
     }
 
-    const { data } = await axios.post(`${APPS_SCRIPT_URL}?action=${action}`, JSON.stringify({ action, ...payload }), {
-      headers: {
-        'Content-Type': 'text/plain;charset=utf-8', 
+    try {
+      const { data } = await axios.post(`${APPS_SCRIPT_URL}?action=${action}`, JSON.stringify({ action, ...payload }), {
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8', 
+        }
+      });
+      if (!data.success) {
+        if (action === 'saveAbsensiPengajar' && data.message === 'Unknown action') {
+          const index = mockAbsensiPengajar.findIndex((a: any) => a.pengajar_id === payload.pengajar_id && a.tanggal === payload.tanggal);
+          if (index > -1) {
+            mockAbsensiPengajar[index] = { ...mockAbsensiPengajar[index], ...payload };
+          } else {
+            mockAbsensiPengajar.push({ id: 'ap_' + Date.now(), ...payload });
+          }
+          return { data: { message: 'Absensi pengajar tersimpan' } };
+        }
+        throw new Error(data.message);
       }
-    });
-    if (!data.success) throw new Error(data.message);
-    return data;
+      return data;
+    } catch (error: any) {
+      if (action === 'saveAbsensiPengajar') {
+         const index = mockAbsensiPengajar.findIndex((a: any) => a.pengajar_id === payload.pengajar_id && a.tanggal === payload.tanggal);
+         if (index > -1) {
+           mockAbsensiPengajar[index] = { ...mockAbsensiPengajar[index], ...payload };
+         } else {
+           mockAbsensiPengajar.push({ id: 'ap_' + Date.now(), ...payload });
+         }
+         return { data: { message: 'Absensi pengajar tersimpan lokal.' } };
+      }
+      throw error;
+    }
   }
 };

@@ -30,7 +30,7 @@ export default function SetupGuide() {
             <li>Tambahkan data admin di baris ke-2:<br/>
               <code>1</code> | <code>Admin</code> | <code>admin@admin.com</code> | <code>password123</code> | <code>admin</code> | <code>active</code>
             </li>
-            <li>Di Sheet <code>MAHASANTRI</code>, pastikan memiliki header: <code>id</code>, <code>nim</code>, <code>nama</code>, <code>jenis_kelamin</code>, <code>kelas</code>, <code>semester</code>, <code>status</code>.</li>
+            <li>Di Sheet <code>MAHASANTRI</code>, pastikan memiliki header: <code>id</code>, <code>nim</code>, <code>nama</code>, <code>jenis_kelamin</code>, <code>kelas</code>, <code>semester</code>, <code>status</code>, <code>tahun_masuk</code>.</li>
           </ol>
 
           <h3 className="text-xl font-bold mt-8 mb-4">Langkah 2: Pasang Apps Script</h3>

@@ -35,7 +35,7 @@
 // GANTI DENGAN ID SPREADSHEET ANDA (Ambil dari URL Spreadsheet)
 // Contoh URL: https://docs.google.com/spreadsheets/d/1XyZ_abcdefghijk/edit
 // ID-nya adalah: 1XyZ_abcdefghijk
-const SPREADSHEET_ID = "YOUR_SPREADSHEET_ID_HERE";
+const SPREADSHEET_ID = "1BvRKRLSqp0B1o2dvJeDLXlEeBgyuxSVIYFRaZqSJMaE";
 
 function getSpreadsheet() {
   if (SPREADSHEET_ID === "YOUR_SPREADSHEET_ID_HERE") {
@@ -53,6 +53,7 @@ const SHEET_SCHEMAS = {
   'KELAS': ['id', 'program', 'nama_kelas'],
   'JADWAL': ['id', 'hari', 'jam_ke', 'jam_mulai', 'jam_berakhir', 'program', 'kelas', 'nama_mk', 'pengajar', 'lokasi', 'deskripsi'],
   'ABSENSI': ['id', 'tanggal', 'jam_ke', 'program', 'kelas', 'nama_mk', 'mahasiswa_id', 'status', 'pembahasan', 'timestamp'],
+  'ABSENSI_PENGAJAR': ['id', 'pengajar_id', 'tanggal', 'waktu_datang', 'waktu_pulang', 'lokasi_datang', 'lokasi_pulang', 'alasan_pulang_awal'],
   'NILAI': ['id', 'mahasiswa_id', 'program', 'kelas', 'nama_mk', 'presensi', 'tugas', 'uts', 'uas', 'total', 'tahun_akademik', 'semester'],
   'PENGUMUMAN': ['id', 'kategori', 'judul', 'tanggal', 'isi_lengkap', 'penting']
 };
@@ -202,6 +203,8 @@ function doGet(e) {
         return successResponse(getData('JADWAL'));
       case 'getAbsensi':
         return successResponse(getData('ABSENSI'));
+      case 'getAbsensiPengajar':
+        return successResponse(getData('ABSENSI_PENGAJAR'));
       case 'getNilai':
         return successResponse(getData('NILAI'));
       case 'getPengumuman':
@@ -288,6 +291,9 @@ function doPost(e) {
         return updateData('ABSENSI', body.id, body.data);
       case 'deleteAbsensi':
         return deleteData('ABSENSI', body.id);
+        
+      case 'saveAbsensiPengajar':
+        return upsertAbsensiPengajar(body);
         
       case 'saveNilai':
         return upsertNilai(body);
@@ -564,6 +570,56 @@ function upsertNilai(item) {
     }
     sheet.appendRow(newRow);
     return successResponse({ id: item.id, message: "Nilai created successfully" });
+  }
+}
+
+function upsertAbsensiPengajar(item) {
+  const sheet = ensureSheetHeaders('ABSENSI_PENGAJAR');
+  const data = sheet.getDataRange().getValues();
+  if (data.length === 0) return errorResponse("Sheet ABSENSI_PENGAJAR is empty");
+  
+  const headers = data[0];
+  const normalizedHeaders = headers.map(h => h ? h.toString().toLowerCase().trim() : '');
+  
+  const idxPengajar = normalizedHeaders.indexOf('pengajar_id');
+  const idxTanggal = normalizedHeaders.indexOf('tanggal');
+  
+  if (idxPengajar === -1 || idxTanggal === -1) {
+    return errorResponse("Missing required columns in ABSENSI_PENGAJAR sheet");
+  }
+  
+  let foundRowIndex = -1;
+  // Start from 1 to skip headers
+  for (let i = 1; i < data.length; i++) {
+    let pId = data[i][idxPengajar];
+    let tgl = data[i][idxTanggal];
+    
+    if (pId == item.pengajar_id && tgl == item.tanggal) {
+      foundRowIndex = i;
+      break;
+    }
+  }
+  
+  if (foundRowIndex > -1) {
+    // Update existing row
+    for (let j = 0; j < headers.length; j++) {
+      const headerName = normalizedHeaders[j];
+      // update only provided fields except id
+      if (item.hasOwnProperty(headerName) && headerName !== 'id') {
+        sheet.getRange(foundRowIndex + 1, j + 1).setValue(item[headerName] !== undefined ? item[headerName] : "");
+      }
+    }
+    return successResponse({ message: "Absensi pengajar updated successfully" });
+  } else {
+    // Add new row
+    item.id = generateId();
+    const newRow = [];
+    for (let j = 0; j < headers.length; j++) {
+      const headerName = normalizedHeaders[j];
+      newRow.push(item[headerName] !== undefined ? item[headerName] : "");
+    }
+    sheet.appendRow(newRow);
+    return successResponse({ id: item.id, message: "Absensi pengajar created successfully" });
   }
 }
 

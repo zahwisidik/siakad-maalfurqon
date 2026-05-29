@@ -152,18 +152,22 @@ export default function ProfilView({ user, onUpdateProfile, onLogout }: ProfilVi
           <div className="bg-slate-50/80 rounded-xl p-4 text-left divide-y divide-slate-150 text-[11px] space-y-2.5 pt-3">
             <div className="flex justify-between pb-2.5">
               <span className="text-slate-450 font-bold">Status Akademik</span>
-              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-150 text-emerald-750 font-bold uppercase text-[9px] leading-none">
-                <CheckCircle2 className="w-2.5 h-2.5 text-emerald-600" />
-                Syar'i Aktif
+              <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full border font-bold uppercase text-[9px] leading-none ${
+                user?.status?.toLowerCase() === 'aktif' 
+                  ? 'bg-emerald-50 border-emerald-150 text-emerald-750' 
+                  : 'bg-red-50 border-red-150 text-red-750'
+              }`}>
+                <CheckCircle2 className={`w-2.5 h-2.5 ${user?.status?.toLowerCase() === 'aktif' ? 'text-emerald-600' : 'text-red-600'}`} />
+                {user?.status || 'Aktif'}
               </span>
             </div>
-            <div className="flex justify-between py-2.5">
+            <div className="flex justify-between pt-2.5">
               <span className="text-slate-450 font-bold">Tahun Masuk</span>
-              <span className="text-slate-800 font-extrabold font-mono">2024 (Lokal)</span>
+              <span className="text-slate-800 font-extrabold font-mono">{user?.tahun_masuk || '-'}</span>
             </div>
             <div className="flex justify-between pt-2.5">
-              <span className="text-slate-450 font-bold">Dosen Wali</span>
-              <span className="text-slate-805 font-bold">Ust. Ahmad, Lc.</span>
+              <span className="text-slate-450 font-bold">Program Studi</span>
+              <span className="text-slate-800 font-bold">{user?.program || '-'} {user?.kelas ? `(${user.kelas})` : ''}</span>
             </div>
           </div>
         </div>
