@@ -354,7 +354,11 @@ export default function DashboardPengajar() {
                   <h4 className="font-bold text-slate-800">{j.nama_mk}</h4>
                   <p className="text-sm text-slate-500 mt-1">{j.program} - {j.kelas}</p>
                 </div>
-                <Link to="/absensi-pengajar" className="shrink-0 px-4 py-2 bg-white text-emerald-600 font-semibold text-sm rounded-lg border border-emerald-200 hover:bg-emerald-600 hover:text-white transition-colors">
+                <Link 
+                  to="/absensi-pengajar" 
+                  state={{ autoOpenModal: true, mk: j.nama_mk, kelas: j.kelas, program: j.program }}
+                  className="shrink-0 px-4 py-2 bg-white text-emerald-600 font-semibold text-sm rounded-lg border border-emerald-200 hover:bg-emerald-600 hover:text-white transition-colors"
+                >
                   Isi Absensi
                 </Link>
               </div>

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { api } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 import toast from 'react-hot-toast';
@@ -27,6 +28,9 @@ const getPropValue = (obj: any, propName: string): any => {
 };
 
 export default function AbsensiPengajar() {
+  const location = useLocation();
+  const state = location.state as any;
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { user } = useAuth();
   
@@ -41,6 +45,7 @@ export default function AbsensiPengajar() {
   const [loading, setLoading] = useState(false);
   const [isFetchingInitial, setIsFetchingInitial] = useState(true);
   const [hasQueried, setHasQueried] = useState(false);
+  const [modalAutoOpened, setModalAutoOpened] = useState(false);
 
   // Main Rekap Filters
   const [selectedProgram, setSelectedProgram] = useState<string>(PROGRAM_OPTIONS[0]);
@@ -148,6 +153,25 @@ export default function AbsensiPengajar() {
 
   // Main dropdown filters automatic synchronization
   useEffect(() => {
+    if (hasQueried && state?.autoOpenModal && !modalAutoOpened) {
+      if (state.program) {
+        setModalProgram(state.program);
+        setSelectedProgram(state.program);
+      }
+      if (state.mk) {
+        setModalMatkul(state.mk);
+        setSelectedMatkul(state.mk);
+      }
+      if (state.kelas) {
+        setModalKelas(state.kelas);
+        setSelectedKelas(state.kelas);
+      }
+      setIsAddModalOpen(true);
+      setModalAutoOpened(true);
+    }
+  }, [hasQueried, state, modalAutoOpened]);
+
+  useEffect(() => {
     if (selectedProgram) {
       const availableMK = Array.from(new Set(matakuliahList.filter(m => m.program === selectedProgram).map(m => m.nama_mk)));
       if (availableMK.length > 0 && !availableMK.includes(selectedMatkul)) {
@@ -191,13 +215,13 @@ export default function AbsensiPengajar() {
   useEffect(() => {
     if (isAddModalOpen) {
       const modalMks = Array.from(new Set(matakuliahList.filter(m => m.program === modalProgram).map(m => m.nama_mk)));
-      if (modalMks.length > 0) {
+      if (modalMks.length > 0 && !modalMks.includes(modalMatkul)) {
         setModalMatkul(modalMks[0]);
-      } else {
+      } else if (modalMks.length === 0) {
         setModalMatkul('');
       }
     }
-  }, [modalProgram, isAddModalOpen]);
+  }, [modalProgram, isAddModalOpen, matakuliahList]);
 
   // Modal resets class when modalMatkul shifts
   useEffect(() => {
