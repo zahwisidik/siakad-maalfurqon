@@ -10,6 +10,7 @@ export default defineConfig(() => {
       'process.env.GOOGLE_MAPS_PLATFORM_KEY': JSON.stringify(process.env.GOOGLE_MAPS_PLATFORM_KEY || '')
     },
     resolve: {
+      dedupe: ['react', 'react-dom'],
       alias: {
         '@': path.resolve(__dirname, '.'),
       },

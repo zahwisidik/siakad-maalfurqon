@@ -29,6 +29,7 @@ interface ProfilViewProps {
 }
 
 export default function ProfilView({ user, onUpdateProfile, onLogout }: ProfilViewProps) {
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Profile forms

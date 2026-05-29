@@ -5,7 +5,7 @@ import { BookOpen, Clock, Users, CalendarDays, MapPin, CheckCircle, LogOut, Aler
 import { Link } from 'react-router-dom';
 import { formatTimeDisplay } from '../../utils/time';
 import toast from 'react-hot-toast';
-import { APIProvider, Map, AdvancedMarker, Pin } from '@vis.gl/react-google-maps';
+
 
 const API_KEY = process.env.GOOGLE_MAPS_PLATFORM_KEY || (import.meta as any).env?.VITE_GOOGLE_MAPS_PLATFORM_KEY || '';
 const hasValidKey = Boolean(API_KEY) && API_KEY !== 'YOUR_API_KEY';
@@ -392,19 +392,16 @@ export default function DashboardPengajar() {
             <div className="p-4 sm:p-6 overflow-y-auto space-y-6">
               <div className="rounded-xl overflow-hidden border border-slate-200">
                 {hasValidKey && currentLocation ? (
-                  <APIProvider apiKey={API_KEY} version="weekly">
-                    <Map
-                      defaultCenter={currentLocation}
-                      defaultZoom={17}
-                      mapId="LOCATION_MAP"
-                      style={{width: '100%', height: '200px'}}
-                      disableDefaultUI={true}
-                    >
-                      <AdvancedMarker position={currentLocation}>
-                         <Pin background="#10b981" glyphColor="#fff" borderColor="#047857" />
-                      </AdvancedMarker>
-                    </Map>
-                  </APIProvider>
+                  <div className="w-full h-[200px]">
+                    <iframe
+                      width="100%"
+                      height="100%"
+                      frameBorder="0"
+                      style={{ border: 0 }}
+                      src={`https://www.google.com/maps/embed/v1/view?key=${API_KEY}&center=${currentLocation.lat},${currentLocation.lng}&zoom=17`}
+                      allowFullScreen
+                    ></iframe>
+                  </div>
                 ) : (
                   <div className="h-[200px] bg-slate-100 flex flex-col items-center justify-center text-center p-4">
                      <MapPin className="w-8 h-8 text-slate-400 mb-2" />
@@ -483,19 +480,16 @@ export default function DashboardPengajar() {
             <div className="p-4 sm:p-6 overflow-y-auto space-y-6">
               <div className="rounded-xl overflow-hidden border border-slate-200">
                 {hasValidKey && currentLocation ? (
-                  <APIProvider apiKey={API_KEY} version="weekly">
-                    <Map
-                      defaultCenter={currentLocation}
-                      defaultZoom={17}
-                      mapId="LOCATION_MAP"
-                      style={{width: '100%', height: '200px'}}
-                      disableDefaultUI={true}
-                    >
-                      <AdvancedMarker position={currentLocation}>
-                         <Pin background="#f59e0b" glyphColor="#fff" borderColor="#b45309" />
-                      </AdvancedMarker>
-                    </Map>
-                  </APIProvider>
+                  <div className="w-full h-[200px]">
+                    <iframe
+                      width="100%"
+                      height="100%"
+                      frameBorder="0"
+                      style={{ border: 0 }}
+                      src={`https://www.google.com/maps/embed/v1/view?key=${API_KEY}&center=${currentLocation.lat},${currentLocation.lng}&zoom=17`}
+                      allowFullScreen
+                    ></iframe>
+                  </div>
                 ) : (
                   <div className="h-[200px] bg-slate-100 flex flex-col items-center justify-center text-center p-4">
                      <MapPin className="w-8 h-8 text-slate-400 mb-2" />
