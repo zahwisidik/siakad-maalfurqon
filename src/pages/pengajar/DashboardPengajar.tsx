@@ -5,6 +5,10 @@ import { BookOpen, Clock, Users, CalendarDays, MapPin, CheckCircle, LogOut, Aler
 import { Link } from 'react-router-dom';
 import { formatTimeDisplay } from '../../utils/time';
 import toast from 'react-hot-toast';
+import { APIProvider, Map, AdvancedMarker, Pin } from '@vis.gl/react-google-maps';
+
+const API_KEY = process.env.GOOGLE_MAPS_PLATFORM_KEY || (import.meta as any).env?.VITE_GOOGLE_MAPS_PLATFORM_KEY || '';
+const hasValidKey = Boolean(API_KEY) && API_KEY !== 'YOUR_API_KEY';
 
 export default function DashboardPengajar() {
   const { user } = useAuth();
@@ -17,6 +21,8 @@ export default function DashboardPengajar() {
     waktu_pulang: string | null;
   }>({ waktu_datang: null, waktu_pulang: null });
 
+  const [currentLocation, setCurrentLocation] = useState<{lat: number, lng: number} | null>(null);
+
   const [showModalPulang, setShowModalPulang] = useState(false);
   const [pulangData, setPulangData] = useState({ lokasi: '', alasan: '' });
   const [showWarningAlasan, setShowWarningAlasan] = useState(false);
@@ -24,6 +30,8 @@ export default function DashboardPengajar() {
   const [showModalDatang, setShowModalDatang] = useState(false);
   const [datangData, setDatangData] = useState({ lokasi: '', alasan_terlambat: '' });
   const [showWarningAlasanDatang, setShowWarningAlasanDatang] = useState(false);
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -57,6 +65,10 @@ export default function DashboardPengajar() {
       toast.error('Sila isi alasan keterlambatan anda');
       return;
     }
+    if (isSubmitting) return;
+
+    setIsSubmitting(true);
+    toast.loading('Menyimpan presensi...', { id: 'submit_presensi' });
 
     const now = new Date();
     const today = now.toLocaleDateString('en-CA');
@@ -74,11 +86,14 @@ export default function DashboardPengajar() {
          lokasi_datang: datangData.lokasi,
          alasan_terlambat: datangData.alasan_terlambat
        });
-       toast.success('Berhasil Absen Datang');
+       toast.success('Berhasil Absen Datang', { id: 'submit_presensi' });
     } catch (e) {
-       toast.error('Absen tersimpan lokal. Gagal sinkronisasi ke server.');
+       console.error(e);
+       toast.error('Absen tersimpan lokal. Gagal sinkronisasi ke server.', { id: 'submit_presensi' });
+    } finally {
+       setIsSubmitting(false);
+       setShowModalDatang(false);
     }
-    setShowModalDatang(false);
   };
 
   const handleClockIn = async () => {
@@ -94,8 +109,8 @@ export default function DashboardPengajar() {
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         toast.dismiss('loc_check');
-        // Lokasi terverifikasi
-        toast.success('Lokasi terverifikasi sesuai.');
+        setCurrentLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        toast.success('Lokasi berhasil dipetakan.');
         setShowModalDatang(true);
         setDatangData({ lokasi: '', alasan_terlambat: '' });
         const now = new Date();
@@ -114,15 +129,32 @@ export default function DashboardPengajar() {
   };
 
   const handleClockOutClick = () => {
-    setShowModalPulang(true);
-    setPulangData({ lokasi: '', alasan: '' });
-    const now = new Date();
-    // Assumption: regular work hours end around 15:00
-    if (now.getHours() < 15) {
-      setShowWarningAlasan(true);
-    } else {
-      setShowWarningAlasan(false);
+    if (!navigator.geolocation) {
+      toast.error('Geolocation tidak didukung oleh browser anda.');
+      return;
     }
+
+    toast.loading('Memverifikasi lokasi...', { id: 'loc_check_pulang' });
+
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        toast.dismiss('loc_check_pulang');
+        setCurrentLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        setShowModalPulang(true);
+        setPulangData({ lokasi: '', alasan: '' });
+        const now = new Date();
+        // Assumption: regular work hours end around 15:00
+        if (now.getHours() < 15) {
+          setShowWarningAlasan(true);
+        } else {
+          setShowWarningAlasan(false);
+        }
+      },
+      (err) => {
+        toast.dismiss('loc_check_pulang');
+        toast.error('Gagal mendapatkan lokasi. Pastikan izin akses lokasi diberikan.');
+      }
+    );
   };
 
   const submitClockOut = async () => {
@@ -135,6 +167,10 @@ export default function DashboardPengajar() {
       toast.error('Sila isi alasan anda');
       return;
     }
+    if (isSubmitting) return;
+
+    setIsSubmitting(true);
+    toast.loading('Menyimpan presensi...', { id: 'submit_presensi' });
 
     const now = new Date();
     const today = now.toLocaleDateString('en-CA');
@@ -152,11 +188,14 @@ export default function DashboardPengajar() {
          lokasi_pulang: pulangData.lokasi,
          alasan_pulang_awal: pulangData.alasan
        });
-       toast.success('Berhasil Absen Pulang');
+       toast.success('Berhasil Absen Pulang', { id: 'submit_presensi' });
     } catch (e) {
-       toast.error('Absen tersimpan lokal. Gagal sinkronisasi ke server.');
+       console.error(e);
+       toast.error('Absen tersimpan lokal. Gagal sinkronisasi ke server.', { id: 'submit_presensi' });
+    } finally {
+       setIsSubmitting(false);
+       setShowModalPulang(false);
     }
-    setShowModalPulang(false);
   };
 
   const fetchData = async () => {
@@ -351,8 +390,35 @@ export default function DashboardPengajar() {
             </div>
             
             <div className="p-4 sm:p-6 overflow-y-auto space-y-6">
+              <div className="rounded-xl overflow-hidden border border-slate-200">
+                {hasValidKey && currentLocation ? (
+                  <APIProvider apiKey={API_KEY} version="weekly">
+                    <Map
+                      defaultCenter={currentLocation}
+                      defaultZoom={17}
+                      mapId="LOCATION_MAP"
+                      style={{width: '100%', height: '200px'}}
+                      disableDefaultUI={true}
+                    >
+                      <AdvancedMarker position={currentLocation}>
+                         <Pin background="#10b981" glyphColor="#fff" borderColor="#047857" />
+                      </AdvancedMarker>
+                    </Map>
+                  </APIProvider>
+                ) : (
+                  <div className="h-[200px] bg-slate-100 flex flex-col items-center justify-center text-center p-4">
+                     <MapPin className="w-8 h-8 text-slate-400 mb-2" />
+                     {currentLocation ? (
+                       <p className="text-sm text-slate-600">Terverifikasi. Lokasi: {currentLocation.lat.toFixed(4)}, {currentLocation.lng.toFixed(4)}</p>
+                     ) : (
+                       <p className="text-sm text-slate-600">Mencari lokasi...</p>
+                     )}
+                  </div>
+                )}
+              </div>
+
               <div>
-                <p className="text-sm text-slate-700 font-medium mb-3">Silahkan pilih lokasi Anda.</p>
+                <p className="text-sm text-slate-700 font-medium mb-3">Silahkan konfirmasi lokasi gedung Anda saat ini.</p>
                 <select 
                   className="w-full border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none"
                   value={datangData.lokasi}
@@ -394,9 +460,10 @@ export default function DashboardPengajar() {
               </button>
               <button 
                 onClick={submitClockIn}
-                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl text-sm"
+                disabled={isSubmitting}
+                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl text-sm disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Simpan Presensi
+                {isSubmitting ? 'Menyimpan...' : 'Simpan Presensi'}
               </button>
             </div>
           </div>
@@ -414,8 +481,35 @@ export default function DashboardPengajar() {
             </div>
             
             <div className="p-4 sm:p-6 overflow-y-auto space-y-6">
+              <div className="rounded-xl overflow-hidden border border-slate-200">
+                {hasValidKey && currentLocation ? (
+                  <APIProvider apiKey={API_KEY} version="weekly">
+                    <Map
+                      defaultCenter={currentLocation}
+                      defaultZoom={17}
+                      mapId="LOCATION_MAP"
+                      style={{width: '100%', height: '200px'}}
+                      disableDefaultUI={true}
+                    >
+                      <AdvancedMarker position={currentLocation}>
+                         <Pin background="#f59e0b" glyphColor="#fff" borderColor="#b45309" />
+                      </AdvancedMarker>
+                    </Map>
+                  </APIProvider>
+                ) : (
+                  <div className="h-[200px] bg-slate-100 flex flex-col items-center justify-center text-center p-4">
+                     <MapPin className="w-8 h-8 text-slate-400 mb-2" />
+                     {currentLocation ? (
+                       <p className="text-sm text-slate-600">Terverifikasi. Lokasi: {currentLocation.lat.toFixed(4)}, {currentLocation.lng.toFixed(4)}</p>
+                     ) : (
+                       <p className="text-sm text-slate-600">Mencari lokasi...</p>
+                     )}
+                  </div>
+                )}
+              </div>
+
               <div>
-                <p className="text-sm text-slate-700 font-medium mb-3">Apakah Anda sudah selesai bekerja? Silahkan pilih lokasi Anda.</p>
+                <p className="text-sm text-slate-700 font-medium mb-3">Apakah Anda sudah selesai bekerja? Silahkan konfirmasi lokasi Anda.</p>
                 <select 
                   className="w-full border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none"
                   value={pulangData.lokasi}
@@ -457,9 +551,10 @@ export default function DashboardPengajar() {
               </button>
               <button 
                 onClick={submitClockOut}
-                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl text-sm"
+                disabled={isSubmitting}
+                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl text-sm disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Simpan Presensi
+                {isSubmitting ? 'Menyimpan...' : 'Simpan Presensi'}
               </button>
             </div>
           </div>

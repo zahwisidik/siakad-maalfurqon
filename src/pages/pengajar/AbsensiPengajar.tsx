@@ -27,6 +27,7 @@ const getPropValue = (obj: any, propName: string): any => {
 };
 
 export default function AbsensiPengajar() {
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { user } = useAuth();
   
   // Dynamic Master Reference Lists
@@ -140,7 +141,7 @@ export default function AbsensiPengajar() {
       setHasQueried(true);
     } catch (err) {
       toast.error('Gagal mengambil data referensi');
-    } finally {
+    } finally { setIsSubmitting(false); 
       setIsFetchingInitial(false);
     }
   };
@@ -432,7 +433,7 @@ export default function AbsensiPengajar() {
       setAbsensiData(resAbs.data || []);
     } catch (err) {
       console.error(err);
-    }
+    } finally { setIsSubmitting(false); }
   };
 
   const tampilkanRekap = async () => {
@@ -461,7 +462,7 @@ export default function AbsensiPengajar() {
       }
     } catch (err) {
       toast.error('Gagal mengambil data absensi');
-    } finally {
+    } finally { setIsSubmitting(false); 
       setLoading(false);
     }
   };
@@ -478,6 +479,8 @@ export default function AbsensiPengajar() {
   };
 
   const handleSaveNewSession = async () => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
     if (studentsInModalClass.length === 0) {
       toast.error("Tidak ada mahasantri aktif di kelas ini.");
       return;
@@ -513,10 +516,10 @@ export default function AbsensiPengajar() {
       setIsAddModalOpen(false);
       // automatically query / refresh report
       tampilkanRekap();
-    } catch (error) {
+    } catch (err) {
       Swal.close();
       toast.error('Gagal menyimpan absensi');
-    } finally {
+    } finally { setIsSubmitting(false); 
       setSavingNewSession(false);
     }
   };
@@ -623,7 +626,7 @@ export default function AbsensiPengajar() {
       tampilkanRekap(); 
     } catch (err) {
       toast.error('Gagal memperbarui sesi', { id: 'save-session' });
-    } finally {
+    } finally { setIsSubmitting(false);
       setIsSavingSession(false);
     }
   };

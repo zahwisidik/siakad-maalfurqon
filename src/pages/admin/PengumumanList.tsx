@@ -9,6 +9,7 @@ import { formatToIndonesianDate, getTodayIndonesianDate } from '../../utils/time
 const KATEGORI_OPTIONS = ['Akademik', 'Asrama', 'Ujian', 'Administrasi', 'Umum'];
 
 export default function PengumumanList() {
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [data, setData] = useState<Pengumuman[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -35,6 +36,8 @@ export default function PengumumanList() {
   };
 
   const handleSave = async (e: React.FormEvent) => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
     e.preventDefault();
     const action = isEditing ? 'updatePengumuman' : 'addPengumuman';
     
@@ -320,7 +323,7 @@ export default function PengumumanList() {
                   Batal
                 </button>
                 <button
-                  type="submit"
+                  type="submit" disabled={isSubmitting}
                   className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 cursor-pointer"
                 >
                   {isEditing ? 'Simpan Perubahan' : 'Terbitkan Sekarang'}

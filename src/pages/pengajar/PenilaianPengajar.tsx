@@ -7,6 +7,7 @@ import toast from 'react-hot-toast';
 import * as XLSX from 'xlsx';
 
 export default function PenilaianPengajar() {
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { user } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [jadwals, setJadwals] = useState<Jadwal[]>([]);
@@ -139,6 +140,8 @@ export default function PenilaianPengajar() {
   };
 
   const handleSaveEdit = async () => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
     if (!editingMhs || !selectedMK || !selectedKelas || !selectedProgram) return;
     
     setIsSaving(true);

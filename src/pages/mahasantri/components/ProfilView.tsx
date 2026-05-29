@@ -82,12 +82,14 @@ export default function ProfilView({ user, onUpdateProfile, onLogout }: ProfilVi
   };
 
   const handleSavePersonalInfo = (e: React.FormEvent) => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
     e.preventDefault();
     setSavingPersonal(true);
     setTimeout(() => {
       onUpdateProfile({ email, no_hp: phone });
       setSavingPersonal(false);
-      toast.success('Pembaruan data pribadi berhasil disimpan.');
+      toast.success('Pembaruan data pribadi berhasil disimpan.'); setIsSubmitting(false);
     }, 1000);
   };
 
@@ -107,7 +109,7 @@ export default function ProfilView({ user, onUpdateProfile, onLogout }: ProfilVi
       setOldPassword('');
       setNewPassword('');
       setConfirmPassword('');
-      toast.success('Kata sandi berhasil diperbarui.');
+      toast.success('Kata sandi berhasil diperbarui.'); setIsSubmitting(false);
     }, 1200);
   };
 
@@ -343,8 +345,7 @@ export default function ProfilView({ user, onUpdateProfile, onLogout }: ProfilVi
 
             <div className="text-right pt-2">
               <button 
-                type="submit" 
-                disabled={savingPersonal}
+                type="submit" disabled={isSubmitting || savingPersonal} 
                 className="bg-emerald-600 hover:bg-emerald-750 transition-colors font-bold text-xs text-white py-2 px-5 rounded-xl cursor-pointer shadow flex items-center gap-1.5 inline-flex"
               >
                 {savingPersonal && <RefreshCw className="w-4.5 h-4.5 animate-spin shrink-0" />}
@@ -413,7 +414,7 @@ export default function ProfilView({ user, onUpdateProfile, onLogout }: ProfilVi
               </button>
 
               <button 
-                type="submit" 
+                type="submit" disabled={isSubmitting} 
                 disabled={changingPassword}
                 className="bg-slate-900 hover:bg-slate-800 transition-colors font-bold text-xs text-white py-2 px-5 rounded-xl cursor-pointer shadow flex items-center gap-1.5"
               >

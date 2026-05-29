@@ -8,6 +8,7 @@ import { KELAS_OPTIONS, PROGRAM_OPTIONS } from '../../constants';
 import ExcelImport from '../../components/ExcelImport';
 
 export default function MatakuliahList() {
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [_data, _setData] = useState<Matakuliah[]>([]);
   const [pengajars, setPengajars] = useState<Pengajar[]>([]);
   const [loading, setLoading] = useState(true);
@@ -33,7 +34,7 @@ export default function MatakuliahList() {
       setPengajars(resPengajar.data || []);
     } catch (err) {
       toast.error('Gagal mengambil data');
-    } finally {
+    } finally { setIsSubmitting(false); 
       setLoading(false);
     }
   };
@@ -63,10 +64,12 @@ export default function MatakuliahList() {
     } catch (err) {
       Swal.close();
       toast.error('Gagal mengimport data');
-    }
+    } finally { setIsSubmitting(false); }
   };
 
   const handleSave = async (e: React.FormEvent) => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
     e.preventDefault();
     const action = isEditing ? 'updateMatakuliah' : 'addMatakuliah';
     
@@ -86,7 +89,7 @@ export default function MatakuliahList() {
     } catch (err) {
       Swal.close();
       toast.error('Gagal menyimpan data');
-    }
+    } finally { setIsSubmitting(false); }
   };
 
   const handleDelete = async (id: string) => {
@@ -266,9 +269,7 @@ export default function MatakuliahList() {
                   </div>
                 </div>
                 <div className="bg-slate-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
-                  <button type="submit" className="inline-flex w-full justify-center rounded-md border border-transparent bg-emerald-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-emerald-700 sm:ml-3 sm:w-auto sm:text-sm">
-                    Simpan
-                  </button>
+                  <button type="submit" disabled={isSubmitting} className="inline-flex w-full justify-center rounded-md border border-transparent bg-emerald-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-emerald-700 sm:ml-3 sm:w-auto sm:text-sm">{isSubmitting ? "Menyimpan..." : "Simpan"}</button>
                   <button type="button" onClick={() => setIsModalOpen(false)} className="mt-3 inline-flex w-full justify-center rounded-md border border-slate-300 bg-white px-4 py-2 text-base font-medium text-slate-700 shadow-sm hover:bg-slate-50 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
                     Batal
                   </button>
