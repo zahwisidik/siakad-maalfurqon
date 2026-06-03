@@ -148,7 +148,7 @@ export default function DashboardPengajar() {
         
         fetchRealWIBTime().then((realNow) => {
           const wibTime = getWIBTime(realNow);
-          if (wibTime < '15:00') {
+          if (wibTime < '14:30') {
             setShowWarningAlasan(true);
           } else {
             setShowWarningAlasan(false);

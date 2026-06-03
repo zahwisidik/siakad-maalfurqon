@@ -115,6 +115,16 @@ let mockPengumuman = [
 export const isUsingMock = !APPS_SCRIPT_URL;
 
 let mockAbsensiPengajar: any[] = [];
+try {
+  const stored = localStorage.getItem('mock_absensi_pengajar');
+  if (stored) mockAbsensiPengajar = JSON.parse(stored);
+} catch (e) {}
+
+const saveMockAbsensiPengajar = () => {
+  try {
+    localStorage.setItem('mock_absensi_pengajar', JSON.stringify(mockAbsensiPengajar));
+  } catch (e) {}
+};
 
 export const api = {
   get: async (action: string) => {
@@ -200,6 +210,7 @@ export const api = {
             } else {
               mockAbsensiPengajar.push({ id: 'ap_' + Date.now(), ...payload });
             }
+            saveMockAbsensiPengajar();
             resolve({ data: { message: 'Absensi pengajar tersimpan' } });
           } else if (action === 'saveNilai') {
             const index = mockNilai.findIndex((n: any) => n.mahasiswa_id === payload.mahasiswa_id && n.nama_mk === payload.nama_mk && n.kelas === payload.kelas);
@@ -243,6 +254,7 @@ export const api = {
           } else {
             mockAbsensiPengajar.push({ id: 'ap_' + Date.now(), ...payload });
           }
+          saveMockAbsensiPengajar();
           return { data: { message: 'Absensi pengajar tersimpan' } };
         }
         throw new Error(data.message);
@@ -256,6 +268,7 @@ export const api = {
          } else {
            mockAbsensiPengajar.push({ id: 'ap_' + Date.now(), ...payload });
          }
+         saveMockAbsensiPengajar();
          return { data: { message: 'Absensi pengajar tersimpan lokal.' } };
       }
       throw error;
