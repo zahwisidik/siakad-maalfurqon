@@ -15,7 +15,7 @@ export const formatTimeDisplay = (val: any): string => {
         minute: '2-digit'
       });
       if (formatted && formatted !== 'Invalid Date' && /^\d{2}[:\.]\d{2}/.test(formatted)) {
-        return formatted.replace(':', '.');
+        return formatted.replace('.', ':');
       }
     } catch (e) {
       // Ignore and fallback below
@@ -29,7 +29,7 @@ export const formatTimeDisplay = (val: any): string => {
       const m = parseInt(timeMatch[2]);
       h = (h - 8 + 24) % 24;
       const pad = (n: number) => n.toString().padStart(2, '0');
-      return `${pad(h)}.${pad(m)}`;
+      return `${pad(h)}:${pad(m)}`;
     }
   }
   
@@ -46,10 +46,10 @@ export const formatTimeDisplay = (val: any): string => {
         m = m.substring(0, 2);
       }
     }
-    return `${h}.${m}`;
+    return `${h}:${m}`;
   }
   
-  return str.replace(':', '.');
+  return str.replace('.', ':');
 };
 
 export function formatToIndonesianDate(dateStr: string | any): string {

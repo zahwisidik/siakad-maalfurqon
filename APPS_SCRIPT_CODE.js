@@ -594,7 +594,17 @@ function upsertAbsensiPengajar(item) {
     let pId = data[i][idxPengajar];
     let tgl = data[i][idxTanggal];
     
-    if (pId == item.pengajar_id && tgl == item.tanggal) {
+    // Normalize date from Google Sheets to string if it's a Date object
+    let tglStr = tgl;
+    if (tgl instanceof Date) {
+       // Extract YYYY-MM-DD
+       const yyyy = tgl.getFullYear();
+       const mm = String(tgl.getMonth() + 1).padStart(2, '0');
+       const dd = String(tgl.getDate()).padStart(2, '0');
+       tglStr = `${yyyy}-${mm}-${dd}`;
+    }
+    
+    if (pId == item.pengajar_id && tglStr == item.tanggal) {
       foundRowIndex = i;
       break;
     }
@@ -625,4 +635,33 @@ function upsertAbsensiPengajar(item) {
 
 function generateId() {
   return Utilities.getUuid();
+}
+
+// ------------------- HANDLE AUTO ID DI GOOGLE SHEETS -------------------
+// Fungsi ini akan berjalan otomatis setiap kali Anda mengetik di Spreadsheet (tanpa melalui aplikasi)
+function onEdit(e) {
+  if (!e || !e.range) return;
+  const sheet = e.source.getActiveSheet();
+  const sheetName = sheet.getName();
+  
+  const range = e.range;
+  const rowStart = range.getRow();
+  const rowEnd = rowStart + range.getNumRows() - 1;
+  const colStart = range.getColumn();
+  
+  // Jika yang diedit adalah baris header (baris 1) atau kolom ID (kolom 1), abaikan
+  if (rowStart === 1 || colStart === 1) return;
+  
+  for (let r = Math.max(2, rowStart); r <= rowEnd; r++) {
+    const idRange = sheet.getRange(r, 1);
+    
+    // Cek sel yang baru saja diedit di baris ini
+    const editedCell = sheet.getRange(r, colStart).getValue();
+    
+    // Jika sel yang diedit memiliki isi, dan ID di baris itu  masih kosong
+    if (editedCell && editedCell.toString().trim() !== '' && !idRange.getValue()) {
+      let newId = generateId();
+      idRange.setValue(newId);
+    }
+  }
 }

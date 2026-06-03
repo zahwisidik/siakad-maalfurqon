@@ -43,11 +43,28 @@ export default function DashboardPengajar() {
     try {
       const today = getWIBDate(); // Read operation uses local fallback to prevent layout breaks
       const res = await api.get('getAbsensiPengajar');
-      const myAbs = res.data.find((a: any) => a.pengajar_id === user.id && a.tanggal === today);
+      const myAbs = res.data.find((a: any) => {
+        if (a.pengajar_id !== user.id) return false;
+        if (!a.tanggal) return false;
+        
+        const apiTanggal = String(a.tanggal);
+        if (apiTanggal === today || apiTanggal === getTodayIndonesianDate() || apiTanggal.startsWith(today)) return true;
+        
+        try {
+          // If Google Sheets sends date as ISO string (e.g. 2026-06-03T17:00:00.000Z), parse and convert to WIB
+          const d = new Date(apiTanggal);
+          if (!isNaN(d.getTime())) {
+             const formatted = d.toLocaleDateString('en-CA', { timeZone: 'Asia/Jakarta' });
+             if (formatted === today) return true;
+          }
+        } catch(err) {}
+
+        return false;
+      });
       if (myAbs) {
         setAttendance({
-          waktu_datang: myAbs.waktu_datang || null,
-          waktu_pulang: myAbs.waktu_pulang || null,
+          waktu_datang: myAbs.waktu_datang ? formatTimeDisplay(myAbs.waktu_datang) : null,
+          waktu_pulang: myAbs.waktu_pulang ? formatTimeDisplay(myAbs.waktu_pulang) : null,
         });
       }
     } catch (e: any) {
