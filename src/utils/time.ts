@@ -129,24 +129,40 @@ export function formatToIndonesianDate(dateStr: string | any): string {
 
 export function getTodayIndonesianDate(): string {
   const d = new Date();
+  const idDays = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
   const idMonths = [
     'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
     'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
   ];
-  return `${d.getDate()} ${idMonths[d.getMonth()]} ${d.getFullYear()}`;
+  return `${idDays[d.getDay()]}, ${d.getDate()} ${idMonths[d.getMonth()]} ${d.getFullYear()}`;
 }
 
 export async function fetchRealWIBTime(): Promise<Date> {
-  try {
-    const res = await fetch('https://worldtimeapi.org/api/timezone/Asia/Jakarta', { cache: 'no-store' });
-    if (res.ok) {
+  const apis = [
+    async () => {
+      const res = await fetch('https://worldtimeapi.org/api/timezone/Asia/Jakarta', { cache: 'no-store' });
       const data = await res.json();
       return new Date(data.datetime);
+    },
+    async () => {
+      const res = await fetch('https://timeapi.io/api/time/current/zone?timeZone=Asia/Jakarta', { cache: 'no-store' });
+      const data = await res.json();
+      return new Date(data.dateTime);
     }
-  } catch (e) {
-    console.warn('Gagal mengambil waktu dari server, menggunakan waktu lokal', e);
+  ];
+
+  for (const apiFn of apis) {
+    try {
+      const date = await apiFn();
+      if (date && !isNaN(date.getTime())) {
+        return date;
+      }
+    } catch (e) {
+      // Ignore and try next
+    }
   }
-  return new Date();
+
+  throw new Error('Gagal mengambil waktu dari server (CORS/Jaringan diblokir).');
 }
 
 export function getWIBDate(date?: Date): string {

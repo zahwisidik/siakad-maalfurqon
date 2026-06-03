@@ -3,7 +3,7 @@ import { api } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 import { BookOpen, Clock, Users, CalendarDays, MapPin, CheckCircle, LogOut, AlertCircle, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { formatTimeDisplay, getWIBDate, getWIBTime, fetchRealWIBTime } from '../../utils/time';
+import { formatTimeDisplay, getWIBDate, getWIBTime, fetchRealWIBTime, getTodayIndonesianDate } from '../../utils/time';
 import toast from 'react-hot-toast';
 
 
@@ -41,8 +41,7 @@ export default function DashboardPengajar() {
   const checkAttendance = async () => {
     if (!user?.id) return;
     try {
-      const realNow = await fetchRealWIBTime();
-      const today = getWIBDate(realNow);
+      const today = getWIBDate(); // Read operation uses local fallback to prevent layout breaks
       const res = await api.get('getAbsensiPengajar');
       const myAbs = res.data.find((a: any) => a.pengajar_id === user.id && a.tanggal === today);
       if (myAbs) {
@@ -51,7 +50,7 @@ export default function DashboardPengajar() {
           waktu_pulang: myAbs.waktu_pulang || null,
         });
       }
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
     }
   };
@@ -71,7 +70,15 @@ export default function DashboardPengajar() {
     setIsSubmitting(true);
     toast.loading('Menyimpan presensi...', { id: 'submit_presensi' });
 
-    const realNow = await fetchRealWIBTime();
+    let realNow: Date;
+    try {
+      realNow = await fetchRealWIBTime();
+    } catch (e: any) {
+      setIsSubmitting(false);
+      toast.error('Gagal mengambil waktu dari server. Buka di Tab Baru atau matikan pemblokir iklan.', { id: 'submit_presensi' });
+      return;
+    }
+
     const today = getWIBDate(realNow);
     const time = getWIBTime(realNow);
     
@@ -122,6 +129,9 @@ export default function DashboardPengajar() {
           } else {
             setShowWarningAlasanDatang(false);
           }
+        }).catch((e: any) => {
+          setShowModalDatang(false);
+          toast.error('Gagal mengambil waktu dari server. Buka di Tab Baru atau matikan pemblokir iklan.');
         });
       },
       (err) => {
@@ -153,6 +163,9 @@ export default function DashboardPengajar() {
           } else {
             setShowWarningAlasan(false);
           }
+        }).catch((e: any) => {
+          setShowModalPulang(false);
+          toast.error('Gagal mengambil waktu dari server. Buka di Tab Baru atau matikan pemblokir iklan.');
         });
       },
       (err) => {
@@ -177,7 +190,15 @@ export default function DashboardPengajar() {
     setIsSubmitting(true);
     toast.loading('Menyimpan presensi...', { id: 'submit_presensi' });
 
-    const realNow = await fetchRealWIBTime();
+    let realNow: Date;
+    try {
+      realNow = await fetchRealWIBTime();
+    } catch (e: any) {
+      setIsSubmitting(false);
+      toast.error('Gagal mengambil waktu dari server. Buka di Tab Baru atau matikan pemblokir iklan.', { id: 'submit_presensi' });
+      return;
+    }
+
     const today = getWIBDate(realNow);
     const time = getWIBTime(realNow);
     
@@ -261,10 +282,13 @@ export default function DashboardPengajar() {
           {/* subtle background decoration */}
           <div className="absolute -right-8 -top-8 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none"></div>
 
-          <h3 className="font-bold text-slate-100 mb-4 flex items-center gap-2">
-            <CheckCircle className="w-5 h-5 text-emerald-400" /> 
-            Presensi Hari Ini
-          </h3>
+          <div className="mb-4">
+            <h3 className="font-bold text-slate-100 flex items-center gap-2">
+              <CheckCircle className="w-5 h-5 text-emerald-400" /> 
+              Presensi Hari Ini
+            </h3>
+            <p className="text-xs text-slate-400 mt-1 pl-7">{getTodayIndonesianDate()}</p>
+          </div>
           
           <div className="flex flex-col gap-3 flex-1 justify-center">
             {/* Datang */}
