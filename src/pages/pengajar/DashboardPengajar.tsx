@@ -3,7 +3,7 @@ import { api } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 import { BookOpen, Clock, Users, CalendarDays, MapPin, CheckCircle, LogOut, AlertCircle, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { formatTimeDisplay } from '../../utils/time';
+import { formatTimeDisplay, getWIBDate, getWIBTime, fetchRealWIBTime } from '../../utils/time';
 import toast from 'react-hot-toast';
 
 
@@ -41,7 +41,8 @@ export default function DashboardPengajar() {
   const checkAttendance = async () => {
     if (!user?.id) return;
     try {
-      const today = new Date().toLocaleDateString('en-CA');
+      const realNow = await fetchRealWIBTime();
+      const today = getWIBDate(realNow);
       const res = await api.get('getAbsensiPengajar');
       const myAbs = res.data.find((a: any) => a.pengajar_id === user.id && a.tanggal === today);
       if (myAbs) {
@@ -70,9 +71,9 @@ export default function DashboardPengajar() {
     setIsSubmitting(true);
     toast.loading('Menyimpan presensi...', { id: 'submit_presensi' });
 
-    const now = new Date();
-    const today = now.toLocaleDateString('en-CA');
-    const time = now.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' });
+    const realNow = await fetchRealWIBTime();
+    const today = getWIBDate(realNow);
+    const time = getWIBTime(realNow);
     
     const newState = { ...attendance, waktu_datang: time };
     setAttendance(newState);
@@ -113,13 +114,15 @@ export default function DashboardPengajar() {
         toast.success('Lokasi berhasil dipetakan.');
         setShowModalDatang(true);
         setDatangData({ lokasi: '', alasan_terlambat: '' });
-        const now = new Date();
-        // Assuming work starts around 08:00
-        if (now.getHours() >= 8 && (now.getHours() > 8 || now.getMinutes() > 0)) {
-          setShowWarningAlasanDatang(true);
-        } else {
-          setShowWarningAlasanDatang(false);
-        }
+        
+        fetchRealWIBTime().then((realNow) => {
+          const wibTime = getWIBTime(realNow);
+          if (wibTime > '08:00') {
+            setShowWarningAlasanDatang(true);
+          } else {
+            setShowWarningAlasanDatang(false);
+          }
+        });
       },
       (err) => {
         toast.dismiss('loc_check');
@@ -142,13 +145,15 @@ export default function DashboardPengajar() {
         setCurrentLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
         setShowModalPulang(true);
         setPulangData({ lokasi: '', alasan: '' });
-        const now = new Date();
-        // Assumption: regular work hours end around 15:00
-        if (now.getHours() < 15) {
-          setShowWarningAlasan(true);
-        } else {
-          setShowWarningAlasan(false);
-        }
+        
+        fetchRealWIBTime().then((realNow) => {
+          const wibTime = getWIBTime(realNow);
+          if (wibTime < '15:00') {
+            setShowWarningAlasan(true);
+          } else {
+            setShowWarningAlasan(false);
+          }
+        });
       },
       (err) => {
         toast.dismiss('loc_check_pulang');
@@ -172,9 +177,9 @@ export default function DashboardPengajar() {
     setIsSubmitting(true);
     toast.loading('Menyimpan presensi...', { id: 'submit_presensi' });
 
-    const now = new Date();
-    const today = now.toLocaleDateString('en-CA');
-    const time = now.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' });
+    const realNow = await fetchRealWIBTime();
+    const today = getWIBDate(realNow);
+    const time = getWIBTime(realNow);
     
     const newState = { ...attendance, waktu_pulang: time };
     setAttendance(newState);

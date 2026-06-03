@@ -136,3 +136,26 @@ export function getTodayIndonesianDate(): string {
   return `${d.getDate()} ${idMonths[d.getMonth()]} ${d.getFullYear()}`;
 }
 
+export async function fetchRealWIBTime(): Promise<Date> {
+  try {
+    const res = await fetch('https://worldtimeapi.org/api/timezone/Asia/Jakarta', { cache: 'no-store' });
+    if (res.ok) {
+      const data = await res.json();
+      return new Date(data.datetime);
+    }
+  } catch (e) {
+    console.warn('Gagal mengambil waktu dari server, menggunakan waktu lokal', e);
+  }
+  return new Date();
+}
+
+export function getWIBDate(date?: Date): string {
+  const d = date || new Date();
+  return d.toLocaleDateString('en-CA', { timeZone: 'Asia/Jakarta' }); // YYYY-MM-DD in WIB
+}
+
+export function getWIBTime(date?: Date): string {
+  const d = date || new Date();
+  return d.toLocaleTimeString('en-US', { timeZone: 'Asia/Jakarta', hour12: false, hour: '2-digit', minute: '2-digit' }).replace('24:', '00:');
+}
+
