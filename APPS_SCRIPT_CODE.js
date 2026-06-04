@@ -54,7 +54,7 @@ const SHEET_SCHEMAS = {
   'JADWAL': ['id', 'hari', 'jam_ke', 'jam_mulai', 'jam_berakhir', 'program', 'kelas', 'nama_mk', 'pengajar', 'lokasi', 'deskripsi'],
   'ABSENSI': ['id', 'tanggal', 'jam_ke', 'program', 'kelas', 'nama_mk', 'mahasiswa_id', 'status', 'pembahasan', 'timestamp'],
   'ABSENSI_PENGAJAR': ['id', 'pengajar_id', 'tanggal', 'waktu_datang', 'waktu_pulang', 'lokasi_datang', 'lokasi_pulang', 'alasan_pulang_awal', 'alasan_terlambat'],
-  'NILAI': ['id', 'mahasiswa_id', 'program', 'kelas', 'nama_mk', 'presensi', 'tugas', 'uts', 'uas', 'total', 'tahun_akademik', 'semester'],
+  'NILAI': ['id', 'nim', 'nama', 'program', 'kelas', 'nama_mk', 'presensi', 'tugas', 'uts', 'uas', 'total', 'tahun_akademik_data', 'semester_data'],
   'PENGUMUMAN': ['id', 'kategori', 'judul', 'tanggal', 'isi_lengkap', 'penting']
 };
 
@@ -297,6 +297,8 @@ function doPost(e) {
         
       case 'saveNilai':
         return upsertNilai(body);
+      case 'deleteNilai':
+        return deleteData('NILAI', body.id);
         
       case 'addPengumuman':
         return addData('PENGUMUMAN', body.data);
@@ -529,46 +531,141 @@ function upsertNilai(item) {
   const headers = data[0];
   const normalizedHeaders = headers.map(h => h ? h.toString().toLowerCase().trim() : '');
   
-  const idxMhs = normalizedHeaders.indexOf('mahasiswa_id');
-  const idxMk = normalizedHeaders.indexOf('nama_mk');
-  const idxKelas = normalizedHeaders.indexOf('kelas');
+  // Normalize fields and ensure we map legacy variations to the new scheme
+  if (item.mahasiswa_id && !item.nim) {
+    item.nim = item.mahasiswa_id;
+  }
+  if (item.nama_mahasiswa && !item.nama) {
+    item.nama = item.nama_mahasiswa;
+  }
+  if (item.nama && !item.nama_mahasiswa) {
+    item.nama_mahasiswa = item.nama;
+  }
   
-  if (idxMhs === -1 || idxMk === -1 || idxKelas === -1) {
-    return errorResponse("Missing required columns in NILAI sheet for upsert matching");
+  if (item.tahun_akademik && !item.tahun_akademik_data) {
+    item.tahun_akademik_data = item.tahun_akademik;
+  }
+  if (item.semester && !item.semester_data) {
+    item.semester_data = item.semester;
+  }
+  
+  // Robust index detection for finding rows
+  let idxNim = -1;
+  let idxNama = -1;
+  let idxMk = -1;
+  let idxId = -1;
+  for (let j = 0; j < headers.length; j++) {
+    const h = normalizedHeaders[j];
+    if (h === 'id') idxId = j;
+    else if (h === 'nim' || h === 'mahasiswa_id' || h === 'mahasiswa id' || h === 'mahasiswaid') idxNim = j;
+    else if (h === 'nama' || h === 'nama_mahasiswa' || h === 'mahasiswa_nama' || h === 'nama mahasiswa' || h === 'namamahasiswa') idxNama = j;
+    else if (h === 'nama_mk' || h === 'nama mk' || h === 'matakuliah' || h === 'mata kuliah' || h === 'namamk') idxMk = j;
   }
   
   let foundRowIndex = -1;
-  // Start from 1 to skip headers
-  for (let i = 1; i < data.length; i++) {
-    let mhsId = data[i][idxMhs];
-    let mk = data[i][idxMk];
-    let kelas = data[i][idxKelas];
-    
-    if (mhsId == item.mahasiswa_id && mk == item.nama_mk && kelas == item.kelas) {
-      foundRowIndex = i;
-      break;
+  
+  // Search by ID first if provided
+  if (idxId !== -1 && item.id) {
+    const itemIdStr = item.id.toString().trim().toLowerCase();
+    for (let i = 1; i < data.length; i++) {
+      const cellId = data[i][idxId];
+      if (cellId !== null && cellId !== undefined) {
+        const cellIdStr = cellId.toString().trim().toLowerCase();
+        if (cellIdStr === itemIdStr) {
+          foundRowIndex = i;
+          break;
+        }
+      }
     }
   }
   
+  // Fallback to match by NIM/Nama + MK if ID not found or not provided
+  if (foundRowIndex === -1) {
+    if ((idxNim !== -1 || idxNama !== -1) && idxMk !== -1) {
+      for (let i = 1; i < data.length; i++) {
+        let nim = idxNim !== -1 ? data[i][idxNim] : null;
+        let nama = idxNama !== -1 ? data[i][idxNama] : null;
+        let mk = data[i][idxMk];
+        
+        let studentMatch = false;
+        
+        let strNim = nim !== null && nim !== undefined ? nim.toString().trim().toLowerCase() : "";
+        let strNama = nama !== null && nama !== undefined ? nama.toString().trim().toLowerCase() : "";
+        let strMk = mk !== null && mk !== undefined ? mk.toString().trim().toLowerCase() : "";
+        
+        let itemNim = item.nim !== null && item.nim !== undefined ? item.nim.toString().trim().toLowerCase() : "";
+        let itemNama = item.nama !== null && item.nama !== undefined ? item.nama.toString().trim().toLowerCase() : "";
+        let itemNamaMhs = item.nama_mahasiswa !== null && item.nama_mahasiswa !== undefined ? item.nama_mahasiswa.toString().trim().toLowerCase() : "";
+        let itemMk = item.nama_mk !== null && item.nama_mk !== undefined ? item.nama_mk.toString().trim().toLowerCase() : "";
+        
+        if (itemNim && strNim && strNim === itemNim) {
+          studentMatch = true;
+        } else if (itemNama && strNama && strNama === itemNama) {
+          studentMatch = true;
+        } else if (itemNamaMhs && strNama && strNama === itemNamaMhs) {
+          studentMatch = true;
+        }
+        
+        if (studentMatch && strMk && itemMk && strMk === itemMk) {
+          foundRowIndex = i;
+          break;
+        }
+      }
+    }
+  }
+  
+  // List of restricted columns that must be completely untouched to preserve Google Sheets automatic formulas
+  const restrictedKeys = [
+    'mahasiswa_id', 'mahasiswa id', 'mahasiswaid',
+    'tahun_akademik', 'tahun akademik', 'tahunakademik',
+    'semester',
+    'total',
+    'am',
+    'm',
+    'hm',
+    'nim'
+  ];
+
+  // Completely delete legacy/restricted properties to prevent writing them to columns
+  // or interfering with Google Sheets array formulas
+  for (let k = 0; k < restrictedKeys.length; k++) {
+    delete item[restrictedKeys[k]];
+  }
+
   if (foundRowIndex > -1) {
     // Update existing row
     for (let j = 0; j < headers.length; j++) {
       const headerName = normalizedHeaders[j];
-      // update only provided fields except id
-      if (item.hasOwnProperty(headerName) && headerName !== 'id') {
-        sheet.getRange(foundRowIndex + 1, j + 1).setValue(item[headerName] !== undefined ? item[headerName] : "");
+      if (headerName === 'id' || restrictedKeys.indexOf(headerName) !== -1) {
+        continue;
+      }
+      if (headerName in item) {
+        let val = item[headerName];
+        sheet.getRange(foundRowIndex + 1, j + 1).setValue(val !== undefined && val !== null ? val : "");
       }
     }
-    return successResponse({ message: "Nilai updated successfully" });
+    return successResponse({ id: data[foundRowIndex][idxId] || item.id, message: "Nilai updated successfully" });
   } else {
     // Add new row
-    item.id = generateId();
-    const newRow = [];
+    if (!item.id) {
+      item.id = generateId();
+    }
+    const newRowIndex = sheet.getLastRow() + 1;
+    // We write cell-by-cell only for permitted columns, keeping restricted columns completely empty/untouched
     for (let j = 0; j < headers.length; j++) {
       const headerName = normalizedHeaders[j];
-      newRow.push(item[headerName] !== undefined ? item[headerName] : "");
+      if (headerName === 'id') {
+        sheet.getRange(newRowIndex, j + 1).setValue(item.id);
+        continue;
+      }
+      if (restrictedKeys.indexOf(headerName) !== -1) {
+        continue; // Do NOT write anything at all to this column cell, keeping it completely untouched for array formulas
+      }
+      if (headerName in item) {
+        let val = item[headerName];
+        sheet.getRange(newRowIndex, j + 1).setValue(val !== undefined && val !== null ? val : "");
+      }
     }
-    sheet.appendRow(newRow);
     return successResponse({ id: item.id, message: "Nilai created successfully" });
   }
 }

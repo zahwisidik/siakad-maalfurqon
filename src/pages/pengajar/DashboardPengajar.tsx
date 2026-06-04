@@ -10,11 +10,49 @@ import toast from 'react-hot-toast';
 const API_KEY = process.env.GOOGLE_MAPS_PLATFORM_KEY || (import.meta as any).env?.VITE_GOOGLE_MAPS_PLATFORM_KEY || '';
 const hasValidKey = Boolean(API_KEY) && API_KEY !== 'YOUR_API_KEY';
 
+const getPropValue = (obj: any, propName: string): any => {
+  if (!obj) return undefined;
+  const target = propName.toLowerCase().trim();
+  for (const key of Object.keys(obj)) {
+    const keyCleaned = key.toLowerCase().trim().replace(/_/g, ' ');
+    const targetCleaned = target.replace(/_/g, ' ');
+    if (keyCleaned === targetCleaned) {
+      return obj[key];
+    }
+  }
+  return obj[propName];
+};
+
+const cleanCompare = (val1: any, val2: any) => {
+  const s1 = val1 !== undefined && val1 !== null ? val1.toString().toLowerCase().trim() : '';
+  const s2 = val2 !== undefined && val2 !== null ? val2.toString().toLowerCase().trim() : '';
+  return s1 === s2;
+};
+
+const isSameDay = (dateVal1: any, dateVal2: any) => {
+  if (!dateVal1 || !dateVal2) return false;
+  
+  const cleanStr = (val: any) => {
+    if (typeof val !== 'string') val = String(val);
+    const m = val.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})/);
+    if (m) {
+      const year = m[1];
+      const month = m[2].padStart(2, '0');
+      const day = m[3].padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+    return val.substring(0, 10);
+  };
+
+  return cleanStr(dateVal1) === cleanStr(dateVal2);
+};
+
 export default function DashboardPengajar() {
   const { user } = useAuth();
   const [stats, setStats] = useState({ matakuliah: 0, kelas: 0, sks: 0 });
   const [todayJadwal, setTodayJadwal] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const [absensiList, setAbsensiList] = useState<any[]>([]);
   
   const [attendance, setAttendance] = useState<{
     waktu_datang: string | null;
@@ -244,10 +282,13 @@ export default function DashboardPengajar() {
   const fetchData = async () => {
     if (!user?.nama) return;
     try {
-      const [jd, mk] = await Promise.all([
+      const [jd, mk, abs] = await Promise.all([
         api.get('getJadwal'),
-        api.get('getMatakuliah')
+        api.get('getMatakuliah'),
+        api.get('getAbsensi').catch(() => ({ data: [] }))
       ]);
+
+      setAbsensiList(abs.data || []);
 
       const myMk = (mk.data || []).filter((m: any) => {
         const mp = String(m.pengajar || '').trim().toLowerCase();
@@ -393,22 +434,44 @@ export default function DashboardPengajar() {
           </div>
           
           <div className="space-y-4">
-            {todayJadwal.length > 0 ? todayJadwal.map(j => (
-              <div key={j.id} className="flex flex-col sm:flex-row gap-4 sm:items-center justify-between p-4 rounded-xl border border-slate-100 bg-slate-50 hover:bg-emerald-50 transition-colors">
-                <div>
-                  <div className="text-xs font-bold text-emerald-600 mb-1">{formatTimeDisplay(j.jam_mulai)} - {formatTimeDisplay(j.jam_berakhir)}</div>
-                  <h4 className="font-bold text-slate-800">{j.nama_mk}</h4>
-                  <p className="text-sm text-slate-500 mt-1">{j.program} - {j.kelas}</p>
+            {todayJadwal.length > 0 ? todayJadwal.map(j => {
+              const isAlreadyAttended = absensiList.some(abs => {
+                const absProg = getPropValue(abs, 'program');
+                const absKls = getPropValue(abs, 'kelas');
+                const absMk = getPropValue(abs, 'nama_mk');
+                const absTgl = getPropValue(abs, 'tanggal');
+
+                return (
+                  cleanCompare(absProg, j.program) &&
+                  cleanCompare(absKls, j.kelas) &&
+                  cleanCompare(absMk, j.nama_mk) &&
+                  isSameDay(absTgl, getWIBDate())
+                );
+              });
+
+              return (
+                <div key={j.id} className="flex flex-col sm:flex-row gap-4 sm:items-center justify-between p-4 rounded-xl border border-slate-100 bg-slate-50 hover:bg-emerald-50 transition-colors">
+                  <div>
+                    <div className="text-xs font-bold text-emerald-600 mb-1">{formatTimeDisplay(j.jam_mulai)} - {formatTimeDisplay(j.jam_berakhir)}</div>
+                    <h4 className="font-bold text-slate-800">{j.nama_mk}</h4>
+                    <p className="text-sm text-slate-500 mt-1">{j.program} - {j.kelas}</p>
+                  </div>
+                  {isAlreadyAttended ? (
+                    <div className="shrink-0 px-4 py-2 bg-emerald-50 text-emerald-700 font-bold text-sm rounded-lg border border-emerald-200 flex items-center gap-1.5 shadow-sm">
+                      <CheckCircle className="w-4 h-4 text-emerald-600" /> Telah Diabsen
+                    </div>
+                  ) : (
+                    <Link 
+                      to="/absensi-pengajar" 
+                      state={{ autoOpenModal: true, mk: j.nama_mk, kelas: j.kelas, program: j.program }}
+                      className="shrink-0 px-4 py-2 bg-white text-emerald-600 font-semibold text-sm rounded-lg border border-emerald-200 hover:bg-emerald-600 hover:text-white transition-colors"
+                    >
+                      Isi Absensi
+                    </Link>
+                  )}
                 </div>
-                <Link 
-                  to="/absensi-pengajar" 
-                  state={{ autoOpenModal: true, mk: j.nama_mk, kelas: j.kelas, program: j.program }}
-                  className="shrink-0 px-4 py-2 bg-white text-emerald-600 font-semibold text-sm rounded-lg border border-emerald-200 hover:bg-emerald-600 hover:text-white transition-colors"
-                >
-                  Isi Absensi
-                </Link>
-              </div>
-            )) : (
+              );
+            }) : (
               <div className="text-center py-8">
                 <div className="mx-auto h-12 w-12 bg-slate-100 rounded-full flex items-center justify-center mb-3">
                   <Clock className="h-6 w-6 text-slate-400" />

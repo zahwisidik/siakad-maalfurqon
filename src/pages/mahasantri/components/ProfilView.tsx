@@ -415,8 +415,7 @@ export default function ProfilView({ user, onUpdateProfile, onLogout }: ProfilVi
               </button>
 
               <button 
-                type="submit" disabled={isSubmitting} 
-                disabled={changingPassword}
+                type="submit" disabled={isSubmitting || changingPassword}
                 className="bg-slate-900 hover:bg-slate-800 transition-colors font-bold text-xs text-white py-2 px-5 rounded-xl cursor-pointer shadow flex items-center gap-1.5"
               >
                 {changingPassword && <RefreshCw className="w-4.5 h-4.5 animate-spin shrink-0" />}

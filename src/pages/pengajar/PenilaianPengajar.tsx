@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { api } from '../../services/api';
 import { Matakuliah, Kelas, Jadwal, Mahasantri, Nilai } from '../../types';
-import { RefreshCw, AlertCircle, TrendingUp, Search, Filter, BookOpen, Download, Compass, Edit2, X, Save, Plus, Upload } from 'lucide-react';
+import { RefreshCw, AlertCircle, TrendingUp, Search, Filter, BookOpen, Download, Compass, Edit2, X, Save, Plus, Upload, Trash2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import * as XLSX from 'xlsx';
 
@@ -23,12 +23,13 @@ export default function PenilaianPengajar() {
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingMhs, setEditingMhs] = useState<Mahasantri | null>(null);
-  const [editData, setEditData] = useState({ presensi: '', tugas: '', uts: '', uas: '', semester: 'Ganjil', tahunAkademik: new Date().getFullYear().toString() });
+  const [editingNilaiId, setEditingNilaiId] = useState<string | null>(null);
+  const [editData, setEditData] = useState({ presensi: '', tugas: '', uts: '', uas: '', semester: '1', tahunAkademik: '2025/2026' });
   const [isSaving, setIsSaving] = useState(false);
   
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [addTahun, setAddTahun] = useState(new Date().getFullYear().toString());
-  const [addSemester, setAddSemester] = useState('Ganjil');
+  const [addTahun, setAddTahun] = useState('2025/2026');
+  const [addSemester, setAddSemester] = useState('1');
   const [addInputData, setAddInputData] = useState<Record<string, { presensi: string, tugas: string, uts: string, uas: string }>>({});
 
   useEffect(() => {
@@ -95,14 +96,64 @@ export default function PenilaianPengajar() {
 
   const handleEditClick = (mhs: Mahasantri, n: Nilai | undefined) => {
     setEditingMhs(mhs);
+    setEditingNilaiId(n ? n.id : null);
+    
+    // Auto detect semester from selectedKelas filter (e.g., 'Semester 1' from 'Semester 1 - Putra')
+    let defaultSemester = 'Semester 1';
+    if (selectedKelas) {
+      const matchSel = selectedKelas.match(/Semester\s+(\d+)/i);
+      if (matchSel) {
+        defaultSemester = `Semester ${matchSel[1]}`;
+      } else {
+        const numMatch = selectedKelas.match(/\d+/);
+        if (numMatch) {
+          defaultSemester = `Semester ${numMatch[0]}`;
+        }
+      }
+    }
+
     if (n) {
+      const dbTahun = (n as any).tahun_akademik_data || n.tahun_akademik || '';
+      let mappedTahun = '2025/2026';
+      if (dbTahun) {
+        const dbTahunStr = dbTahun.toString().trim();
+        if (dbTahunStr.includes('/')) {
+          mappedTahun = dbTahunStr;
+        } else {
+          const startYear = parseInt(dbTahunStr);
+          if (!isNaN(startYear)) {
+            mappedTahun = `${startYear}/${startYear + 1}`;
+          }
+        }
+      }
+      const dbSemester = (n as any).semester_data || n.semester || '';
+      let mappedSemester = defaultSemester;
+      if (dbSemester) {
+        if (dbSemester.toLowerCase().includes('semester')) {
+          const digitMatch = dbSemester.match(/\d+/);
+          if (digitMatch) {
+            mappedSemester = `Semester ${digitMatch[0]}`;
+          } else {
+            mappedSemester = dbSemester;
+          }
+        } else {
+          const match = dbSemester.match(/\d+/);
+          if (match) {
+            mappedSemester = `Semester ${match[0]}`;
+          } else if (dbSemester.toLowerCase().includes('ganjil')) {
+            mappedSemester = 'Semester 1';
+          } else if (dbSemester.toLowerCase().includes('genap')) {
+            mappedSemester = 'Semester 2';
+          }
+        }
+      }
       setEditData({
         presensi: n.presensi.toString(),
         tugas: n.tugas.toString(),
         uts: n.uts.toString(),
         uas: n.uas.toString(),
-        semester: n.semester || 'Ganjil',
-        tahunAkademik: n.tahun_akademik || new Date().getFullYear().toString(),
+        semester: mappedSemester,
+        tahunAkademik: mappedTahun,
       });
     } else {
       setEditData({
@@ -110,38 +161,22 @@ export default function PenilaianPengajar() {
         tugas: '',
         uts: '',
         uas: '',
-        semester: 'Ganjil',
-        tahunAkademik: new Date().getFullYear().toString(),
+        semester: defaultSemester,
+        tahunAkademik: '2025/2026',
       });
     }
     setIsEditModalOpen(true);
   };
 
   const handleEditChange = (field: 'presensi' | 'tugas' | 'uts' | 'uas' | 'semester' | 'tahunAkademik', value: string) => {
-    if (field === 'semester' || field === 'tahunAkademik') {
-      setEditData(prev => ({
-        ...prev,
-        [field]: value
-      }));
-      return;
-    }
-
-    let numVal = parseInt(value || '0');
-    if (field === 'presensi' && numVal > 10) numVal = 10;
-    if (field === 'tugas' && numVal > 20) numVal = 20;
-    if (field === 'uts' && numVal > 30) numVal = 30;
-    if (field === 'uas' && numVal > 40) numVal = 40;
-    if (numVal < 0) numVal = 0;
-    
     setEditData(prev => ({
       ...prev,
-      [field]: value === '' ? '' : numVal.toString()
+      [field]: value
     }));
   };
 
   const handleSaveEdit = async () => {
-    if (isSubmitting) return;
-    setIsSubmitting(true);
+    if (isSaving) return;
     if (!editingMhs || !selectedMK || !selectedKelas || !selectedProgram) return;
     
     setIsSaving(true);
@@ -150,20 +185,23 @@ export default function PenilaianPengajar() {
       const tugas = parseFloat(editData.tugas || '0');
       const uts = parseFloat(editData.uts || '0');
       const uas = parseFloat(editData.uas || '0');
-      const total = presensi + tugas + uts + uas;
+      
+      const formattedTahun = editData.tahunAkademik ? editData.tahunAkademik.split('/')[0].trim() : '';
+      const formattedSemester = editData.semester.toLowerCase().includes('semester') ? editData.semester : `Semester ${editData.semester}`;
       
       await api.post('saveNilai', {
-        mahasiswa_id: editingMhs.id,
+        id: editingNilaiId || undefined,
+        nim: editingMhs.nim,
+        nama: editingMhs.nama,
+        nama_mahasiswa: editingMhs.nama,
         program: selectedProgram,
-        kelas: selectedKelas,
         nama_mk: selectedMK,
         presensi,
         tugas,
         uts,
         uas,
-        total,
-        tahun_akademik: editData.tahunAkademik,
-        semester: editData.semester
+        tahun_akademik_data: formattedTahun,
+        semester_data: formattedSemester
       });
       
       toast.success('Nilai berhasil diperbarui!');
@@ -171,6 +209,23 @@ export default function PenilaianPengajar() {
       fetchData();
     } catch (error: any) {
       toast.error('Gagal menyimpan nilai: ' + error.message);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleDeleteNilai = async (nilaiId: string) => {
+    if (!nilaiId) return;
+    const confirmDelete = window.confirm('Apakah Anda yakin ingin menghapus nilai ini dari database?');
+    if (!confirmDelete) return;
+
+    try {
+      setIsSaving(true);
+      await api.post('deleteNilai', { id: nilaiId });
+      toast.success('Nilai berhasil dihapus!');
+      fetchData();
+    } catch (error: any) {
+      toast.error('Gagal menghapus nilai: ' + error.message);
     } finally {
       setIsSaving(false);
     }
@@ -320,7 +375,7 @@ export default function PenilaianPengajar() {
         const dataRows = rawRows.slice(headerRowIndex + 1);
 
         activeMhsList.forEach(mhs => {
-          const existing = filteredNilais.find(n => n.mahasiswa_id === mhs.id);
+          const existing = filteredNilais.find(n => n.nim === mhs.nim);
           
           // Match row in excel
           const excelRow = dataRows.find(row => {
@@ -408,7 +463,16 @@ export default function PenilaianPengajar() {
   const handleOpenAddModal = () => {
     const newInputs: Record<string, any> = {};
     activeMhsList.forEach(mhs => {
-      const existing = filteredNilais.find(n => n.mahasiswa_id === mhs.id);
+      const existing = filteredNilais.find(n => {
+        const nNim = n.nim || n.mahasiswa_id;
+        const mNim = mhs.nim;
+        const isNimMatched = nNim && mNim && nNim.toString().trim().toLowerCase() === mNim.toString().trim().toLowerCase();
+        const isIdMatched = n.mahasiswa_id && mhs.id && n.mahasiswa_id.toString().trim().toLowerCase() === mhs.id.toString().trim().toLowerCase();
+        const nNama = n.nama || n.nama_mahasiswa;
+        const mNama = mhs.nama;
+        const isNamaMatched = nNama && mNama && nNama.toString().trim().toLowerCase() === mNama.toString().trim().toLowerCase();
+        return !!(isNimMatched || isIdMatched || isNamaMatched);
+      });
       if (existing) {
         newInputs[mhs.id] = {
           presensi: existing.presensi.toString(),
@@ -425,18 +489,11 @@ export default function PenilaianPengajar() {
   };
 
   const handleAddInputChange = (mhsId: string, field: 'presensi' | 'tugas' | 'uts' | 'uas', value: string) => {
-    let numVal = parseInt(value || '0');
-    if (field === 'presensi' && numVal > 10) numVal = 10;
-    if (field === 'tugas' && numVal > 20) numVal = 20;
-    if (field === 'uts' && numVal > 30) numVal = 30;
-    if (field === 'uas' && numVal > 40) numVal = 40;
-    if (numVal < 0) numVal = 0;
-    
     setAddInputData(prev => ({
       ...prev,
       [mhsId]: {
         ...prev[mhsId],
-        [field]: value === '' ? '' : numVal.toString()
+        [field]: value
       }
     }));
   };
@@ -452,20 +509,34 @@ export default function PenilaianPengajar() {
         const tugas = parseFloat(data.tugas || '0');
         const uts = parseFloat(data.uts || '0');
         const uas = parseFloat(data.uas || '0');
-        const total = presensi + tugas + uts + uas;
         
+        const formattedTahun = addTahun ? addTahun.split('/')[0].trim() : '';
+        const formattedSemester = addSemester.toLowerCase().includes('semester') ? addSemester : `Semester ${addSemester}`;
+
+        const existing = filteredNilais.find(n => {
+          const nNim = n.nim || n.mahasiswa_id;
+          const mNim = mhs.nim;
+          const isNimMatched = nNim && mNim && nNim.toString().trim().toLowerCase() === mNim.toString().trim().toLowerCase();
+          const isIdMatched = n.mahasiswa_id && mhs.id && n.mahasiswa_id.toString().trim().toLowerCase() === mhs.id.toString().trim().toLowerCase();
+          const nNama = n.nama || n.nama_mahasiswa;
+          const mNama = mhs.nama;
+          const isNamaMatched = nNama && mNama && nNama.toString().trim().toLowerCase() === mNama.toString().trim().toLowerCase();
+          return !!(isNimMatched || isIdMatched || isNamaMatched);
+        });
+
         await api.post('saveNilai', {
-          mahasiswa_id: mhs.id,
+          id: existing ? existing.id : undefined,
+          nim: mhs.nim,
+          nama: mhs.nama,
+          nama_mahasiswa: mhs.nama,
           program: selectedProgram,
-          kelas: selectedKelas,
           nama_mk: selectedMK,
           presensi,
           tugas,
           uts,
           uas,
-          total,
-          tahun_akademik: addTahun,
-          semester: addSemester
+          tahun_akademik_data: formattedTahun,
+          semester_data: formattedSemester
         });
       }
       
@@ -489,7 +560,7 @@ export default function PenilaianPengajar() {
   // Sort mahasantri by name
   activeMhsList.sort((a, b) => a.nama.localeCompare(b.nama));
 
-  const filteredNilais = nilais.filter(n => n.nama_mk === selectedMK && n.kelas === selectedKelas);
+  const filteredNilais = nilais.filter(n => n.nama_mk === selectedMK);
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
@@ -500,41 +571,6 @@ export default function PenilaianPengajar() {
             Rekap Nilai Mahasantri
           </h2>
           <p className="text-slate-500 text-sm mt-1">Lihat rekapitulasi penilaian akademik per matakuliah reguler.</p>
-        </div>
-        
-        <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-          <input 
-            type="file" 
-            ref={fileInputRef} 
-            onChange={handleImportExcel} 
-            accept=".xlsx, .xls" 
-            className="hidden" 
-          />
-          <button
-            onClick={() => fileInputRef.current?.click()}
-            disabled={activeMhsList.length === 0}
-            className="flex items-center justify-center gap-2 px-4 py-2 bg-white border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 hover:text-emerald-600 disabled:opacity-50 transition-colors text-sm font-medium shadow-sm"
-          >
-            <Upload className="w-4 h-4" />
-            <span>Import Excel</span>
-          </button>
-          
-          <button 
-            onClick={fetchData}
-            title="Refresh Data"
-            className="p-2.5 text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors border border-slate-200 bg-white"
-          >
-            <RefreshCw className="w-4 h-4" />
-          </button>
-          
-          <button
-            onClick={handleOpenAddModal}
-            disabled={activeMhsList.length === 0}
-            className="flex items-center justify-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 disabled:opacity-50 transition-colors text-sm font-medium shadow-sm"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Tambah Data Nilai</span>
-          </button>
         </div>
       </div>
 
@@ -606,16 +642,16 @@ export default function PenilaianPengajar() {
                     Nama Mahasantri / NIM
                   </th>
                   <th scope="col" className="px-4 py-4 text-center text-xs font-semibold text-emerald-700 uppercase tracking-wider bg-emerald-50/50">
-                    Presensi<br/><span className="text-[10px] text-emerald-600 font-normal block mt-0.5">(Maks. 10)</span>
+                    Presensi
                   </th>
                   <th scope="col" className="px-4 py-4 text-center text-xs font-semibold text-blue-700 uppercase tracking-wider bg-blue-50/50">
-                    Tugas<br/><span className="text-[10px] text-blue-600 font-normal block mt-0.5">(Maks. 20)</span>
+                    Tugas
                   </th>
                   <th scope="col" className="px-4 py-4 text-center text-xs font-semibold text-amber-700 uppercase tracking-wider bg-amber-50/50">
-                    UTS<br/><span className="text-[10px] text-amber-600 font-normal block mt-0.5">(Maks. 30)</span>
+                    UTS
                   </th>
                   <th scope="col" className="px-4 py-4 text-center text-xs font-semibold text-indigo-700 uppercase tracking-wider bg-indigo-50/50">
-                    UAS<br/><span className="text-[10px] text-indigo-600 font-normal block mt-0.5">(Maks. 40)</span>
+                    UAS
                   </th>
                   <th scope="col" className="px-6 py-4 text-center text-xs font-semibold text-slate-700 uppercase tracking-wider bg-slate-100 border-l border-slate-200">
                     Total
@@ -659,16 +695,16 @@ export default function PenilaianPengajar() {
                     Nama Mahasantri / NIM
                   </th>
                   <th scope="col" className="px-4 py-4 text-center text-xs font-semibold text-emerald-700 uppercase tracking-wider bg-emerald-50/50">
-                    Presensi<br/><span className="text-[10px] text-emerald-600 font-normal block mt-0.5">(Maks. 10)</span>
+                    Presensi
                   </th>
                   <th scope="col" className="px-4 py-4 text-center text-xs font-semibold text-blue-700 uppercase tracking-wider bg-blue-50/50">
-                    Tugas<br/><span className="text-[10px] text-blue-600 font-normal block mt-0.5">(Maks. 20)</span>
+                    Tugas
                   </th>
                   <th scope="col" className="px-4 py-4 text-center text-xs font-semibold text-amber-700 uppercase tracking-wider bg-amber-50/50">
-                    UTS<br/><span className="text-[10px] text-amber-600 font-normal block mt-0.5">(Maks. 30)</span>
+                    UTS
                   </th>
                   <th scope="col" className="px-4 py-4 text-center text-xs font-semibold text-indigo-700 uppercase tracking-wider bg-indigo-50/50">
-                    UAS<br/><span className="text-[10px] text-indigo-600 font-normal block mt-0.5">(Maks. 40)</span>
+                    UAS
                   </th>
                   <th scope="col" className="px-6 py-4 text-center text-xs font-semibold text-slate-700 uppercase tracking-wider bg-slate-100 border-l border-slate-200">
                     Total
@@ -680,7 +716,16 @@ export default function PenilaianPengajar() {
               </thead>
               <tbody className="bg-white divide-y divide-slate-100">
                 {activeMhsList.map((mhs, i) => {
-                  const data = filteredNilais.find(n => n.mahasiswa_id === mhs.id);
+                  const data = filteredNilais.find(n => {
+                    const nNim = n.nim || n.mahasiswa_id;
+                    const mNim = mhs.nim;
+                    const isNimMatched = nNim && mNim && nNim.toString().trim().toLowerCase() === mNim.toString().trim().toLowerCase();
+                    const isIdMatched = n.mahasiswa_id && mhs.id && n.mahasiswa_id.toString().trim().toLowerCase() === mhs.id.toString().trim().toLowerCase();
+                    const nNama = n.nama || n.nama_mahasiswa;
+                    const mNama = mhs.nama;
+                    const isNamaMatched = nNama && mNama && nNama.toString().trim().toLowerCase() === mNama.toString().trim().toLowerCase();
+                    return !!(isNimMatched || isIdMatched || isNamaMatched);
+                  });
                   const total = data ? data.total : 0;
                   
                   return (
@@ -690,7 +735,7 @@ export default function PenilaianPengajar() {
                       </td>
                       <td className="px-6 py-3 whitespace-nowrap">
                         <div className="font-semibold text-slate-800 text-[14px]">{mhs.nama}</div>
-                        <div className="text-xs text-slate-500 font-medium">{mhs.nim} • {mhs.program}</div>
+                        <div className="text-xs text-slate-500 font-medium">{mhs.nim}</div>
                       </td>
                       <td className="px-2 py-3 whitespace-nowrap text-center bg-emerald-50/20 tabular-nums font-semibold">
                         {data?.presensi ?? '-'}
@@ -708,13 +753,15 @@ export default function PenilaianPengajar() {
                         <span className="font-bold text-slate-800 tabular-nums">{Number(total).toFixed(2)}</span>
                       </td>
                       <td className="px-6 py-3 whitespace-nowrap text-center bg-slate-50">
-                        <button
-                          onClick={() => handleEditClick(mhs, data)}
-                          className="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded transition-colors"
-                          title="Edit Nilai"
-                        >
-                          <Edit2 className="w-4 h-4" />
-                        </button>
+                        <div className="flex justify-center items-center gap-1">
+                          <button
+                            onClick={() => handleEditClick(mhs, data)}
+                            className="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded transition-colors"
+                            title="Edit Nilai"
+                          >
+                            <Edit2 className="w-4.5 h-4.5" />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   );
@@ -754,40 +801,36 @@ export default function PenilaianPengajar() {
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-semibold tracking-wider text-emerald-700 mb-1.5 uppercase">Presensi (Maks: 10)</label>
+                    <label className="block text-xs font-semibold tracking-wider text-emerald-700 mb-1.5 uppercase">Presensi</label>
                     <input
                       type="number"
-                      min="0" max="10"
                       value={editData.presensi}
                       onChange={(e) => handleEditChange('presensi', e.target.value)}
                       className="block w-full rounded-md border-slate-300 bg-emerald-50/50 py-2 px-3 text-sm focus:border-emerald-500 focus:ring-emerald-500 shadow-sm font-medium tabular-nums"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold tracking-wider text-blue-700 mb-1.5 uppercase">Tugas (Maks: 20)</label>
+                    <label className="block text-xs font-semibold tracking-wider text-blue-700 mb-1.5 uppercase">Tugas</label>
                     <input
                       type="number"
-                      min="0" max="20"
                       value={editData.tugas}
                       onChange={(e) => handleEditChange('tugas', e.target.value)}
                       className="block w-full rounded-md border-slate-300 bg-blue-50/50 py-2 px-3 text-sm focus:border-blue-500 focus:ring-blue-500 shadow-sm font-medium tabular-nums"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold tracking-wider text-amber-700 mb-1.5 uppercase">UTS (Maks: 30)</label>
+                    <label className="block text-xs font-semibold tracking-wider text-amber-700 mb-1.5 uppercase">UTS</label>
                     <input
                       type="number"
-                      min="0" max="30"
                       value={editData.uts}
                       onChange={(e) => handleEditChange('uts', e.target.value)}
                       className="block w-full rounded-md border-slate-300 bg-amber-50/50 py-2 px-3 text-sm focus:border-amber-500 focus:ring-amber-500 shadow-sm font-medium tabular-nums"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold tracking-wider text-indigo-700 mb-1.5 uppercase">UAS (Maks: 40)</label>
+                    <label className="block text-xs font-semibold tracking-wider text-indigo-700 mb-1.5 uppercase">UAS</label>
                     <input
                       type="number"
-                      min="0" max="40"
                       value={editData.uas}
                       onChange={(e) => handleEditChange('uas', e.target.value)}
                       className="block w-full rounded-md border-slate-300 bg-indigo-50/50 py-2 px-3 text-sm focus:border-indigo-500 focus:ring-indigo-500 shadow-sm font-medium tabular-nums"
@@ -798,13 +841,17 @@ export default function PenilaianPengajar() {
                 <div className="border-t border-slate-100 pt-4 grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-semibold tracking-wider text-slate-700 mb-1.5 uppercase">Tahun Akademik</label>
-                    <input
-                      type="text"
+                    <select
                       value={editData.tahunAkademik}
                       onChange={(e) => handleEditChange('tahunAkademik', e.target.value)}
-                      placeholder="Misal: 2024"
                       className="block w-full rounded-md border-slate-300 bg-white py-2 px-3 text-sm focus:border-emerald-500 focus:ring-emerald-500 shadow-sm font-medium border"
-                    />
+                    >
+                      <option value="2025/2026">2025/2026</option>
+                      <option value="2026/2027">2026/2027</option>
+                      <option value="2027/2028">2027/2028</option>
+                      <option value="2028/2029">2028/2029</option>
+                      <option value="2029/2030">2029/2030</option>
+                    </select>
                   </div>
                   <div>
                     <label className="block text-xs font-semibold tracking-wider text-slate-700 mb-1.5 uppercase">Semester</label>
@@ -813,8 +860,14 @@ export default function PenilaianPengajar() {
                       onChange={(e) => handleEditChange('semester', e.target.value)}
                       className="block w-full rounded-md border-slate-300 bg-white py-2 px-3 text-sm focus:border-emerald-500 focus:ring-emerald-500 shadow-sm font-medium border"
                     >
-                      <option value="Ganjil">Ganjil</option>
-                      <option value="Genap">Genap</option>
+                      <option value="Semester 1">Semester 1</option>
+                      <option value="Semester 2">Semester 2</option>
+                      <option value="Semester 3">Semester 3</option>
+                      <option value="Semester 4">Semester 4</option>
+                      <option value="Semester 5">Semester 5</option>
+                      <option value="Semester 6">Semester 6</option>
+                      <option value="Semester 7">Semester 7</option>
+                      <option value="Semester 8">Semester 8</option>
                     </select>
                   </div>
                 </div>
@@ -865,13 +918,17 @@ export default function PenilaianPengajar() {
             <div className="p-5 border-b border-slate-100 grid grid-cols-1 md:grid-cols-2 gap-4 bg-white">
               <div>
                 <label className="block text-sm font-semibold text-slate-700 mb-1.5">Tahun Akademik</label>
-                <input
-                  type="text"
+                <select
                   value={addTahun}
                   onChange={(e) => setAddTahun(e.target.value)}
-                  placeholder="Misal: 2024"
-                  className="block w-full rounded-md border-slate-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm pl-3 py-2 border"
-                />
+                  className="block w-full rounded-md border-slate-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm pl-3 pr-10 py-2 border"
+                >
+                  <option value="2025/2026">2025/2026</option>
+                  <option value="2026/2027">2026/2027</option>
+                  <option value="2027/2028">2027/2028</option>
+                  <option value="2028/2029">2028/2029</option>
+                  <option value="2029/2030">2029/2030</option>
+                </select>
               </div>
               <div>
                 <label className="block text-sm font-semibold text-slate-700 mb-1.5">Semester</label>
@@ -880,8 +937,14 @@ export default function PenilaianPengajar() {
                   onChange={(e) => setAddSemester(e.target.value)}
                   className="block w-full rounded-md border-slate-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm pl-3 pr-10 py-2 border"
                 >
-                  <option value="Ganjil">Ganjil</option>
-                  <option value="Genap">Genap</option>
+                  <option value="1">1</option>
+                  <option value="2">2</option>
+                  <option value="3">3</option>
+                  <option value="4">4</option>
+                  <option value="5">5</option>
+                  <option value="6">6</option>
+                  <option value="7">7</option>
+                  <option value="8">8</option>
                 </select>
               </div>
             </div>
@@ -892,10 +955,10 @@ export default function PenilaianPengajar() {
                   <tr>
                     <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider w-[5%] bg-slate-100">No</th>
                     <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider w-[35%] bg-slate-100">Nama Mahasantri / NIM</th>
-                    <th scope="col" className="px-2 py-3 text-center text-xs font-semibold text-emerald-700 uppercase tracking-wider bg-emerald-50 border-l border-emerald-100">Presensi<br/><span className="text-[10px] text-emerald-600 font-normal">(Maks. 10)</span></th>
-                    <th scope="col" className="px-2 py-3 text-center text-xs font-semibold text-blue-700 uppercase tracking-wider bg-blue-50">Tugas<br/><span className="text-[10px] text-blue-600 font-normal">(Maks. 20)</span></th>
-                    <th scope="col" className="px-2 py-3 text-center text-xs font-semibold text-amber-700 uppercase tracking-wider bg-amber-50">UTS<br/><span className="text-[10px] text-amber-600 font-normal">(Maks. 30)</span></th>
-                    <th scope="col" className="px-2 py-3 text-center text-xs font-semibold text-indigo-700 uppercase tracking-wider bg-indigo-50">UAS<br/><span className="text-[10px] text-indigo-600 font-normal">(Maks. 40)</span></th>
+                    <th scope="col" className="px-2 py-3 text-center text-xs font-semibold text-emerald-700 uppercase tracking-wider bg-emerald-50 border-l border-emerald-100">Presensi</th>
+                    <th scope="col" className="px-2 py-3 text-center text-xs font-semibold text-blue-700 uppercase tracking-wider bg-blue-50">Tugas</th>
+                    <th scope="col" className="px-2 py-3 text-center text-xs font-semibold text-amber-700 uppercase tracking-wider bg-amber-50">UTS</th>
+                    <th scope="col" className="px-2 py-3 text-center text-xs font-semibold text-indigo-700 uppercase tracking-wider bg-indigo-50">UAS</th>
                     <th scope="col" className="px-4 py-3 text-center text-xs font-semibold text-slate-700 uppercase tracking-wider bg-slate-100 border-l border-slate-200">Total</th>
                   </tr>
                 </thead>
@@ -911,16 +974,16 @@ export default function PenilaianPengajar() {
                           <div className="text-[11px] text-slate-500">{mhs.nim}</div>
                         </td>
                         <td className="px-2 py-2 whitespace-nowrap text-center bg-emerald-50/20 border-l border-emerald-50">
-                          <input type="number" min="0" max="10" value={data.presensi} onChange={(e) => handleAddInputChange(mhs.id, 'presensi', e.target.value)} className="w-16 mx-auto text-center font-medium rounded border-slate-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-xs py-1" placeholder="0" />
+                          <input type="number" value={data.presensi} onChange={(e) => handleAddInputChange(mhs.id, 'presensi', e.target.value)} className="w-16 mx-auto text-center font-medium rounded border-slate-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-xs py-1" placeholder="0" />
                         </td>
                         <td className="px-2 py-2 whitespace-nowrap text-center bg-blue-50/20">
-                          <input type="number" min="0" max="20" value={data.tugas} onChange={(e) => handleAddInputChange(mhs.id, 'tugas', e.target.value)} className="w-16 mx-auto text-center font-medium rounded border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-xs py-1" placeholder="0" />
+                          <input type="number" value={data.tugas} onChange={(e) => handleAddInputChange(mhs.id, 'tugas', e.target.value)} className="w-16 mx-auto text-center font-medium rounded border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-xs py-1" placeholder="0" />
                         </td>
                         <td className="px-2 py-2 whitespace-nowrap text-center bg-amber-50/20">
-                          <input type="number" min="0" max="30" value={data.uts} onChange={(e) => handleAddInputChange(mhs.id, 'uts', e.target.value)} className="w-16 mx-auto text-center font-medium rounded border-slate-300 shadow-sm focus:border-amber-500 focus:ring-amber-500 sm:text-xs py-1" placeholder="0" />
+                          <input type="number" value={data.uts} onChange={(e) => handleAddInputChange(mhs.id, 'uts', e.target.value)} className="w-16 mx-auto text-center font-medium rounded border-slate-300 shadow-sm focus:border-amber-500 focus:ring-amber-500 sm:text-xs py-1" placeholder="0" />
                         </td>
                         <td className="px-2 py-2 whitespace-nowrap text-center bg-indigo-50/20">
-                          <input type="number" min="0" max="40" value={data.uas} onChange={(e) => handleAddInputChange(mhs.id, 'uas', e.target.value)} className="w-16 mx-auto text-center font-medium rounded border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-xs py-1" placeholder="0" />
+                          <input type="number" value={data.uas} onChange={(e) => handleAddInputChange(mhs.id, 'uas', e.target.value)} className="w-16 mx-auto text-center font-medium rounded border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-xs py-1" placeholder="0" />
                         </td>
                         <td className="px-4 py-2 whitespace-nowrap text-center bg-slate-50 border-l border-slate-200">
                           <span className="font-bold text-slate-800 text-sm tabular-nums">{total}</span>
