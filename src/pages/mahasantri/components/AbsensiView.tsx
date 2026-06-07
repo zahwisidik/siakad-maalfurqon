@@ -251,22 +251,9 @@ export default function AbsensiView({
         <div>
           <h2 className="text-lg font-bold text-slate-800">Presensi Kuliah Digital</h2>
           <p className="text-xs text-slate-400 mt-1 leading-relaxed">
-            Lakukan input dan verifikasi kehadiran Anda secara instan menggunakan metode Scan QR kelas, GPS koordinat, atau tombol hadir mandiri.
+            Halaman informasi, rekapitulasi persentase kehadiran, dan seluruh riwayat presensi perkuliahan Mahasantri.
           </p>
         </div>
-        <button 
-          onClick={() => {
-            if (uniqueCourses.length > 0) setSelectedCheckInMK(uniqueCourses[0]);
-            setSelectedCheckInKelas(user?.kelas || (uniqueClassesOptions[0] || ''));
-            setSelectedCheckInJamKe('1');
-            setSelectedCheckInTanggal(new Date().toISOString().split('T')[0]);
-            setShowCheckInModal(true);
-          }}
-          className="bg-emerald-600 hover:bg-emerald-700 hover:shadow-emerald-100 shadow transition-all cursor-pointer font-bold text-sm text-white px-5 py-2.5 rounded-xl inline-flex items-center gap-2"
-        >
-          <QrCode className="w-5 h-5" />
-          Absen Sekarang
-        </button>
       </div>
 
       {/* Grid: Progressive Rekap and Filters & Table */}
