@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { formatToIndonesianDate, formatTimeDisplay } from '../../../utils/time';
 import { 
   CheckCircle2, 
@@ -45,20 +45,23 @@ export default function DashboardView({
     { id: '4', nama: 'Panduan Penggunaan Portal SIAKAD Mahasantri', file_path: '/dokumen/panduan_siakad_mahasantri.pdf' },
   ];
 
-  const getStoredDocs = () => {
-    const stored = localStorage.getItem('akademik_dokumen_list');
-    if (stored) {
-      try {
-        return JSON.parse(stored);
-      } catch (e) {
-        return DEFAULT_DOCUMENTS;
-      }
-    }
-    localStorage.setItem('akademik_dokumen_list', JSON.stringify(DEFAULT_DOCUMENTS));
-    return DEFAULT_DOCUMENTS;
-  };
+  const [docs, setDocs] = useState<any[]>([]);
 
-  const docs = getStoredDocs();
+  useEffect(() => {
+    const getStoredDocs = () => {
+      const stored = localStorage.getItem('akademik_dokumen_list');
+      if (stored) {
+        try {
+          return JSON.parse(stored);
+        } catch (e) {
+          return DEFAULT_DOCUMENTS;
+        }
+      }
+      localStorage.setItem('akademik_dokumen_list', JSON.stringify(DEFAULT_DOCUMENTS));
+      return DEFAULT_DOCUMENTS;
+    };
+    setDocs(getStoredDocs());
+  }, []);
 
   // Calculate stats
   const totalPresence = attendanceList.filter(a => a.status === 'hadir' || a.status === 'terlambat').length;
