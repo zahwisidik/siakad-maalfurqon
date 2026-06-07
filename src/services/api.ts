@@ -92,7 +92,8 @@ let mockPengumuman = [
     judul: 'Edaran Kewajiban Setoran Hafalan Mutun Syar’iyyah', 
     tanggal: '15 Juni 2026', 
     isi_lengkap: 'Bagi seluruh thullab penerima beasiswa, batas akhir ujian lisan hafalan Kitab Tuhfatul Athfal dan Jazariyyah diundur hingga tanggal 10 Juni 2026 pukul 15.00 WIB bersama dewan pembina masing-masing kamar.', 
-    penting: true 
+    penting: true,
+    file_path: '/dokumen/panduan_siakad_mahasantri.pdf'
   },
   { 
     id: 'p4', 
@@ -100,7 +101,8 @@ let mockPengumuman = [
     judul: 'Pendaftaran Re-Registrasi Syahadah Ma’had Aly', 
     tanggal: '12 Juni 2026', 
     isi_lengkap: 'Formulir re-registrasi thullab tholibah dapat diakses melalui portal administrasi atau langsung menghadap amil bagian kesekretariatan keuangan utama.', 
-    penting: false 
+    penting: false,
+    file_path: '/dokumen/formulir_izin_luar_pesantren.pdf'
   },
   { 
     id: 'p5', 
@@ -110,6 +112,13 @@ let mockPengumuman = [
     isi_lengkap: 'Hadirilah kajian ilmiah bedah Kitab At-Taudhih Al-Asma wa Al-Shifat bertempat di Aula Mesjid Utama Jami Baitul Atiq selepas sholat Ashar s.d Isya teruntuk seluruh thullab Ma’had.', 
     penting: false 
   }
+];
+
+let mockDokumen = [
+  { id: '1', nama: 'Kalender Akademik Tahun Ajaran 2025/2026', file_path: '/dokumen/kalender_akademik_2025_2026.pdf' },
+  { id: '2', nama: 'Buku Panduan Akademik dan Tata Tertib Mahasantri', file_path: '/dokumen/buku_panduan_mahasantri.pdf' },
+  { id: '3', nama: 'Formulir Pengajuan Izin Keluar Lingkungan Pesantren', file_path: '/dokumen/formulir_izin_luar_pesantren.pdf' },
+  { id: '4', nama: 'Panduan Penggunaan Portal SIAKAD Mahasantri', file_path: '/dokumen/panduan_siakad_mahasantri.pdf' },
 ];
 
 export const isUsingMock = !APPS_SCRIPT_URL;
@@ -137,6 +146,28 @@ const saveMockNilai = () => {
   } catch (e) {}
 };
 
+try {
+  const stored = localStorage.getItem('akademik_dokumen_list');
+  if (stored) mockDokumen = JSON.parse(stored);
+} catch (e) {}
+
+const saveMockDokumen = () => {
+  try {
+    localStorage.setItem('akademik_dokumen_list', JSON.stringify(mockDokumen));
+  } catch (e) {}
+};
+
+try {
+  const stored = localStorage.getItem('mock_pengumuman');
+  if (stored) mockPengumuman = JSON.parse(stored);
+} catch (e) {}
+
+const saveMockPengumuman = () => {
+  try {
+    localStorage.setItem('mock_pengumuman', JSON.stringify(mockPengumuman));
+  } catch (e) {}
+};
+
 export const api = {
   get: async (action: string) => {
     if (isUsingMock) {
@@ -151,6 +182,7 @@ export const api = {
           if (action === 'getAbsensi') resolve({ data: mockAbsensi });
           if (action === 'getAbsensiPengajar') resolve({ data: mockAbsensiPengajar });
           if (action === 'getPengumuman') resolve({ data: mockPengumuman });
+          if (action === 'getDokumen') resolve({ data: mockDokumen });
           resolve({ data: [] });
         }, 500);
       });
@@ -161,6 +193,9 @@ export const api = {
       if (!data.success) {
         if (action === 'getAbsensiPengajar' && data.message === 'Unknown action') {
           return { data: mockAbsensiPengajar };
+        }
+        if (action === 'getDokumen' && data.message === 'Unknown action') {
+          return { data: mockDokumen };
         }
         throw new Error(data.message);
       }
@@ -178,6 +213,7 @@ export const api = {
       else if (action === 'getAbsensi') fallbackData = mockAbsensi;
       else if (action === 'getAbsensiPengajar') fallbackData = mockAbsensiPengajar;
       else if (action === 'getPengumuman') fallbackData = mockPengumuman;
+      else if (action === 'getDokumen') fallbackData = mockDokumen;
       
       return { data: fallbackData, success: true, isFallback: true };
     }
@@ -295,15 +331,34 @@ export const api = {
       } else if (action === 'addPengumuman') {
         const newItem = { id: 'p_' + Date.now(), ...payload.data };
         mockPengumuman.push(newItem);
+        saveMockPengumuman();
         return newItem;
       } else if (action === 'updatePengumuman') {
         const index = mockPengumuman.findIndex(p => p.id === payload.id);
         if (index > -1) {
           mockPengumuman[index] = { ...mockPengumuman[index], ...payload.data };
+          saveMockPengumuman();
         }
         return mockPengumuman[index];
       } else if (action === 'deletePengumuman') {
         mockPengumuman = mockPengumuman.filter(p => p.id !== payload.id);
+        saveMockPengumuman();
+        return { success: true };
+      } else if (action === 'addDokumen') {
+        const newItem = { id: 'doc_' + Date.now(), ...payload.data };
+        mockDokumen.push(newItem);
+        saveMockDokumen();
+        return newItem;
+      } else if (action === 'updateDokumen') {
+        const index = mockDokumen.findIndex(d => d.id === payload.id);
+        if (index > -1) {
+          mockDokumen[index] = { ...mockDokumen[index], ...payload.data };
+          saveMockDokumen();
+        }
+        return mockDokumen[index];
+      } else if (action === 'deleteDokumen') {
+        mockDokumen = mockDokumen.filter(d => d.id !== payload.id);
+        saveMockDokumen();
         return { success: true };
       } else if (action.startsWith('add') || action.startsWith('update') || action.startsWith('delete')) {
         return { message: 'Aksi disimulasikan berhasil.' };
@@ -331,7 +386,10 @@ export const api = {
         }
       });
       if (!data.success) {
-        if (action === 'saveAbsensiPengajar' && data.message === 'Unknown action') {
+        if (
+          (action === 'saveAbsensiPengajar' || action === 'addDokumen' || action === 'updateDokumen' || action === 'deleteDokumen' || action === 'addPengumuman' || action === 'updatePengumuman' || action === 'deletePengumuman') && 
+          data.message === 'Unknown action'
+        ) {
           const res = runMockPost();
           return { data: res };
         }

@@ -13,8 +13,18 @@ Aplikasi Sistem Manajemen Absensi Mahasantri ini dibangun menggunakan React (Vit
    - `KELAS`
    - `JADWAL`
    - `ABSENSI`
-3. Di dalam Sheet `USERS`, buat header di baris pertama (A1, B1, dst):
-   - `id`, `nama`, `username`, `password`, `role`, `status`, `nim`, `program`, `kelas`
+   - `PENGUMUMAN`
+   - `DOKUMEN`
+3. Di dalam Sheet masing-masing, buat header di baris pertama (A1, B1, dst) sebagai berikut:
+   - `USERS`: `id`, `nama`, `username`, `password`, `role`, `status`
+   - `MAHASANTRI`: `id`, `nim`, `nama`, `jenis_kelamin`, `kelas`, `semester`, `status`, `tahun_masuk`
+   - `PENGAJAR`: `id`, `nama`, `mapel`, `status`
+   - `MATAKULIAH`: `id`, `kode`, `nama_mk`, `program`, `kelas`, `pengajar`
+   - `KELAS`: `id`, `program`, `nama_kelas`
+   - `JADWAL`: `id`, `hari`, `jam_ke`, `jam_mulai`, `jam_berakhir`, `program`, `kelas`, `nama_mk`, `pengajar`, `lokasi`, `deskripsi`
+   - `ABSENSI`: `id`, `tanggal`, `jam_ke`, `program`, `kelas`, `nama_mk`, `mahasiswa_id`, `status`, `pembahasan`, `timestamp`
+   - `PENGUMUMAN`: `id`, `kategori`, `judul`, `tanggal`, `isi_lengkap`, `penting`, `file_path`
+   - `DOKUMEN`: `id`, `nama`, `file_path`
 4. Masukkan satu baris data admin di Sheet `USERS`:
    - id: `1`
    - nama: `Admin`

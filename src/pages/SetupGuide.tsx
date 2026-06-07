@@ -24,6 +24,8 @@ export default function SetupGuide() {
                 <li>KELAS</li>
                 <li>JADWAL</li>
                 <li>ABSENSI</li>
+                <li>PENGUMUMAN</li>
+                <li>DOKUMEN</li>
               </ul>
             </li>
             <li>Di Sheet <code>USERS</code>, tulis header di baris ke-1, kolom A-F: <code>id</code>, <code>nama</code>, <code>username</code>, <code>password</code>, <code>role</code>, <code>status</code>.</li>
@@ -31,6 +33,8 @@ export default function SetupGuide() {
               <code>1</code> | <code>Admin</code> | <code>admin</code> | <code>password123</code> | <code>admin</code> | <code>aktif</code>
             </li>
             <li>Di Sheet <code>MAHASANTRI</code>, pastikan memiliki header: <code>id</code>, <code>nim</code>, <code>nama</code>, <code>jenis_kelamin</code>, <code>kelas</code>, <code>semester</code>, <code>status</code>, <code>tahun_masuk</code>.</li>
+            <li>Di Sheet <code>PENGUMUMAN</code>, pastikan memiliki header: <code>id</code>, <code>kategori</code>, <code>judul</code>, <code>tanggal</code>, <code>isi_lengkap</code>, <code>penting</code>, <code>file_path</code>.</li>
+            <li>Di Sheet <code>DOKUMEN</code>, pastikan memiliki header: <code>id</code>, <code>nama</code>, <code>file_path</code>.</li>
           </ol>
 
           <h3 className="text-xl font-bold mt-8 mb-4">Langkah 2: Pasang Apps Script</h3>

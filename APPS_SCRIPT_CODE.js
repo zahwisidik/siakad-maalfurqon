@@ -55,7 +55,8 @@ const SHEET_SCHEMAS = {
   'ABSENSI': ['id', 'tanggal', 'jam_ke', 'program', 'kelas', 'nama_mk', 'mahasiswa_id', 'status', 'pembahasan', 'timestamp'],
   'ABSENSI_PENGAJAR': ['id', 'pengajar_id', 'tanggal', 'waktu_datang', 'waktu_pulang', 'lokasi_datang', 'lokasi_pulang', 'alasan_pulang_awal', 'alasan_terlambat'],
   'NILAI': ['id', 'nim', 'nama', 'program', 'kelas', 'nama_mk', 'presensi', 'tugas', 'uts', 'uas', 'total', 'tahun_akademik_data', 'semester_data'],
-  'PENGUMUMAN': ['id', 'kategori', 'judul', 'tanggal', 'isi_lengkap', 'penting']
+  'PENGUMUMAN': ['id', 'kategori', 'judul', 'tanggal', 'isi_lengkap', 'penting', 'file_path'],
+  'DOKUMEN': ['id', 'nama', 'file_path']
 };
 
 function getSheetCaseInsensitive(ss, name) {
@@ -209,6 +210,8 @@ function doGet(e) {
         return successResponse(getData('NILAI'));
       case 'getPengumuman':
         return successResponse(getData('PENGUMUMAN'));
+      case 'getDokumen':
+        return successResponse(getData('DOKUMEN'));
       default:
         return errorResponse("Unknown action");
     }
@@ -306,6 +309,13 @@ function doPost(e) {
         return updateData('PENGUMUMAN', body.id, body.data);
       case 'deletePengumuman':
         return deleteData('PENGUMUMAN', body.id);
+        
+      case 'addDokumen':
+        return addData('DOKUMEN', body.data);
+      case 'updateDokumen':
+        return updateData('DOKUMEN', body.id, body.data);
+      case 'deleteDokumen':
+        return deleteData('DOKUMEN', body.id);
         
       default:
         return errorResponse("Unknown POST action");

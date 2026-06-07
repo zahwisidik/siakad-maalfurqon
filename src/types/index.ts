@@ -94,5 +94,6 @@ export interface Pengumuman {
   tanggal: string; // DD MMM YYYY or YYYY-MM-DD
   isi_lengkap: string;
   penting: boolean | string;
+  file_path?: string;
 }
 

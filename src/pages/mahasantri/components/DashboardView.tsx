@@ -17,6 +17,7 @@ import {
   FileText
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { api } from '../../../services/api';
 
 interface DashboardViewProps {
   user: any;
@@ -38,29 +39,20 @@ export default function DashboardView({
   announcements 
 }: DashboardViewProps) {
 
-  const DEFAULT_DOCUMENTS = [
-    { id: '1', nama: 'Kalender Akademik Tahun Ajaran 2025/2026', file_path: '/dokumen/kalender_akademik_2025_2026.pdf' },
-    { id: '2', nama: 'Buku Panduan Akademik dan Tata Tertib Mahasantri', file_path: '/dokumen/buku_panduan_mahasantri.pdf' },
-    { id: '3', nama: 'Formulir Pengajuan Izin Keluar Lingkungan Pesantren', file_path: '/dokumen/formulir_izin_luar_pesantren.pdf' },
-    { id: '4', nama: 'Panduan Penggunaan Portal SIAKAD Mahasantri', file_path: '/dokumen/panduan_siakad_mahasantri.pdf' },
-  ];
-
   const [docs, setDocs] = useState<any[]>([]);
 
   useEffect(() => {
-    const getStoredDocs = () => {
-      const stored = localStorage.getItem('akademik_dokumen_list');
-      if (stored) {
-        try {
-          return JSON.parse(stored);
-        } catch (e) {
-          return DEFAULT_DOCUMENTS;
+    const fetchDocs = async () => {
+      try {
+        const response = await api.get('getDokumen');
+        if (response && response.data) {
+          setDocs(response.data);
         }
+      } catch (e) {
+        console.error('Failed to load documents', e);
       }
-      localStorage.setItem('akademik_dokumen_list', JSON.stringify(DEFAULT_DOCUMENTS));
-      return DEFAULT_DOCUMENTS;
     };
-    setDocs(getStoredDocs());
+    fetchDocs();
   }, []);
 
   // Calculate stats

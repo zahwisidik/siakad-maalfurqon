@@ -229,25 +229,33 @@ export default function PengumumanView({
                   {selectedAnnouncement.isi_lengkap}
                 </p>
 
-                {/* Simulated file attachments if any */}
-                <div className="space-y-2">
-                  <span className="text-[10px] text-slate-400 font-bold block uppercase tracking-wider">Lampiran Dokumen Tambahan</span>
-                  <div 
-                    onClick={() => downloadAttachment(selectedAnnouncement.judul)}
-                    className="p-3 bg-slate-55 border border-slate-150 rounded-xl flex items-center justify-between hover:bg-slate-50 cursor-pointer transition-colors"
-                  >
-                    <div className="flex items-center gap-2.5">
-                      <span className="p-2 bg-rose-50 text-rose-600 rounded-lg block">
-                        <Download className="w-4.5 h-4.5" />
-                      </span>
-                      <div>
-                        <p className="text-[11px] font-bold text-slate-800 leading-none">Lampiran_Keterangan_{selectedAnnouncement.id}.pdf</p>
-                        <p className="text-[9px] text-slate-400 mt-1 leading-none">Dokumen PDF Resmi • 1.2 MB</p>
+                {/* Dynamic database attachments if any */}
+                {selectedAnnouncement.file_path ? (
+                  <div className="space-y-2">
+                    <span className="text-[10px] text-slate-400 font-bold block uppercase tracking-wider">Lampiran Dokumen Tambahan</span>
+                    <a 
+                      href={selectedAnnouncement.file_path}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="p-3 bg-slate-55 border border-slate-150 rounded-xl flex items-center justify-between hover:bg-slate-50 hover:border-emerald-300 cursor-pointer transition-all flex"
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <span className="p-2 bg-emerald-50 text-emerald-600 rounded-lg block">
+                          <Download className="w-4.5 h-4.5" />
+                        </span>
+                        <div className="text-left">
+                          <p className="text-[11px] font-bold text-slate-800 leading-none">Unduh / Buka Dokumen Lampiran</p>
+                          <p className="text-[9px] text-slate-400 mt-1.5 leading-none">Klik untuk membuka lampiran secara langsung</p>
+                        </div>
                       </div>
-                    </div>
-                    <ChevronRight className="w-4 h-4 text-slate-350" />
+                      <ChevronRight className="w-4 h-4 text-slate-350" />
+                    </a>
                   </div>
-                </div>
+                ) : (
+                  <div className="text-slate-400 italic text-[10px] text-center bg-slate-50/50 py-2.5 rounded-xl border border-slate-150">
+                    Tidak ada dokumen lampiran untuk pengumuman ini.
+                  </div>
+                )}
 
                 <div className="pt-3 text-[10px] text-center text-slate-400 border-t border-slate-100">
                   Diterbitkan oleh: <strong>Sekretariat Umum Ma'had Aly Magelang</strong>

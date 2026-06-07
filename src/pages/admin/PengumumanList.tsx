@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { api } from '../../services/api';
 import toast from 'react-hot-toast';
 import { Pengumuman } from '../../types';
-import { Pen, Trash2, Plus, Search, Megaphone, CheckCircle2, AlertTriangle } from 'lucide-react';
+import { Pen, Trash2, Plus, Search, Megaphone, CheckCircle2, AlertTriangle, Paperclip, ExternalLink } from 'lucide-react';
 import Swal from 'sweetalert2';
 import { formatToIndonesianDate, getTodayIndonesianDate } from '../../utils/time';
 
@@ -64,6 +64,8 @@ export default function PengumumanList() {
     } catch (err: any) {
       Swal.close();
       toast.error('Gagal menyimpan pengumuman: ' + err.message);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -177,6 +179,7 @@ export default function PengumumanList() {
                 <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider bg-slate-50">Judul Pengumuman</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider bg-slate-50 w-36">Tanggal</th>
                 <th className="px-6 py-3 text-center text-xs font-medium text-slate-500 uppercase tracking-wider bg-slate-50 w-28">Penting</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider bg-slate-50 w-40">Lampiran</th>
                 <th className="px-6 py-3 text-right text-xs font-medium text-slate-500 uppercase tracking-wider bg-slate-50 w-28">Aksi</th>
               </tr>
             </thead>
@@ -215,6 +218,22 @@ export default function PengumumanList() {
                         <span className="text-[11px] text-slate-400 font-medium">Tidak</span>
                       )}
                     </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      {item.file_path ? (
+                        <a 
+                          href={item.file_path}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 text-emerald-600 hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100 px-2.5 py-1 rounded-md transition-colors"
+                          title={item.file_path}
+                        >
+                          <Paperclip className="w-3.5 h-3.5 shrink-0" />
+                          <span className="text-xs font-semibold">Buka Lampiran</span>
+                        </a>
+                      ) : (
+                        <span className="text-xs text-slate-400 font-normal italic">Tidak ada</span>
+                      )}
+                    </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <div className="flex justify-end gap-2">
                         <button
@@ -243,88 +262,100 @@ export default function PengumumanList() {
 
       {/* Write/Edit Popup Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full overflow-hidden border border-slate-150 animate-in fade-in-50 zoom-in-95 duration-150">
-            <div className="px-6 py-4 border-b border-slate-100 flex items-center gap-2.5 bg-slate-50">
-              <Megaphone className="w-5 h-5 text-emerald-500" />
-              <h3 className="text-base font-bold text-slate-800">
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 z-50 overflow-y-auto">
+          <div className="bg-white rounded-xl sm:rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] flex flex-col overflow-hidden border border-slate-150 animate-in fade-in-50 zoom-in-95 duration-150">
+            <div className="px-5 py-4 border-b border-slate-100 flex items-center gap-2.5 bg-slate-50 shrink-0">
+              <Megaphone className="w-5 h-5 text-emerald-500 shrink-0" />
+              <h3 className="text-sm sm:text-base font-bold text-slate-800 line-clamp-1">
                 {isEditing ? 'Ubah Pengumuman Resmi' : 'Tulis Pengumuman Resmi Baru'}
               </h3>
             </div>
-            <form onSubmit={handleSave} className="p-6 space-y-4">
+            
+            <form onSubmit={handleSave} className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 text-left">
               <div>
-                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide">Kategori Pengumuman</label>
+                <label className="block text-[10px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wide">Kategori Pengumuman</label>
                 <select
                   value={formData.kategori || ''}
                   onChange={e => setFormData({ ...formData, kategori: e.target.value })}
-                  className="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm p-2 border outline-none font-medium"
+                  className="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 text-xs sm:text-sm p-2 border outline-none font-medium"
                 >
                   {KATEGORI_OPTIONS.map(cat => (
                     <option key={cat} value={cat}>{cat}</option>
                   ))}
                 </select>
               </div>
-
+ 
               <div>
-                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide">Judul Pengumuman</label>
+                <label className="block text-[10px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wide">Judul Pengumuman</label>
                 <input
                   type="text"
                   required
                   placeholder="Ketik judul pengumuman..."
                   value={formData.judul || ''}
                   onChange={e => setFormData({ ...formData, judul: e.target.value })}
-                  className="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm p-2 border outline-none font-medium text-slate-800"
+                  className="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 text-xs sm:text-sm p-2 border outline-none font-medium text-slate-800"
                 />
               </div>
-
+ 
               <div>
-                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide">Tanggal Publikasi</label>
+                <label className="block text-[10px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wide">Tanggal Publikasi</label>
                 <input
                   type="text"
                   required
                   placeholder="Contoh: 24 Mei 2026 atau Hari ini"
                   value={formData.tanggal || ''}
                   onChange={e => setFormData({ ...formData, tanggal: e.target.value })}
-                  className="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm p-2 border outline-none font-medium text-slate-800"
+                  className="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 text-xs sm:text-sm p-2 border outline-none font-medium text-slate-800"
                 />
               </div>
-
+ 
               <div>
-                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide">Isi Pengumuman Lengkap</label>
+                <label className="block text-[10px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wide">Isi Pengumuman Lengkap</label>
                 <textarea
                   required
                   rows={4}
                   placeholder="Ketik isi pengumuman secara menyeluruh di sini..."
                   value={formData.isi_lengkap || ''}
                   onChange={e => setFormData({ ...formData, isi_lengkap: e.target.value })}
-                  className="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm p-2 border outline-none text-slate-800 leading-relaxed font-normal"
+                  className="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 text-xs sm:text-sm p-2 border outline-none text-slate-800 leading-relaxed font-normal"
                 />
               </div>
-
-              <div className="flex items-center">
+ 
+              <div>
+                <label className="block text-[10px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wide">Link Lampiran Dokumen (Opsional)</label>
+                <input
+                  type="text"
+                  placeholder="Contoh: https://drive.google.com/xyz atau /dokumen/file.pdf"
+                  value={formData.file_path || ''}
+                  onChange={e => setFormData({ ...formData, file_path: e.target.value })}
+                  className="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 text-xs sm:text-sm p-2 border outline-none font-medium text-slate-800"
+                />
+              </div>
+ 
+              <div className="flex items-start">
                 <input
                   id="penting-checkbox"
                   type="checkbox"
                   checked={formData.penting === true}
                   onChange={e => setFormData({ ...formData, penting: e.target.checked })}
-                  className="h-4 w-4 text-emerald-600 focus:ring-emerald-500 border-slate-300 rounded cursor-pointer"
+                  className="mt-1 h-4 w-4 text-emerald-600 focus:ring-emerald-500 border-slate-300 rounded cursor-pointer shrink-0"
                 />
-                <label htmlFor="penting-checkbox" className="ml-2 block text-sm font-medium text-slate-700 cursor-pointer select-none">
+                <label htmlFor="penting-checkbox" className="ml-2 block text-xs sm:text-sm font-medium text-slate-700 cursor-pointer select-none leading-snug">
                   Lencana Penting (Highlight warna merah bagi mahasantri)
                 </label>
               </div>
-
-              <div className="pt-3 border-t border-slate-100 flex justify-end gap-2.5">
+ 
+              <div className="pt-3 border-t border-slate-100 flex justify-end gap-2.5 shrink-0">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 border border-slate-300 rounded-md text-sm font-medium text-slate-700 hover:bg-slate-50 cursor-pointer"
+                  className="px-4 py-2 border border-slate-300 rounded-md text-xs sm:text-sm font-medium text-slate-700 hover:bg-slate-50 cursor-pointer"
                 >
                   Batal
                 </button>
                 <button
                   type="submit" disabled={isSubmitting}
-                  className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 cursor-pointer"
+                  className="px-4 py-2 border border-transparent rounded-md shadow-sm text-xs sm:text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 cursor-pointer disabled:opacity-50"
                 >
                   {isEditing ? 'Simpan Perubahan' : 'Terbitkan Sekarang'}
                 </button>

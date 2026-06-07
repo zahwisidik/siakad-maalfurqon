@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import { FileText, Plus, Search, Edit2, Trash2, Download, ExternalLink } from 'lucide-react';
 import Swal from 'sweetalert2';
+import { api } from '../../services/api';
 
 interface Dokumen {
   id: string;
@@ -9,39 +10,33 @@ interface Dokumen {
   file_path: string;
 }
 
-const DEFAULT_DOCUMENTS = [
-  { id: '1', nama: 'Kalender Akademik Tahun Ajaran 2025/2026', file_path: '/dokumen/kalender_akademik_2025_2026.pdf' },
-  { id: '2', nama: 'Buku Panduan Akademik dan Tata Tertib Mahasantri', file_path: '/dokumen/buku_panduan_mahasantri.pdf' },
-  { id: '3', nama: 'Formulir Pengajuan Izin Keluar Lingkungan Pesantren', file_path: '/dokumen/formulir_izin_luar_pesantren.pdf' },
-  { id: '4', nama: 'Panduan Penggunaan Portal SIAKAD Mahasantri', file_path: '/dokumen/panduan_siakad_mahasantri.pdf' },
-];
-
 export default function DokumenList() {
   const [data, setData] = useState<Dokumen[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState<Partial<Dokumen>>({});
   const [isEditing, setIsEditing] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     fetchData();
   }, []);
 
-  const fetchData = () => {
-    const stored = localStorage.getItem('akademik_dokumen_list');
-    if (stored) {
-      try {
-        setData(JSON.parse(stored));
-        return;
-      } catch (e) {
-        // Fall back
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const response = await api.get('getDokumen');
+      if (response && response.data) {
+        setData(response.data);
       }
+    } catch (e: any) {
+      toast.error('Gagal memuat dokumen: ' + (e.message || e));
+    } finally {
+      setLoading(false);
     }
-    localStorage.setItem('akademik_dokumen_list', JSON.stringify(DEFAULT_DOCUMENTS));
-    setData(DEFAULT_DOCUMENTS);
   };
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.nama?.trim()) {
       toast.error('Nama dokumen wajib diisi!');
@@ -59,35 +54,38 @@ export default function DokumenList() {
       didOpen: () => Swal.showLoading()
     });
 
-    let updatedList: Dokumen[] = [...data];
-
-    if (isEditing && formData.id) {
-      updatedList = updatedList.map((doc) => 
-        doc.id === formData.id ? { ...doc, nama: formData.nama!, file_path: formData.file_path! } : doc
-      );
-    } else {
-      const newDoc: Dokumen = {
-        id: 'doc_' + Date.now().toString(),
-        nama: formData.nama!,
-        file_path: formData.file_path!
-      };
-      updatedList.push(newDoc);
-    }
-
-    localStorage.setItem('akademik_dokumen_list', JSON.stringify(updatedList));
-    setData(updatedList);
-
-    setTimeout(() => {
-      Swal.close();
-      toast.success(isEditing ? 'Dokumen diperbarui' : 'Dokumen baru berhasil ditambahkan');
+    try {
+      if (isEditing && formData.id) {
+        await api.post('updateDokumen', {
+          id: formData.id,
+          data: {
+            nama: formData.nama.trim(),
+            file_path: formData.file_path.trim()
+          }
+        });
+        toast.success('Dokumen berhasil diperbarui');
+      } else {
+        await api.post('addDokumen', {
+          data: {
+            nama: formData.nama.trim(),
+            file_path: formData.file_path.trim()
+          }
+        });
+        toast.success('Dokumen baru berhasil ditambahkan');
+      }
       setIsModalOpen(false);
-    }, 400);
+      fetchData();
+    } catch (err: any) {
+      toast.error('Gagal menyimpan dokumen: ' + (err.message || err));
+    } finally {
+      Swal.close();
+    }
   };
 
   const handleDelete = async (id: string) => {
     const result = await Swal.fire({
       title: 'Apakah Anda yakin?',
-      text: 'Dokumen ini akan dihapus permanen dari portal mahasantri!',
+      text: 'Dokumen ini akan dihapus permanen dari portal dan database!',
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#10b981',
@@ -104,14 +102,15 @@ export default function DokumenList() {
         didOpen: () => Swal.showLoading()
       });
 
-      const updatedList = data.filter((doc) => doc.id !== id);
-      localStorage.setItem('akademik_dokumen_list', JSON.stringify(updatedList));
-      setData(updatedList);
-
-      setTimeout(() => {
-        Swal.close();
+      try {
+        await api.post('deleteDokumen', { id });
         toast.success('Dokumen berhasil dihapus dari portal');
-      }, 400);
+        fetchData();
+      } catch (err: any) {
+        toast.error('Gagal menghapus dokumen: ' + (err.message || err));
+      } finally {
+        Swal.close();
+      }
     }
   };
 
@@ -230,7 +229,7 @@ export default function DokumenList() {
 
       {/* Modal Dialog */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-[9999] animate-fade-in">
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fade-in">
           <div className="bg-white rounded-2xl border border-slate-200 shadow-xl w-full max-w-md overflow-hidden">
             <div className="p-5 bg-gradient-to-r from-emerald-700 to-slate-905 text-white flex justify-between items-center">
               <h3 className="font-bold text-sm flex items-center gap-2">
