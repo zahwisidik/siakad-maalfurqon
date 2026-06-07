@@ -49,7 +49,12 @@ export default function MahasantriList() {
         jenis_kelamin: (item.jenis_kelamin || item['Jenis Kelamin'] || '').toLowerCase().startsWith('l') ? 'laki-laki' : 'perempuan',
         program: item.program || item.Program || PROGRAM_OPTIONS[0],
         kelas: item.kelas || item.Kelas || KELAS_OPTIONS[0],
-        status: (item.status || item.Status || 'aktif').toLowerCase()
+        status: (() => {
+          const raw = String(item.status || item.Status || 'aktif').toLowerCase().trim();
+          if (raw === 'active' || raw === 'aktif') return 'aktif';
+          if (raw === 'lulus') return 'lulus';
+          return 'tidak aktif';
+        })()
       }));
 
       await api.post('bulkAddMahasantri', { data: formattedData });
@@ -140,7 +145,7 @@ export default function MahasantriList() {
       <div className="sm:flex sm:items-center sm:justify-between mb-6">
         <div>
           <h3 className="text-lg font-medium leading-6 text-slate-900">Kelola Data Mahasantri</h3>
-          <p className="mt-1 max-w-2xl text-sm text-slate-500">Menampilkan daftar semua mahasantri aktif dan nonaktif.</p>
+          <p className="mt-1 max-w-2xl text-sm text-slate-500">Menampilkan daftar semua mahasantri aktif dan tidak aktif.</p>
         </div>
         <div className="mt-4 sm:mt-0 flex flex-wrap gap-2 items-center">
           <ExcelImport onImport={handleImport} />
@@ -265,7 +270,7 @@ export default function MahasantriList() {
                       <label className="block text-sm font-medium text-slate-700">Status</label>
                       <select value={formData.status || 'aktif'} onChange={e => setFormData({...formData, status: e.target.value as any})} className="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm p-2 border">
                         <option value="aktif">Aktif</option>
-                        <option value="nonaktif">Nonaktif</option>
+                        <option value="tidak aktif">Tidak Aktif</option>
                         <option value="lulus">Lulus</option>
                       </select>
                     </div>

@@ -1,9 +1,10 @@
 export interface User {
   id: string;
   nama: string;
-  email: string;
-  role: 'admin' | 'pengajar' | 'mahasantri';
-  status: 'active' | 'inactive' | 'aktif' | 'nonaktif' | string;
+  email?: string;
+  username?: string;
+  role: 'admin' | 'pengajar' | 'mahasantri' | 'tenaga_kependidikan';
+  status: 'aktif' | 'tidak aktif' | string;
   nim?: string;
   program?: string;
   kelas?: string;
@@ -17,7 +18,7 @@ export interface Mahasantri {
   jenis_kelamin?: 'laki-laki' | 'perempuan' | string;
   program: string;
   kelas: string;
-  status: 'aktif' | 'nonaktif' | 'lulus' | string;
+  status: 'aktif' | 'tidak aktif' | 'lulus' | string;
   tahun_masuk?: string;
 }
 
@@ -25,7 +26,7 @@ export interface Pengajar {
   id: string;
   nama: string;
   jabatan: string;
-  status: 'aktif' | 'nonaktif';
+  status: 'aktif' | 'tidak aktif' | string;
 }
 
 export interface Matakuliah {

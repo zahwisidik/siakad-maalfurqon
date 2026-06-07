@@ -46,7 +46,7 @@ function getSpreadsheet() {
 }
 
 const SHEET_SCHEMAS = {
-  'USERS': ['id', 'nama', 'email', 'password', 'role', 'status'],
+  'USERS': ['id', 'nama', 'username', 'password', 'role', 'status'],
   'MAHASANTRI': ['id', 'nim', 'nama', 'jenis_kelamin', 'kelas', 'semester', 'status'],
   'PENGAJAR': ['id', 'nama', 'mapel', 'status'],
   'MATAKULIAH': ['id', 'kode', 'nama_mk', 'program', 'kelas', 'pengajar'],
@@ -242,7 +242,7 @@ function doPost(e) {
   try {
     switch (action) {
       case 'login':
-        return login(body.email, body.password);
+        return login(body.username || body.email, body.password);
       case 'addMahasantri':
         return addData('MAHASANTRI', body.data);
       case 'updateMahasantri':
@@ -317,15 +317,16 @@ function doPost(e) {
 
 // ------------------- CORE FUNCTIONS -------------------
 
-function login(email, password) {
+function login(usernameOrEmail, password) {
   const users = getData('USERS');
-  const checkEmail = email ? email.toString().toLowerCase().trim() : '';
+  const checkUsername = usernameOrEmail ? usernameOrEmail.toString().toLowerCase().trim() : '';
   const checkPassword = password ? password.toString() : '';
 
   const user = users.find(u => {
-    const uEmail = u.email ? u.email.toString().toLowerCase().trim() : '';
+    // Check both u.username and u.email to support seamless transition if they haven't updated sheet headers
+    const uUsername = (u.username || u.email || '').toString().toLowerCase().trim();
     const uPassword = u.password ? u.password.toString() : '';
-    return uEmail === checkEmail && uPassword === checkPassword;
+    return uUsername === checkUsername && uPassword === checkPassword;
   });
   
   if (user) {

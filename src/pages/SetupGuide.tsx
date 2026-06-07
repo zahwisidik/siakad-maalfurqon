@@ -26,9 +26,9 @@ export default function SetupGuide() {
                 <li>ABSENSI</li>
               </ul>
             </li>
-            <li>Di Sheet <code>USERS</code>, tulis header di baris ke-1, kolom A-F: <code>id</code>, <code>nama</code>, <code>email</code>, <code>password</code>, <code>role</code>, <code>status</code>.</li>
+            <li>Di Sheet <code>USERS</code>, tulis header di baris ke-1, kolom A-F: <code>id</code>, <code>nama</code>, <code>username</code>, <code>password</code>, <code>role</code>, <code>status</code>.</li>
             <li>Tambahkan data admin di baris ke-2:<br/>
-              <code>1</code> | <code>Admin</code> | <code>admin@admin.com</code> | <code>password123</code> | <code>admin</code> | <code>active</code>
+              <code>1</code> | <code>Admin</code> | <code>admin</code> | <code>password123</code> | <code>admin</code> | <code>aktif</code>
             </li>
             <li>Di Sheet <code>MAHASANTRI</code>, pastikan memiliki header: <code>id</code>, <code>nim</code>, <code>nama</code>, <code>jenis_kelamin</code>, <code>kelas</code>, <code>semester</code>, <code>status</code>, <code>tahun_masuk</code>.</li>
           </ol>

@@ -106,7 +106,15 @@ export default function DashboardLayout() {
           <div className="flex items-center gap-3">
             <div className="flex-1 min-w-0">
               <p className="text-white text-sm font-semibold truncate">{user.nama || 'User'}</p>
-              <p className="text-slate-400 text-xs truncate capitalize">{user.role}</p>
+              <p className="text-slate-400 text-xs truncate">
+                {user.role === 'admin'
+                  ? 'Administrator'
+                  : user.role === 'mahasantri'
+                  ? 'Mahasantri'
+                  : user.role === 'tenaga_kependidikan'
+                  ? 'Tenaga Kependidikan'
+                  : 'Ustadz / Pengajar'}
+              </p>
             </div>
             <button
               onClick={logout}

@@ -6,7 +6,7 @@ import toast from 'react-hot-toast';
 import { Eye, EyeOff } from 'lucide-react';
 
 export default function Login() {
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -30,7 +30,7 @@ export default function Login() {
     setLoading(true);
     
     try {
-      const response = await api.post('login', { email, password });
+      const response = await api.post('login', { username, email: username, password });
       login(response.data.user);
       
       toast.success(`Ahlan wa sahlan, ${response.data.user.nama || 'User'}!`);
@@ -65,9 +65,10 @@ export default function Login() {
               <div className="mb-4 bg-amber-50 border-l-4 border-amber-400 p-4 rounded-lg">
                 <p className="text-xs text-amber-800 leading-relaxed font-medium">
                   <b className="text-amber-900 block mb-1">💡 Demo Mode / Mockup Aktif</b>
-                  Login Admin: <code className="bg-amber-100 px-1 rounded">admin@admin.com</code><br/>
-                  Login Pengajar: <code className="bg-amber-100 px-1 rounded">ahmad@pengajar.com</code><br/>
-                  Login Mahasantri: <code className="bg-amber-100 px-1 rounded">fulan@mahasantri.com</code> atau <code className="bg-amber-150 px-1 rounded">fulanah@mahasantri.com</code><br/>
+                  Login Admin: <code className="bg-amber-100 px-1 rounded">admin</code><br/>
+                  Login Pengajar: <code className="bg-amber-100 px-1 rounded">ahmad</code><br/>
+                  Login Tenaga Kependidikan: <code className="bg-amber-100 px-1 rounded">staff</code><br/>
+                  Login Mahasantri: <code className="bg-amber-100 px-1 rounded">fulan</code> atau <code className="bg-amber-150 px-1 rounded">fulanah</code> (atau NIM: <code className="bg-amber-100 px-1 rounded">1001</code> / <code className="bg-amber-100 px-1 rounded">1002</code>)<br/>
                   Password: <span className="italic">bebas (sembarang kata)</span>
                 </p>
                 <div className="mt-2 text-xs">
@@ -78,14 +79,14 @@ export default function Login() {
 
             <form onSubmit={handleLogin} className="space-y-6">
               <div>
-                <label className="block text-sm font-medium text-slate-700">Email</label>
+                <label className="block text-sm font-medium text-slate-700">Username</label>
                 <div className="mt-1">
                   <input
-                    type="email"
+                    type="text"
                     required
-                    placeholder="nama@domain.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="Masukkan username Anda"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
                     className="block w-full appearance-none rounded-md border border-slate-300 px-3 py-2 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-emerald-500 sm:text-sm bg-white"
                   />
                 </div>

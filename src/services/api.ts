@@ -186,21 +186,23 @@ export const api = {
   post: async (action: string, payload: any) => {
     const runMockPost = () => {
       if (action === 'login') {
-        const emailLower = (payload.email || '').toLowerCase();
-        if (emailLower === 'admin@admin.com') {
-          return { data: { user: { id: '1', nama: 'Admin', email: 'admin@admin.com', role: 'admin', status: 'active' } } };
-        } else if (emailLower === 'ahmad@pengajar.com') {
-          return { data: { user: { id: '2', nama: 'Ust. Ahmad', email: 'ahmad@pengajar.com', role: 'pengajar', status: 'active' } } };
-        } else if (emailLower === 'fulan@mahasantri.com' || payload.email === '1001') {
-          return { data: { user: { id: 'm1', nama: 'Fulan', email: 'fulan@mahasantri.com', nim: '1001', role: 'mahasantri', status: 'aktif', program: "I'dad Lughowi", kelas: "Semester 2 - Putra", tahun_masuk: 2025 } } };
-        } else if (emailLower === 'fulanah@mahasantri.com' || payload.email === '1002') {
-          return { data: { user: { id: 'm2', nama: 'Fulanah', email: 'fulanah@mahasantri.com', nim: '1002', role: 'mahasantri', status: 'aktif', program: "Syariah", kelas: "Semester 1 - Putri", tahun_masuk: 2025 } } };
+        const usernameLower = (payload.username || payload.email || '').toLowerCase().replace(/@.*$/, '').trim();
+        if (usernameLower === 'admin') {
+          return { data: { user: { id: '1', nama: 'Admin', username: 'admin', role: 'admin', status: 'aktif' } } };
+        } else if (usernameLower === 'ahmad') {
+          return { data: { user: { id: '2', nama: 'Ust. Ahmad', username: 'ahmad', role: 'pengajar', status: 'aktif' } } };
+        } else if (usernameLower === 'staff' || usernameLower === 'kependidikan') {
+          return { data: { user: { id: '3', nama: 'Ustadzah Fatimah (Staff)', username: 'staff', role: 'tenaga_kependidikan', status: 'aktif' } } };
+        } else if (usernameLower === 'fulan' || usernameLower === '1001') {
+          return { data: { user: { id: 'm1', nama: 'Fulan', username: 'fulan', nim: '1001', role: 'mahasantri', status: 'aktif', program: "I'dad Lughowi", kelas: "Semester 2 - Putra", tahun_masuk: 2025 } } };
+        } else if (usernameLower === 'fulanah' || usernameLower === '1002') {
+          return { data: { user: { id: 'm2', nama: 'Fulanah', username: 'fulanah', nim: '1002', role: 'mahasantri', status: 'aktif', program: "Syariah", kelas: "Semester 1 - Putri", tahun_masuk: 2025 } } };
         } else {
-          const found = mockMahasantri.find(m => m.nim === payload.email || m.nama.toLowerCase() === emailLower);
+          const found = mockMahasantri.find(m => m.nim === usernameLower || m.nama.toLowerCase() === usernameLower);
           if (found) {
-            return { data: { user: { id: found.id, nama: found.nama, email: found.nim + '@mahasantri.com', nim: found.nim, role: 'mahasantri', status: found.status, program: found.program, kelas: found.kelas, tahun_masuk: found.tahun_masuk } } };
+            return { data: { user: { id: found.id, nama: found.nama, username: found.nim, nim: found.nim, role: 'mahasantri', status: found.status, program: found.program, kelas: found.kelas, tahun_masuk: found.tahun_masuk } } };
           } else {
-            throw new Error('User tidak ditemukan. Gunakan admin@admin.com, ahmad@pengajar.com, atau 1001/1002');
+            throw new Error('User tidak ditemukan. Gunakan username admin, ahmad, staff, atau 1001/1002');
           }
         }
       } else if (action === 'saveAbsensi') {

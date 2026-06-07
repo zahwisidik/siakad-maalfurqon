@@ -14,14 +14,14 @@ Aplikasi Sistem Manajemen Absensi Mahasantri ini dibangun menggunakan React (Vit
    - `JADWAL`
    - `ABSENSI`
 3. Di dalam Sheet `USERS`, buat header di baris pertama (A1, B1, dst):
-   - `id`, `nama`, `email`, `password`, `role`, `status`, `nim`, `program`, `kelas`
+   - `id`, `nama`, `username`, `password`, `role`, `status`, `nim`, `program`, `kelas`
 4. Masukkan satu baris data admin di Sheet `USERS`:
    - id: `1`
    - nama: `Admin`
-   - email: `admin@admin.com`
+   - username: `admin`
    - password: `password123`
    - role: `admin`
-   - status: `active`
+   - status: `aktif`
 5. Buka Menu **Ekstensi** > **Apps Script**.
 6. Buka file `APPS_SCRIPT_CODE.js` di dalam project ini, salin seluruh kodenya.
 7. Paste kode tersebut ke editor Google Apps Script. 
@@ -62,5 +62,7 @@ Aplikasi Sistem Manajemen Absensi Mahasantri ini dibangun menggunakan React (Vit
 
 ## Info Login Akun Bawaan (Bila Menggunakan Mode Mock/Local Data):
 Aplikasi ini sudah dipasang Mock Data untuk preview jika Anda belum punya URL backend.
-- Admin: `admin@admin.com` | `password123`
-- Pengajar: `ahmad@pengajar.com` | `pass123`
+- Admin: `admin` | `bebas`
+- Pengajar: `ahmad` | `bebas`
+- Tenaga Kependidikan: `staff` | `bebas`
+- Mahasantri: `fulan` atau `fulanah` (atau NIM `1001` / `1002`) | `bebas`
