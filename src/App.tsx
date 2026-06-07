@@ -12,6 +12,7 @@ import KelasList from './pages/admin/KelasList';
 import JadwalList from './pages/admin/JadwalList';
 import RekapAbsensi from './pages/admin/RekapAbsensi';
 import PengumumanList from './pages/admin/PengumumanList';
+import DokumenList from './pages/admin/DokumenList';
 import AbsensiPengajar from './pages/pengajar/AbsensiPengajar';
 import DashboardPengajar from './pages/pengajar/DashboardPengajar';
 import MatakuliahPengajar from './pages/pengajar/MatakuliahPengajar';
@@ -49,6 +50,7 @@ export default function App() {
             <Route path="/jadwal" element={<JadwalList />} />
             <Route path="/rekap" element={<RekapAbsensi />} />
             <Route path="/pengumuman" element={<PengumumanList />} />
+            <Route path="/admin-dokumen" element={<DokumenList />} />
             
             {/* Pengajar Routes */}
             <Route path="/dashboard-pengajar" element={<DashboardPengajar />} />
@@ -62,6 +64,7 @@ export default function App() {
             <Route path="/absensi-mahasantri" element={<DashboardMahasantri currentTab="absensi" />} />
             <Route path="/jadwal-mahasantri" element={<DashboardMahasantri currentTab="jadwal" />} />
             <Route path="/nilai-mahasantri" element={<DashboardMahasantri currentTab="nilai" />} />
+            <Route path="/transkrip-mahasantri" element={<DashboardMahasantri currentTab="transkrip" />} />
             <Route path="/pengumuman-mahasantri" element={<DashboardMahasantri currentTab="pengumuman" />} />
             <Route path="/profil-mahasantri" element={<DashboardMahasantri currentTab="profil" />} />
           </Route>

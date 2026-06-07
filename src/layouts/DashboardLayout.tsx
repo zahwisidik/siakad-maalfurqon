@@ -1,13 +1,19 @@
 import { useState } from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { LayoutDashboard, Users, UserSquare2, BookOpen, Clock, CalendarDays, ClipboardCheck, LogOut, FileText, Menu, X, Award, Megaphone, User } from 'lucide-react';
+import { LayoutDashboard, Users, UserSquare2, BookOpen, Clock, CalendarDays, ClipboardCheck, LogOut, FileText, Menu, X, Award, Megaphone, User, Plus, Minus } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 
 export default function DashboardLayout() {
   const { user, logout } = useAuth();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const location = useLocation();
+  const [isAkademikOpen, setIsAkademikOpen] = useState(() => {
+    return location.pathname.includes('absensi-mahasantri') ||
+           location.pathname.includes('jadwal-mahasantri') ||
+           location.pathname.includes('nilai-mahasantri') ||
+           location.pathname.includes('transkrip-mahasantri');
+  });
 
   if (!user) {
     return <Navigate to="/login" replace />;
@@ -22,6 +28,7 @@ export default function DashboardLayout() {
     { name: 'Jadwal', icon: Clock, path: '/jadwal' },
     { name: 'Rekap Absensi', icon: FileText, path: '/rekap' },
     { name: 'Pengumuman', icon: Megaphone, path: '/pengumuman' },
+    { name: 'Dokumen Akademik', icon: FileText, path: '/admin-dokumen' },
   ];
 
   const pengajarMenus = [
@@ -83,23 +90,156 @@ export default function DashboardLayout() {
         </div>
         <div className="flex-1 overflow-y-auto">
           <nav className="p-4 space-y-1">
-            {menus.map((menu) => (
-              <NavLink
-                key={menu.name}
-                to={menu.path}
-                onClick={() => setIsSidebarOpen(false)} // Close sidebar on click mobile
-                className={({ isActive }) =>
-                  `px-4 py-3 rounded-xl flex items-center gap-3 font-medium transition-colors cursor-pointer ${
-                    isActive
-                      ? 'bg-emerald-500/10 text-emerald-400'
-                      : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
-                  }`
-                }
-              >
-                <menu.icon className="w-5 h-5 flex-shrink-0" />
-                {menu.name}
-              </NavLink>
-            ))}
+            {user.role === 'mahasantri' ? (
+              <>
+                {/* Dashboard */}
+                <NavLink
+                  to="/dashboard-mahasantri"
+                  onClick={() => setIsSidebarOpen(false)}
+                  className={({ isActive }) =>
+                    `px-4 py-3 rounded-xl flex items-center gap-3 font-medium transition-colors cursor-pointer ${
+                      isActive
+                        ? 'bg-emerald-500/10 text-emerald-400'
+                        : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
+                    }`
+                  }
+                >
+                  <LayoutDashboard className="w-5 h-5 flex-shrink-0" />
+                  Dashboard
+                </NavLink>
+
+                {/* Akademik Submenu Trigger */}
+                <div>
+                  <button
+                    onClick={() => setIsAkademikOpen(!isAkademikOpen)}
+                    type="button"
+                    className="w-full px-4 py-3 rounded-xl flex items-center justify-between font-medium transition-colors cursor-pointer text-slate-400 hover:text-white hover:bg-slate-800/50"
+                  >
+                    <div className="flex items-center gap-3">
+                      <BookOpen className="w-5 h-5 flex-shrink-0" />
+                      <span>Akademik</span>
+                    </div>
+                    {isAkademikOpen ? (
+                      <Minus className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                    ) : (
+                      <Plus className="w-4 h-4 text-slate-400 flex-shrink-0" />
+                    )}
+                  </button>
+
+                  {/* Submenu items */}
+                  {isAkademikOpen && (
+                    <div className="pl-6 pt-1 pb-1 space-y-1 border-l border-slate-700/50 ml-6 mt-1">
+                      <NavLink
+                        to="/absensi-mahasantri"
+                        onClick={() => setIsSidebarOpen(false)}
+                        className={({ isActive }) =>
+                          `px-4 py-2 rounded-lg flex items-center gap-3 text-sm font-medium transition-colors cursor-pointer ${
+                            isActive
+                              ? 'bg-emerald-500/15 text-emerald-400 font-semibold'
+                              : 'text-slate-400 hover:text-white hover:bg-slate-800/30'
+                          }`
+                        }
+                      >
+                        <ClipboardCheck className="w-4 h-4 flex-shrink-0" />
+                        Absensi
+                      </NavLink>
+                      <NavLink
+                        to="/jadwal-mahasantri"
+                        onClick={() => setIsSidebarOpen(false)}
+                        className={({ isActive }) =>
+                          `px-4 py-2 rounded-lg flex items-center gap-3 text-sm font-medium transition-colors cursor-pointer ${
+                            isActive
+                              ? 'bg-emerald-500/15 text-emerald-400 font-semibold'
+                              : 'text-slate-400 hover:text-white hover:bg-slate-800/30'
+                          }`
+                        }
+                      >
+                        <Clock className="w-4 h-4 flex-shrink-0" />
+                        Jadwal
+                      </NavLink>
+                      <NavLink
+                        to="/nilai-mahasantri"
+                        onClick={() => setIsSidebarOpen(false)}
+                        className={({ isActive }) =>
+                          `px-4 py-2 rounded-lg flex items-center gap-3 text-sm font-medium transition-colors cursor-pointer ${
+                            isActive
+                              ? 'bg-emerald-500/15 text-emerald-400 font-semibold'
+                              : 'text-slate-400 hover:text-white hover:bg-slate-800/30'
+                          }`
+                        }
+                      >
+                        <Award className="w-4 h-4 flex-shrink-0" />
+                        Lembar Hasil Studi
+                      </NavLink>
+                      <NavLink
+                        to="/transkrip-mahasantri"
+                        onClick={() => setIsSidebarOpen(false)}
+                        className={({ isActive }) =>
+                          `px-4 py-2 rounded-lg flex items-center gap-3 text-sm font-medium transition-colors cursor-pointer ${
+                            isActive
+                              ? 'bg-emerald-500/15 text-emerald-400 font-semibold'
+                              : 'text-slate-400 hover:text-white hover:bg-slate-800/30'
+                          }`
+                        }
+                      >
+                        <FileText className="w-4 h-4 flex-shrink-0" />
+                        Transkrip Nilai
+                      </NavLink>
+                    </div>
+                  )}
+                </div>
+
+                {/* Pengumuman */}
+                <NavLink
+                  to="/pengumuman-mahasantri"
+                  onClick={() => setIsSidebarOpen(false)}
+                  className={({ isActive }) =>
+                    `px-4 py-3 rounded-xl flex items-center gap-3 font-medium transition-colors cursor-pointer ${
+                      isActive
+                        ? 'bg-emerald-500/10 text-emerald-400'
+                        : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
+                    }`
+                  }
+                >
+                  <Megaphone className="w-5 h-5 flex-shrink-0" />
+                  Pengumuman
+                </NavLink>
+
+                {/* Profil */}
+                <NavLink
+                  to="/profil-mahasantri"
+                  onClick={() => setIsSidebarOpen(false)}
+                  className={({ isActive }) =>
+                    `px-4 py-3 rounded-xl flex items-center gap-3 font-medium transition-colors cursor-pointer ${
+                      isActive
+                        ? 'bg-emerald-500/10 text-emerald-400'
+                        : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
+                    }`
+                  }
+                >
+                  <User className="w-5 h-5 flex-shrink-0" />
+                  Profil
+                </NavLink>
+              </>
+            ) : (
+              menus.map((menu) => (
+                <NavLink
+                  key={menu.name}
+                  to={menu.path}
+                  onClick={() => setIsSidebarOpen(false)} // Close sidebar on click mobile
+                  className={({ isActive }) =>
+                    `px-4 py-3 rounded-xl flex items-center gap-3 font-medium transition-colors cursor-pointer ${
+                      isActive
+                        ? 'bg-emerald-500/10 text-emerald-400'
+                        : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
+                    }`
+                  }
+                >
+                  <menu.icon className="w-5 h-5 flex-shrink-0" />
+                  {menu.name}
+                </NavLink>
+              ))
+            )}
           </nav>
         </div>
         <div className="p-6 mt-auto border-t border-slate-700/50">

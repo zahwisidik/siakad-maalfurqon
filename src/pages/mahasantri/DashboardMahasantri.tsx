@@ -23,17 +23,18 @@ import DashboardView from './components/DashboardView';
 import AbsensiView from './components/AbsensiView';
 import JadwalView from './components/JadwalView';
 import NilaiView from './components/NilaiView';
+import TranskripView from './components/TranskripView';
 import PengumumanView from './components/PengumumanView';
 import ProfilView from './components/ProfilView';
 
 interface DashboardMahasantriProps {
-  currentTab?: 'beranda' | 'absensi' | 'jadwal' | 'nilai' | 'pengumuman' | 'profil';
+  currentTab?: 'beranda' | 'absensi' | 'jadwal' | 'nilai' | 'transkrip' | 'pengumuman' | 'profil';
 }
 
 export default function DashboardMahasantri({ currentTab = 'beranda' }: DashboardMahasantriProps) {
   const { user, login: updateSession, logout } = useAuth();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<'beranda' | 'absensi' | 'jadwal' | 'nilai' | 'pengumuman' | 'profil'>('beranda');
+  const [activeTab, setActiveTab] = useState<'beranda' | 'absensi' | 'jadwal' | 'nilai' | 'transkrip' | 'pengumuman' | 'profil'>('beranda');
 
   useEffect(() => {
     setActiveTab(currentTab);
@@ -265,6 +266,14 @@ export default function DashboardMahasantri({ currentTab = 'beranda' }: Dashboar
         <NilaiView 
           gradeList={gradeList}
           courseList={courseList}
+        />
+      )}
+
+      {activeTab === 'transkrip' && (
+        <TranskripView 
+          gradeList={gradeList}
+          courseList={courseList}
+          user={user}
         />
       )}
 

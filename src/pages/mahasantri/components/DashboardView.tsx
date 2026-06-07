@@ -12,7 +12,9 @@ import {
   User,
   MapPin,
   QrCode,
-  CalendarDays
+  CalendarDays,
+  Download,
+  FileText
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -35,6 +37,28 @@ export default function DashboardView({
   onTabChange,
   announcements 
 }: DashboardViewProps) {
+
+  const DEFAULT_DOCUMENTS = [
+    { id: '1', nama: 'Kalender Akademik Tahun Ajaran 2025/2026', file_path: '/dokumen/kalender_akademik_2025_2026.pdf' },
+    { id: '2', nama: 'Buku Panduan Akademik dan Tata Tertib Mahasantri', file_path: '/dokumen/buku_panduan_mahasantri.pdf' },
+    { id: '3', nama: 'Formulir Pengajuan Izin Keluar Lingkungan Pesantren', file_path: '/dokumen/formulir_izin_luar_pesantren.pdf' },
+    { id: '4', nama: 'Panduan Penggunaan Portal SIAKAD Mahasantri', file_path: '/dokumen/panduan_siakad_mahasantri.pdf' },
+  ];
+
+  const getStoredDocs = () => {
+    const stored = localStorage.getItem('akademik_dokumen_list');
+    if (stored) {
+      try {
+        return JSON.parse(stored);
+      } catch (e) {
+        return DEFAULT_DOCUMENTS;
+      }
+    }
+    localStorage.setItem('akademik_dokumen_list', JSON.stringify(DEFAULT_DOCUMENTS));
+    return DEFAULT_DOCUMENTS;
+  };
+
+  const docs = getStoredDocs();
 
   // Calculate stats
   const totalPresence = attendanceList.filter(a => a.status === 'hadir' || a.status === 'terlambat').length;
@@ -159,7 +183,7 @@ export default function DashboardView({
           {todaySchedules.length === 0 ? (
             <div className="py-14 text-center space-y-2">
               <CalendarDays className="w-8 h-8 text-slate-300 mx-auto" />
-              <p className="text-slate-500 text-sm font-medium">Alhamdulillah, tidak ada jadwal kuliah hari ini.</p>
+              <p className="text-slate-500 text-sm font-medium">Tidak ada jadwal kuliah hari ini.</p>
               <p className="text-xs text-slate-400">Silakan manfaatkan untuk murojaah atau tugas mandiri.</p>
             </div>
           ) : (
@@ -215,33 +239,114 @@ export default function DashboardView({
             </button>
           </div>
 
-          <div className="space-y-3">
-            {announcements.slice(0, 3).map((item) => (
-              <div 
-                key={item.id} 
-                className="p-3.5 rounded-xl border border-slate-150 hover:bg-slate-50 transition-colors cursor-pointer"
-                onClick={() => onTabChange('pengumuman')}
-              >
-                <div className="flex items-center gap-1.5 mb-1.5">
-                  <span className={`px-1.5 py-0.5 rounded text-[9px] uppercase font-bold tracking-wider ${
-                    item.kategori === 'Akademik' ? 'bg-blue-50 text-blue-750 border border-blue-200' :
-                    item.kategori === 'Ujian' ? 'bg-rose-50 text-rose-750 border border-rose-200' :
-                    'bg-amber-50 text-amber-750 border border-amber-200'
-                  }`}>
-                    {item.kategori}
-                  </span>
-                  {item.penting && (
-                    <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse"></span>
-                  )}
-                </div>
-                <h4 className="font-bold text-slate-800 text-xs line-clamp-1">{item.judul}</h4>
-                <p className="text-[11px] text-slate-500 mt-1 line-clamp-2 font-normal leading-relaxed">
-                  {item.isi_lengkap}
-                </p>
-                <p className="text-[10px] text-slate-400 mt-1.5 font-medium">{formatToIndonesianDate(item.tanggal)}</p>
-              </div>
-            ))}
+          <div className="overflow-x-auto border border-slate-150 rounded-xl">
+            <table className="min-w-full divide-y divide-slate-150 text-xs">
+              <thead className="bg-slate-50 text-slate-500 font-bold uppercase tracking-wider text-[10px]">
+                <tr className="divide-x divide-slate-150">
+                  <th scope="col" className="px-3 py-2 text-center w-12">No</th>
+                  <th scope="col" className="px-3 py-2 text-left w-24">Kategori</th>
+                  <th scope="col" className="px-3 py-2 text-left">Judul Pengumuman</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-150 bg-white text-slate-700">
+                {announcements.slice(0, 3).map((item, index) => (
+                  <tr 
+                    key={item.id} 
+                    onClick={() => onTabChange('pengumuman')}
+                    className="divide-x divide-slate-150 hover:bg-slate-50 transition-colors cursor-pointer"
+                  >
+                    <td className="px-3 py-3 text-center font-mono font-bold text-slate-400">
+                      {index + 1}
+                    </td>
+                    <td className="px-3 py-3 whitespace-nowrap">
+                      <span className={`px-1.5 py-0.5 rounded text-[9px] uppercase font-bold tracking-wider ${
+                        item.kategori === 'Akademik' ? 'bg-blue-50 text-blue-750 border border-blue-200' :
+                        item.kategori === 'Ujian' ? 'bg-rose-50 text-rose-750 border border-rose-200' :
+                        'bg-amber-50 text-amber-750 border border-amber-200'
+                      }`}>
+                        {item.kategori}
+                      </span>
+                    </td>
+                    <td className="px-3 py-3">
+                      <div className="space-y-0.5">
+                        <div className="flex items-center gap-1.5">
+                          <p className="font-bold text-slate-800 line-clamp-1">{item.judul}</p>
+                          {item.penting && (
+                            <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse shrink-0"></span>
+                          )}
+                        </div>
+                        <p className="text-[10px] text-slate-400 font-medium">
+                          {formatToIndonesianDate(item.tanggal)}
+                        </p>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+                {announcements.length === 0 && (
+                  <tr>
+                    <td colSpan={3} className="px-3 py-8 text-center text-slate-400 font-medium italic">
+                      Tidak ada pengumuman terbaru
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
           </div>
+        </div>
+      </div>
+
+      {/* Daftar Dokumen Penting */}
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 space-y-4">
+        <div className="flex justify-between items-center pb-2 border-b border-slate-100">
+          <h3 className="font-bold text-slate-800 flex items-center gap-2">
+            <FileText className="w-5 h-5 text-emerald-600" />
+            Dokumen Penting & Panduan Akademik
+          </h3>
+          <span className="text-[11px] bg-slate-105 px-2 py-0.5 rounded-full font-bold text-slate-500">{docs.length} Dokumen</span>
+        </div>
+
+        <div className="overflow-x-auto border border-slate-150 rounded-xl">
+          <table className="min-w-full divide-y divide-slate-150 text-xs">
+            <thead className="bg-slate-50 text-slate-500 font-bold uppercase tracking-wider text-[10px]">
+              <tr className="divide-x divide-slate-150">
+                <th scope="col" className="px-3 py-2.5 text-center w-12">No</th>
+                <th scope="col" className="px-4 py-2.5 text-left">Nama Dokumen</th>
+                <th scope="col" className="px-3 py-2.5 text-center w-24">Link Download</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-150 bg-white text-slate-700 font-medium">
+              {docs.map((doc: any, index: number) => (
+                <tr key={doc.id || index} className="divide-x divide-slate-150 hover:bg-slate-50 transition-colors">
+                  <td className="px-3 py-3.5 text-center font-mono font-bold text-slate-400">
+                    {index + 1}
+                  </td>
+                  <td className="px-4 py-3.5">
+                    <div className="space-y-0.5">
+                      <p className="font-bold text-slate-850 text-[13px]">{doc.nama}</p>
+                    </div>
+                  </td>
+                  <td className="px-3 py-3.5 text-center whitespace-nowrap">
+                    <a
+                      href={doc.file_path}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-emerald-55 hover:bg-emerald-100 border border-emerald-250 text-emerald-700 text-[11px] font-bold rounded-lg transition-colors cursor-pointer"
+                    >
+                      <Download className="w-3.5 h-3.5" />
+                      Download
+                    </a>
+                  </td>
+                </tr>
+              ))}
+              {docs.length === 0 && (
+                <tr>
+                  <td colSpan={3} className="px-4 py-6 text-center text-slate-400 italic">
+                    Belum ada dokumen yang diunggah oleh admin.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
 
@@ -253,16 +358,9 @@ export default function DashboardView({
         <div className="relative z-10 space-y-4">
           <div>
             <h3 className="font-bold text-base">Akses Cepat Kebutuhan Akademik</h3>
-            <p className="text-slate-350 text-xs mt-1">Lakukan absen mandiri, cek transkrip nilai, jadwal harian, atau sunting biodata instan.</p>
+            <p className="text-slate-350 text-xs mt-1 font-medium">Cek transkrip nilai, jadwal harian, atau sunting biodata instan.</p>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1">
-            <button 
-              onClick={() => onTabChange('absensi')}
-              className="bg-white/10 hover:bg-white/15 transition-colors border border-white/15 p-3 rounded-xl flex items-center justify-between text-left text-xs font-bold font-sans cursor-pointer group"
-            >
-              <span>Absen Sekarang</span>
-              <QrCode className="w-4 h-4 text-emerald-450 group-hover:scale-110 transition-transform" />
-            </button>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
             <button 
               onClick={() => onTabChange('jadwal')}
               className="bg-white/10 hover:bg-white/15 transition-colors border border-white/15 p-3 rounded-xl flex items-center justify-between text-left text-xs font-bold font-sans cursor-pointer group"
