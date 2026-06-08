@@ -246,6 +246,10 @@ function doPost(e) {
     switch (action) {
       case 'login':
         return login(body.username || body.email, body.password);
+      case 'updateUser':
+        return updateUserData(body.id, body.data);
+      case 'changePassword':
+        return changePassword(body.id, body.oldPassword, body.newPassword);
       case 'addMahasantri':
         return addData('MAHASANTRI', body.data);
       case 'updateMahasantri':
@@ -326,6 +330,45 @@ function doPost(e) {
 }
 
 // ------------------- CORE FUNCTIONS -------------------
+
+function updateUserData(userId, updatedData) {
+  if (updatedData.username) {
+    const users = getData('USERS');
+    const existingUser = users.find(u => 
+      u.username && u.username.toString().toLowerCase().trim() === updatedData.username.toString().toLowerCase().trim() && u.id != userId
+    );
+    if (existingUser) {
+      return errorResponse("Username sudah digunakan oleh akun lain!");
+    }
+  }
+  return updateData('USERS', userId, updatedData);
+}
+
+function changePassword(userId, oldPassword, newPassword) {
+  const sheet = ensureSheetHeaders('USERS');
+  const data = sheet.getDataRange().getValues();
+  const headers = data[0];
+  const normalizedHeaders = headers.map(h => h ? h.toString().toLowerCase().trim() : '');
+  const idIndex = normalizedHeaders.indexOf('id');
+  const passwordIndex = normalizedHeaders.indexOf('password');
+  
+  if (idIndex === -1 || passwordIndex === -1) {
+    return errorResponse("Kolom ID atau Kata Sandi tidak ditemukan di Lembar USERS.");
+  }
+  
+  for (let i = 1; i < data.length; i++) {
+    const rowId = data[i][idIndex];
+    if (rowId == userId) {
+      const currentPassword = data[i][passwordIndex] ? data[i][passwordIndex].toString() : '';
+      if (currentPassword !== oldPassword) {
+        return errorResponse("Kata sandi lama tidak cocok!");
+      }
+      sheet.getRange(i + 1, passwordIndex + 1).setValue(newPassword);
+      return successResponse({ message: "Kata sandi berhasil diperbarui." });
+    }
+  }
+  return errorResponse("Data pengguna tidak ditemukan.");
+}
 
 function login(usernameOrEmail, password) {
   const users = getData('USERS');

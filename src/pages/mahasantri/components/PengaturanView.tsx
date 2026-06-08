@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import toast from 'react-hot-toast';
+import { api } from '../../../services/api';
 
 interface PengaturanViewProps {
   user: any;
@@ -40,24 +41,43 @@ export default function PengaturanView({ user, onUpdateProfile }: PengaturanView
   const [language, setLanguage] = useState<'indonesia' | 'arab'>('indonesia');
   const [notificationEnabled, setNotificationEnabled] = useState(true);
 
-  const handleUpdateUsername = (e: React.FormEvent) => {
+  // Sync username field when user prop gets resolved
+  React.useEffect(() => {
+    if (user) {
+      setUsername(user.username || user.nim || '');
+    }
+  }, [user]);
+
+  const handleUpdateUsername = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!username.trim()) {
       toast.error('Username tidak boleh kosong!');
       return;
     }
     setSavingUsername(true);
-    setTimeout(() => {
-      if (onUpdateProfile) {
-        onUpdateProfile({ username: username.trim() });
+    try {
+      if (user && user.id) {
+        await api.post('updateUser', {
+          id: user.id,
+          data: { username: username.trim() }
+        });
+        
+        if (onUpdateProfile) {
+          onUpdateProfile({ username: username.trim() });
+        }
+        setIsEditingUsername(false);
+        toast.success('Username berhasil diperbarui di database.');
+      } else {
+        toast.error('Gagal memperbarui username: Sesi masuk tidak valid.');
       }
+    } catch (error: any) {
+      toast.error('Gagal memperbarui username: ' + (error.message || error));
+    } finally {
       setSavingUsername(false);
-      setIsEditingUsername(false);
-      toast.success('Username berhasil diperbarui.');
-    }, 1000);
+    }
   };
 
-  const handleChangePassword = (e: React.FormEvent) => {
+  const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!oldPassword || !newPassword || !confirmPassword) {
       toast.error('Harap lengkapi seluruh formulir kata sandi!');
@@ -73,13 +93,26 @@ export default function PengaturanView({ user, onUpdateProfile }: PengaturanView
     }
     
     setChangingPassword(true);
-    setTimeout(() => {
+    try {
+      if (user && user.id) {
+        await api.post('changePassword', {
+          id: user.id,
+          oldPassword: oldPassword,
+          newPassword: newPassword
+        });
+        
+        setOldPassword('');
+        setNewPassword('');
+        setConfirmPassword('');
+        toast.success('Kata sandi berhasil disimpan di database.');
+      } else {
+        toast.error('Gagal memperbarui kata sandi: Sesi masuk tidak valid.');
+      }
+    } catch (error: any) {
+      toast.error('Gagal memperbarui kata sandi: ' + (error.message || error));
+    } finally {
       setChangingPassword(false);
-      setOldPassword('');
-      setNewPassword('');
-      setConfirmPassword('');
-      toast.success('Kata sandi berhasil diperbarui.');
-    }, 1200);
+    }
   };
 
   return (

@@ -360,6 +360,10 @@ export const api = {
         mockDokumen = mockDokumen.filter(d => d.id !== payload.id);
         saveMockDokumen();
         return { success: true };
+      } else if (action === 'changePassword') {
+        return { success: true, message: 'Kata sandi disimulasikan berhasil diperbarui.' };
+      } else if (action === 'updateUser') {
+        return { success: true, message: 'Username disimulasikan berhasil diperbarui.' };
       } else if (action.startsWith('add') || action.startsWith('update') || action.startsWith('delete')) {
         return { message: 'Aksi disimulasikan berhasil.' };
       }
