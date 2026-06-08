@@ -5,6 +5,7 @@ import { BookOpen, Clock, Users, CalendarDays, MapPin, CheckCircle, LogOut, Aler
 import { Link } from 'react-router-dom';
 import { formatTimeDisplay, getWIBDate, getWIBTime, fetchRealWIBTime, getTodayIndonesianDate } from '../../utils/time';
 import toast from 'react-hot-toast';
+import Swal from 'sweetalert2';
 
 
 const API_KEY = process.env.GOOGLE_MAPS_PLATFORM_KEY || (import.meta as any).env?.VITE_GOOGLE_MAPS_PLATFORM_KEY || '';
@@ -47,8 +48,23 @@ const isSameDay = (dateVal1: any, dateVal2: any) => {
   return cleanStr(dateVal1) === cleanStr(dateVal2);
 };
 
+const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
+  const R = 6371000; // Radius bumi dalam meter
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+            Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c; // Jarak dalam meter
+};
+
 export default function DashboardPengajar() {
   const { user } = useAuth();
+  const [locationPresets, setLocationPresets] = useState<any[]>([
+    { id: '1', nama: 'Gedung Putra', koordinat: '-7.5477347, 110.2333963', radius: 15 },
+    { id: '2', nama: 'Gedung Putri', koordinat: '-7.5474789, 110.2304279', radius: 15 }
+  ]);
   const [stats, setStats] = useState({ matakuliah: 0, kelas: 0, sks: 0 });
   const [todayJadwal, setTodayJadwal] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -304,12 +320,95 @@ export default function DashboardPengajar() {
     setShowScheduleModal(false);
   };
 
+  const promptLocationAndVerify = async (onSuccess: (lokasi: string) => void) => {
+    if (!navigator.geolocation) {
+       toast.error('Geolocation tidak didukung oleh browser anda.');
+       return;
+    }
+
+    if (locationPresets.length === 0) {
+       onSuccess('');
+       return;
+    }
+
+    const inputOptions: Record<string, string> = {};
+    locationPresets.forEach(p => {
+      inputOptions[p.nama] = p.nama;
+    });
+
+    const { value: selectedLocationName } = await Swal.fire({
+      title: 'Pilih Lokasi Presensi',
+      text: 'Di area gedung mana Anda berada saat ini?',
+      input: 'radio',
+      inputOptions: inputOptions,
+      showCancelButton: true,
+      confirmButtonText: 'Lanjut',
+      cancelButtonText: 'Batal',
+      confirmButtonColor: '#059669',
+      inputValidator: (value) => {
+        if (!value) {
+          return 'Anda harus memilih lokasi dahulu';
+        }
+      }
+    });
+
+    if (!selectedLocationName) return;
+
+    toast.loading('Memverifikasi lokasi presensi...', { id: 'loc_verify' });
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        toast.dismiss('loc_verify');
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        setCurrentLocation({ lat, lng });
+
+        const selectedPreset = locationPresets.find(p => p.nama === selectedLocationName);
+        if (selectedPreset) {
+          const parts = String(selectedPreset.koordinat).split(',');
+          if (parts.length >= 2) {
+            const pLat = parseFloat(parts[0].trim());
+            const pLng = parseFloat(parts[1].trim());
+            const distance = calculateDistance(lat, lng, pLat, pLng);
+            const allowedRadius = parseFloat(selectedPreset.radius) || 15;
+            
+            if (distance <= allowedRadius) {
+              onSuccess(selectedLocationName as string);
+            } else {
+              Swal.fire({
+                 icon: 'error',
+                 title: 'Area Tidak Terjangkau',
+                 html: `<div class="text-left text-sm space-y-3 mt-2">
+                          <p>Jarak Anda saat ini <b>${distance.toFixed(1)} meter</b> dari titik pusat <b>${selectedPreset.nama}</b> (<span class="font-mono text-xs">${selectedPreset.koordinat}</span>).</p>
+                          <p>Batas radius presensi maksimal yang diizinkan adalah <b>${allowedRadius} meter</b>.</p>
+                          <p class="text-amber-700 bg-amber-50 p-3 rounded-xl border border-amber-200 mt-2"><b>Solusi:</b> Silakan berjalan lebih dekat ke arah gedung lalu coba lakukan presensi kembali.</p>
+                        </div>`,
+                 confirmButtonColor: '#059669',
+                 confirmButtonText: 'Tutup'
+              });
+            }
+          } else {
+             onSuccess(selectedLocationName as string); // fallback
+          }
+        } else {
+           onSuccess(selectedLocationName as string); // fallback
+        }
+      },
+      (err) => {
+        toast.dismiss('loc_verify');
+        console.error(err);
+        toast.error('Gagal mendapatkan lokasi. Pastikan izin lokasi (GPS) pada browser/perangkat Anda diaktifkan.');
+      },
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+    );
+  };
+
   const submitClockIn = async () => {
     if (!user?.id) return;
     if (!datangData.lokasi) {
       toast.error('Pilih lokasi anda');
       return;
     }
+
     if (showWarningAlasanDatang && !datangData.alasan_terlambat.trim()) {
       toast.error('Sila isi alasan keterlambatan anda');
       return;
@@ -375,98 +474,67 @@ export default function DashboardPengajar() {
       return;
     }
     
-    if (!navigator.geolocation) {
-      toast.error('Geolocation tidak didukung oleh browser anda.');
-      return;
-    }
-
-    toast.loading('Memverifikasi lokasi...', { id: 'loc_check' });
-
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        toast.dismiss('loc_check');
-        setCurrentLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
-        toast.success('Lokasi berhasil dipetakan.');
-        setShowModalDatang(true);
-        setDatangData({ lokasi: '', alasan_terlambat: '' });
+    promptLocationAndVerify((lokasi: string) => {
+      setShowModalDatang(true);
+      setDatangData({ lokasi, alasan_terlambat: '' });
         
-        fetchRealWIBTime().then((realNow) => {
-          const wibTime = getWIBTime(realNow);
+      fetchRealWIBTime().then((realNow) => {
+        const wibTime = getWIBTime(realNow);
+        
+        if (scheduleConfig.type === 'tetap') {
+          const daysMap = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+          const todayName = daysMap[realNow.getDay()];
+          const todaySetting = scheduleConfig.fixed[todayName];
           
-          if (scheduleConfig.type === 'tetap') {
-            const daysMap = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
-            const todayName = daysMap[realNow.getDay()];
-            const todaySetting = scheduleConfig.fixed[todayName];
-            
-            if (todaySetting && todaySetting.enabled) {
-              if (wibTime > todaySetting.from && sessions.length === 0) {
-                setShowWarningAlasanDatang(true);
-              } else {
-                setShowWarningAlasanDatang(false);
-              }
+          if (todaySetting && todaySetting.enabled) {
+            if (wibTime > todaySetting.from && sessions.length === 0) {
+              setShowWarningAlasanDatang(true);
             } else {
               setShowWarningAlasanDatang(false);
             }
           } else {
             setShowWarningAlasanDatang(false);
           }
-        }).catch((e: any) => {
-          setShowModalDatang(false);
-          toast.error('Gagal mengambil waktu dari server. Buka di Tab Baru atau matikan pemblokir iklan.');
-        });
-      },
-      (err) => {
-        toast.dismiss('loc_check');
-        toast.error('Gagal mendapatkan lokasi. Pastikan izin akses lokasi diberikan.');
-      }
-    );
+        } else {
+          setShowWarningAlasanDatang(false);
+        }
+      }).catch((e: any) => {
+        setShowModalDatang(false);
+        toast.error('Gagal mengambil waktu dari server. Buka di Tab Baru atau matikan pemblokir iklan.');
+      });
+    });
   };
 
   const handleClockOutClick = () => {
-    if (!navigator.geolocation) {
-      toast.error('Geolocation tidak didukung oleh browser anda.');
-      return;
-    }
-
-    toast.loading('Memverifikasi lokasi...', { id: 'loc_check_pulang' });
-
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        toast.dismiss('loc_check_pulang');
-        setCurrentLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
-        setShowModalPulang(true);
-        setPulangData({ lokasi: '', alasan: '' });
+    promptLocationAndVerify((lokasi: string) => {
+      setShowModalPulang(true);
+      setPulangData({ lokasi, alasan: '' });
         
-        fetchRealWIBTime().then((realNow) => {
-          const wibTime = getWIBTime(realNow);
+      fetchRealWIBTime().then((realNow) => {
+        const wibTime = getWIBTime(realNow);
+        
+        if (scheduleConfig.type === 'tetap') {
+          const daysMap = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+          const todayName = daysMap[realNow.getDay()];
+          const todaySetting = scheduleConfig.fixed[todayName];
           
-          if (scheduleConfig.type === 'tetap') {
-            const daysMap = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
-            const todayName = daysMap[realNow.getDay()];
-            const todaySetting = scheduleConfig.fixed[todayName];
-            
-            if (todaySetting && todaySetting.enabled) {
-              if (wibTime < todaySetting.to) {
-                setShowWarningAlasan(true);
-              } else {
-                setShowWarningAlasan(false);
-              }
+          if (todaySetting && todaySetting.enabled) {
+            if (wibTime < todaySetting.to) {
+              setShowWarningAlasan(true);
             } else {
               setShowWarningAlasan(false);
             }
           } else {
             setShowWarningAlasan(false);
           }
-        }).catch((e: any) => {
-          setShowModalPulang(false);
-          toast.error('Gagal mengambil waktu dari server. Buka di Tab Baru atau matikan pemblokir iklan.');
-        });
-      },
-      (err) => {
-        toast.dismiss('loc_check_pulang');
-        toast.error('Gagal mendapatkan lokasi. Pastikan izin akses lokasi diberikan.');
-      }
-    );
+        } else {
+          setShowWarningAlasan(false);
+        }
+      }).catch((e: any) => {
+        setShowModalPulang(false);
+        toast.error('Gagal mengambil waktu dari server. Buka di Tab Baru atau matikan pemblokir iklan.');
+      });
+    });
   };
 
   const submitClockOut = async () => {
@@ -475,6 +543,7 @@ export default function DashboardPengajar() {
       toast.error('Pilih lokasi anda');
       return;
     }
+
     if (showWarningAlasan && !pulangData.alasan.trim()) {
       toast.error('Sila isi alasan anda');
       return;
@@ -537,13 +606,17 @@ export default function DashboardPengajar() {
   const fetchData = async () => {
     if (!user?.nama) return;
     try {
-      const [jd, mk, abs] = await Promise.all([
+      const [jd, mk, abs, locs] = await Promise.all([
         api.get('getJadwal'),
         api.get('getMatakuliah'),
-        api.get('getAbsensi').catch(() => ({ data: [] }))
+        api.get('getAbsensi').catch(() => ({ data: [] })),
+        api.get('getLokasiPreset').catch(() => ({ data: [] }))
       ]);
 
       setAbsensiList(abs.data || []);
+      if (locs?.data && Array.isArray(locs.data) && locs.data.length > 0) {
+        setLocationPresets(locs.data);
+      }
 
       const myMk = (mk.data || []).filter((m: any) => {
         const mp = String(m.pengajar || '').trim().toLowerCase();
@@ -1007,15 +1080,17 @@ export default function DashboardPengajar() {
               </div>
 
               <div>
-                <p className="text-sm text-slate-700 font-medium mb-3">Silahkan konfirmasi lokasi gedung Anda saat ini.</p>
+                <p className="text-sm text-slate-700 font-medium mb-3">Lokasi presensi pilihan Anda:</p>
                 <select 
-                  className="w-full border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none"
+                  className="w-full border border-slate-200 bg-slate-50 cursor-not-allowed rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none"
                   value={datangData.lokasi}
                   onChange={(e) => setDatangData({ ...datangData, lokasi: e.target.value })}
+                  disabled
                 >
                   <option value="">-- Pilih Lokasi --</option>
-                  <option value="Gedung Putra">Gedung Putra</option>
-                  <option value="Gedung Putri">Gedung Putri</option>
+                  {locationPresets.map(p => (
+                    <option key={p.id} value={p.nama}>{p.nama}</option>
+                  ))}
                 </select>
               </div>
 
@@ -1095,15 +1170,17 @@ export default function DashboardPengajar() {
               </div>
 
               <div>
-                <p className="text-sm text-slate-700 font-medium mb-3">Apakah Anda sudah selesai bekerja? Silahkan konfirmasi lokasi Anda.</p>
+                <p className="text-sm text-slate-700 font-medium mb-3">Selesai bekerja. Lokasi checkout Anda:</p>
                 <select 
-                  className="w-full border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none"
+                  className="w-full border border-slate-200 bg-slate-50 cursor-not-allowed rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none"
                   value={pulangData.lokasi}
                   onChange={(e) => setPulangData({ ...pulangData, lokasi: e.target.value })}
+                  disabled
                 >
                   <option value="">-- Pilih Lokasi --</option>
-                  <option value="Gedung Putra">Gedung Putra</option>
-                  <option value="Gedung Putri">Gedung Putri</option>
+                  {locationPresets.map(p => (
+                    <option key={p.id} value={p.nama}>{p.nama}</option>
+                  ))}
                 </select>
               </div>
 

@@ -29,6 +29,7 @@ export default function DashboardLayout() {
     { name: 'Rekap Absensi', icon: FileText, path: '/rekap' },
     { name: 'Pengumuman', icon: Megaphone, path: '/pengumuman' },
     { name: 'Dokumen Akademik', icon: FileText, path: '/admin-dokumen' },
+    { name: 'Pengaturan Lokasi', icon: Settings, path: '/pengaturan-lokasi' },
   ];
 
   const pengajarMenus = [

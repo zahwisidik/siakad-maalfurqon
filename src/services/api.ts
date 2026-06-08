@@ -121,6 +121,21 @@ let mockDokumen = [
   { id: '4', nama: 'Panduan Penggunaan Portal SIAKAD Mahasantri', file_path: '/dokumen/panduan_siakad_mahasantri.pdf' },
 ];
 
+let mockLokasiPreset = [
+  { id: '1', nama: 'Gedung Putra', koordinat: '-7.5477347, 110.2333963', radius: 15 },
+  { id: '2', nama: 'Gedung Putri', koordinat: '-7.5474789, 110.2304279', radius: 15 }
+];
+try {
+  const stored = localStorage.getItem('mock_lokasi_preset');
+  if (stored) mockLokasiPreset = JSON.parse(stored);
+} catch (e) {}
+
+const saveMockLokasiPreset = () => {
+  try {
+    localStorage.setItem('mock_lokasi_preset', JSON.stringify(mockLokasiPreset));
+  } catch (e) {}
+};
+
 export const isUsingMock = !APPS_SCRIPT_URL;
 
 let mockAbsensiPengajar: any[] = [];
@@ -183,6 +198,7 @@ export const api = {
           if (action === 'getAbsensiPengajar') resolve({ data: mockAbsensiPengajar });
           if (action === 'getPengumuman') resolve({ data: mockPengumuman });
           if (action === 'getDokumen') resolve({ data: mockDokumen });
+          if (action === 'getLokasiPreset') resolve({ data: mockLokasiPreset });
           resolve({ data: [] });
         }, 500);
       });
@@ -196,6 +212,9 @@ export const api = {
         }
         if (action === 'getDokumen' && data.message === 'Unknown action') {
           return { data: mockDokumen };
+        }
+        if (action === 'getLokasiPreset' && data.message === 'Unknown action') {
+          return { data: mockLokasiPreset };
         }
         throw new Error(data.message);
       }
@@ -214,6 +233,7 @@ export const api = {
       else if (action === 'getAbsensiPengajar') fallbackData = mockAbsensiPengajar;
       else if (action === 'getPengumuman') fallbackData = mockPengumuman;
       else if (action === 'getDokumen') fallbackData = mockDokumen;
+      else if (action === 'getLokasiPreset') fallbackData = mockLokasiPreset;
       
       return { data: fallbackData, success: true, isFallback: true };
     }
@@ -268,6 +288,14 @@ export const api = {
         }
         saveMockAbsensiPengajar();
         return { message: 'Absensi pengajar tersimpan' };
+      } else if (action === 'updateLokasiPreset') {
+        const index = mockLokasiPreset.findIndex((l: any) => l.id == payload.id);
+        if (index > -1) {
+          mockLokasiPreset[index] = { ...mockLokasiPreset[index], ...payload.data };
+          saveMockLokasiPreset();
+          return { success: true, message: 'Preset lokasi berhasil disimpan' };
+        }
+        return { success: false, message: 'Lokasi tidak ditemukan' };
       } else if (action === 'saveNilai') {
         let index = -1;
         if (payload.id) {
@@ -391,7 +419,7 @@ export const api = {
       });
       if (!data.success) {
         if (
-          (action === 'saveAbsensiPengajar' || action === 'addDokumen' || action === 'updateDokumen' || action === 'deleteDokumen' || action === 'addPengumuman' || action === 'updatePengumuman' || action === 'deletePengumuman') && 
+          (action === 'saveAbsensiPengajar' || action === 'addDokumen' || action === 'updateDokumen' || action === 'deleteDokumen' || action === 'addPengumuman' || action === 'updatePengumuman' || action === 'deletePengumuman' || action === 'updateLokasiPreset') && 
           data.message === 'Unknown action'
         ) {
           const res = runMockPost();

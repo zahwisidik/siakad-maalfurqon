@@ -56,7 +56,8 @@ const SHEET_SCHEMAS = {
   'ABSENSI_PENGAJAR': ['id', 'pengajar_id', 'tanggal', 'waktu_datang', 'waktu_pulang', 'lokasi_datang', 'lokasi_pulang', 'alasan_pulang_awal', 'alasan_terlambat'],
   'NILAI': ['id', 'nim', 'nama', 'program', 'kelas', 'nama_mk', 'presensi', 'tugas', 'uts', 'uas', 'total', 'tahun_akademik_data', 'semester_data'],
   'PENGUMUMAN': ['id', 'kategori', 'judul', 'tanggal', 'isi_lengkap', 'penting', 'file_path'],
-  'DOKUMEN': ['id', 'nama', 'file_path']
+  'DOKUMEN': ['id', 'nama', 'file_path'],
+  'LOKASI_PRESET': ['id', 'nama', 'koordinat', 'radius']
 };
 
 function getSheetCaseInsensitive(ss, name) {
@@ -164,6 +165,10 @@ function ensureSheetHeaders(sheetName) {
     SpreadsheetApp.flush();
   }
   
+  if (sheetName === 'LOKASI_PRESET') {
+    initializeDefaultLocations(sheet);
+  }
+  
   // Clean up any empty/ghost rows containing only automatic ID or blank entries
   cleanupEmptyRows(sheet);
   
@@ -212,6 +217,8 @@ function doGet(e) {
         return successResponse(getData('PENGUMUMAN'));
       case 'getDokumen':
         return successResponse(getData('DOKUMEN'));
+      case 'getLokasiPreset':
+        return successResponse(getData('LOKASI_PRESET'));
       default:
         return errorResponse("Unknown action");
     }
@@ -320,6 +327,9 @@ function doPost(e) {
         return updateData('DOKUMEN', body.id, body.data);
       case 'deleteDokumen':
         return deleteData('DOKUMEN', body.id);
+        
+      case 'updateLokasiPreset':
+        return updateData('LOKASI_PRESET', body.id, body.data);
         
       default:
         return errorResponse("Unknown POST action");
@@ -817,3 +827,19 @@ function onEdit(e) {
     }
   }
 }
+
+function initializeDefaultLocations(sheet) {
+  const data = sheet.getDataRange().getValues();
+  // If only headers exist (row length is 1 or empty)
+  if (data.length <= 1) {
+    const defaults = [
+      { id: '1', nama: 'Gedung Putra', koordinat: '-7.5477347, 110.2333963', radius: 15 },
+      { id: '2', nama: 'Gedung Putri', koordinat: '-7.5474789, 110.2304279', radius: 15 }
+    ];
+    defaults.forEach(item => {
+      sheet.appendRow([item.id, item.nama, item.koordinat, item.radius]);
+    });
+    SpreadsheetApp.flush();
+  }
+}
+
