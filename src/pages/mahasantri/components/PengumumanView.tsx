@@ -31,16 +31,16 @@ export default function PengumumanView({
   onMarkAsRead, 
   readList 
 }: PengumumanViewProps) {
-  const [activeCategory, setActiveCategory] = useState<'Semua' | 'Akademik' | 'Ujian' | 'Asrama' | 'Administrasi' | 'Umum'>('Semua');
+  const [activeCategory, setActiveCategory] = useState<'Semua' | 'Akademik' | 'Keuangan' | 'Asrama' | 'Administrasi' | 'Umum'>('Semua');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedAnnouncement, setSelectedAnnouncement] = useState<any | null>(null);
 
   const categories = [
     { name: 'Semua', label: 'Semua', icon: Megaphone, color: 'text-slate-600 bg-slate-50 border-slate-200' },
     { name: 'Akademik', label: 'Akademik', icon: BookOpen, color: 'text-blue-700 bg-blue-50 border-blue-200' },
-    { name: 'Ujian', label: 'Ujian', icon: FileCheck, color: 'text-rose-700 bg-rose-50 border-rose-200' },
+    { name: 'Keuangan', label: 'Keuangan', icon: Coins, color: 'text-rose-700 bg-rose-50 border-rose-200' },
     { name: 'Asrama', label: 'Asrama', icon: Home, color: 'text-amber-705 bg-amber-50 border-amber-200' },
-    { name: 'Administrasi', label: 'Admin', icon: Coins, color: 'text-indigo-700 bg-indigo-50 border-indigo-200' },
+    { name: 'Administrasi', label: 'Administrasi', icon: FileCheck, color: 'text-indigo-700 bg-indigo-50 border-indigo-200' },
     { name: 'Umum', label: 'Umum', icon: MessageSquare, color: 'text-teal-700 bg-teal-50 border-teal-200' }
   ];
 
@@ -135,7 +135,7 @@ export default function PengumumanView({
                     <div className="flex items-center gap-1.5">
                       <span className={`px-2 py-0.5 rounded text-[9px] uppercase font-mono font-bold tracking-wider ${
                         item.kategori === 'Akademik' ? 'bg-blue-50 text-blue-750 border border-blue-200' :
-                        item.kategori === 'Ujian' ? 'bg-rose-50 text-rose-750 border border-rose-200' :
+                        item.kategori === 'Keuangan' ? 'bg-rose-50 text-rose-750 border border-rose-200' :
                         item.kategori === 'Asrama' ? 'bg-amber-50 text-amber-705 border border-amber-250' :
                         item.kategori === 'Administrasi' ? 'bg-indigo-50 text-indigo-705 border border-indigo-250' :
                         'bg-teal-50 text-teal-705 border border-teal-250'
@@ -257,9 +257,7 @@ export default function PengumumanView({
                   </div>
                 )}
 
-                <div className="pt-3 text-[10px] text-center text-slate-400 border-t border-slate-100">
-                  Diterbitkan oleh: <strong>Sekretariat Umum Ma'had Aly Magelang</strong>
-                </div>
+
               </div>
             </motion.div>
           </div>

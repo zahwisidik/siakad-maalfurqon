@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { LayoutDashboard, Users, UserSquare2, BookOpen, Clock, CalendarDays, ClipboardCheck, LogOut, FileText, Menu, X, Award, Megaphone, User, Plus, Minus } from 'lucide-react';
+import { LayoutDashboard, Users, UserSquare2, BookOpen, Clock, CalendarDays, ClipboardCheck, LogOut, FileText, Menu, X, Award, Megaphone, User, Plus, Minus, Settings } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 
 export default function DashboardLayout() {
@@ -46,6 +46,7 @@ export default function DashboardLayout() {
     { name: 'Nilai', icon: Award, path: '/nilai-mahasantri' },
     { name: 'Pengumuman', icon: Megaphone, path: '/pengumuman-mahasantri' },
     { name: 'Profil', icon: User, path: '/profil-mahasantri' },
+    { name: 'Pengaturan', icon: Settings, path: '/pengaturan-mahasantri' },
   ];
 
   const menus = user.role === 'admin' 
@@ -219,6 +220,22 @@ export default function DashboardLayout() {
                 >
                   <User className="w-5 h-5 flex-shrink-0" />
                   Profil
+                </NavLink>
+
+                {/* Pengaturan */}
+                <NavLink
+                  to="/pengaturan-mahasantri"
+                  onClick={() => setIsSidebarOpen(false)}
+                  className={({ isActive }) =>
+                    `px-4 py-3 rounded-xl flex items-center gap-3 font-medium transition-colors cursor-pointer ${
+                      isActive
+                        ? 'bg-emerald-500/10 text-emerald-400'
+                        : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
+                    }`
+                  }
+                >
+                  <Settings className="w-5 h-5 flex-shrink-0" />
+                  Pengaturan
                 </NavLink>
               </>
             ) : (

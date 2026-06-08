@@ -256,7 +256,7 @@ export default function DashboardView({
                     <td className="px-3 py-3 whitespace-nowrap">
                       <span className={`px-1.5 py-0.5 rounded text-[9px] uppercase font-bold tracking-wider ${
                         item.kategori === 'Akademik' ? 'bg-blue-50 text-blue-750 border border-blue-200' :
-                        item.kategori === 'Ujian' ? 'bg-rose-50 text-rose-750 border border-rose-200' :
+                        item.kategori === 'Keuangan' ? 'bg-rose-50 text-rose-750 border border-rose-200' :
                         'bg-amber-50 text-amber-750 border border-amber-200'
                       }`}>
                         {item.kategori}

@@ -67,6 +67,7 @@ export default function App() {
             <Route path="/transkrip-mahasantri" element={<DashboardMahasantri currentTab="transkrip" />} />
             <Route path="/pengumuman-mahasantri" element={<DashboardMahasantri currentTab="pengumuman" />} />
             <Route path="/profil-mahasantri" element={<DashboardMahasantri currentTab="profil" />} />
+            <Route path="/pengaturan-mahasantri" element={<DashboardMahasantri currentTab="pengaturan" />} />
           </Route>
         </Routes>
       </AuthProvider>

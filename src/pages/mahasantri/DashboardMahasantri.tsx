@@ -26,15 +26,16 @@ import NilaiView from './components/NilaiView';
 import TranskripView from './components/TranskripView';
 import PengumumanView from './components/PengumumanView';
 import ProfilView from './components/ProfilView';
+import PengaturanView from './components/PengaturanView';
 
 interface DashboardMahasantriProps {
-  currentTab?: 'beranda' | 'absensi' | 'jadwal' | 'nilai' | 'transkrip' | 'pengumuman' | 'profil';
+  currentTab?: 'beranda' | 'absensi' | 'jadwal' | 'nilai' | 'transkrip' | 'pengumuman' | 'profil' | 'pengaturan';
 }
 
 export default function DashboardMahasantri({ currentTab = 'beranda' }: DashboardMahasantriProps) {
   const { user, login: updateSession, logout } = useAuth();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<'beranda' | 'absensi' | 'jadwal' | 'nilai' | 'transkrip' | 'pengumuman' | 'profil'>('beranda');
+  const [activeTab, setActiveTab] = useState<'beranda' | 'absensi' | 'jadwal' | 'nilai' | 'transkrip' | 'pengumuman' | 'profil' | 'pengaturan'>('beranda');
 
   useEffect(() => {
     setActiveTab(currentTab);
@@ -96,15 +97,99 @@ export default function DashboardMahasantri({ currentTab = 'beranda' }: Dashboar
         studentKelas = foundMahasantri.kelas || studentKelas;
 
         // If the attributes in the current session are outdated or missing, update the auth session state
-        if (user.program !== studentProgram || user.kelas !== studentKelas || user.nama !== foundMahasantri.nama || user.nim !== foundMahasantri.nim || user.tahun_masuk !== foundMahasantri.tahun_masuk || user.status !== foundMahasantri.status) {
+        const hasChanges = 
+          user.program !== studentProgram ||
+          user.kelas !== studentKelas ||
+          user.nama !== foundMahasantri.nama ||
+          user.nim !== foundMahasantri.nim ||
+          user.tahun_masuk !== foundMahasantri.tahun_masuk ||
+          user.status !== foundMahasantri.status ||
+          user.mahasantriId !== foundMahasantri.id ||
+          user.tempat_lahir !== foundMahasantri.tempat_lahir ||
+          user.tanggal_lahir !== foundMahasantri.tanggal_lahir ||
+          user.jenis_kelamin !== foundMahasantri.jenis_kelamin ||
+          user.kewarganegaraan !== foundMahasantri.kewarganegaraan ||
+          user.agama !== foundMahasantri.agama ||
+          user.nik !== foundMahasantri.nik ||
+          user.nisn !== foundMahasantri.nisn ||
+          user.no_hp !== foundMahasantri.no_hp ||
+          user.email !== foundMahasantri.email ||
+          user.jenis_tinggal !== foundMahasantri.jenis_tinggal ||
+          user.jalan !== foundMahasantri.jalan ||
+          user.rt_rw !== foundMahasantri.rt_rw ||
+          user.dukuh !== foundMahasantri.dukuh ||
+          user.kelurahan !== foundMahasantri.kelurahan ||
+          user.kecamatan !== foundMahasantri.kecamatan ||
+          user.kabupaten !== foundMahasantri.kabupaten ||
+          user.provinsi !== foundMahasantri.provinsi ||
+          user.kode_pos !== foundMahasantri.kode_pos ||
+          user.nama_ayah !== foundMahasantri.nama_ayah ||
+          user.nik_ayah !== foundMahasantri.nik_ayah ||
+          user.tanggal_lahir_ayah !== foundMahasantri.tanggal_lahir_ayah ||
+          user.pendidikan_ayah !== foundMahasantri.pendidikan_ayah ||
+          user.pekerjaan_ayah !== foundMahasantri.pekerjaan_ayah ||
+          user.penghasilan_ayah !== foundMahasantri.penghasilan_ayah ||
+          user.nama_wali !== foundMahasantri.nama_wali ||
+          user.nik_wali !== foundMahasantri.nik_wali ||
+          user.tanggal_lahir_wali !== foundMahasantri.tanggal_lahir_wali ||
+          user.pendidikan_wali !== foundMahasantri.pendidikan_wali ||
+          user.pekerjaan_wali !== foundMahasantri.pekerjaan_wali ||
+          user.penghasilan_wali !== foundMahasantri.penghasilan_wali ||
+          user.nama_ibu !== foundMahasantri.nama_ibu ||
+          user.nik_ibu !== foundMahasantri.nik_ibu ||
+          user.tanggal_lahir_ibu !== foundMahasantri.tanggal_lahir_ibu ||
+          user.pendidikan_ibu !== foundMahasantri.pendidikan_ibu ||
+          user.pekerjaan_ibu !== foundMahasantri.pekerjaan_ibu ||
+          user.penghasilan_ibu !== foundMahasantri.penghasilan_ibu ||
+          user.avatar !== foundMahasantri.avatar;
+
+        if (hasChanges) {
           const updatedUser = { 
             ...user, 
+            mahasantriId: foundMahasantri.id,
             nama: foundMahasantri.nama || user.nama,
             nim: foundMahasantri.nim || user.nim,
             program: studentProgram,
             kelas: studentKelas,
             status: foundMahasantri.status || user.status,
-            tahun_masuk: foundMahasantri.tahun_masuk || user.tahun_masuk
+            tahun_masuk: foundMahasantri.tahun_masuk || user.tahun_masuk,
+            tempat_lahir: foundMahasantri.tempat_lahir || '',
+            tanggal_lahir: foundMahasantri.tanggal_lahir || '',
+            jenis_kelamin: foundMahasantri.jenis_kelamin || '',
+            kewarganegaraan: foundMahasantri.kewarganegaraan || '',
+            agama: foundMahasantri.agama || '',
+            nik: foundMahasantri.nik || '',
+            nisn: foundMahasantri.nisn || '',
+            no_hp: foundMahasantri.no_hp || '',
+            email: foundMahasantri.email || '',
+            jenis_tinggal: foundMahasantri.jenis_tinggal || '',
+            jalan: foundMahasantri.jalan || '',
+            rt_rw: foundMahasantri.rt_rw || '',
+            dukuh: foundMahasantri.dukuh || '',
+            kelurahan: foundMahasantri.kelurahan || '',
+            kecamatan: foundMahasantri.kecamatan || '',
+            kabupaten: foundMahasantri.kabupaten || '',
+            provinsi: foundMahasantri.provinsi || '',
+            kode_pos: foundMahasantri.kode_pos || '',
+            nama_ayah: foundMahasantri.nama_ayah || '',
+            nik_ayah: foundMahasantri.nik_ayah || '',
+            tanggal_lahir_ayah: foundMahasantri.tanggal_lahir_ayah || '',
+            pendidikan_ayah: foundMahasantri.pendidikan_ayah || '',
+            pekerjaan_ayah: foundMahasantri.pekerjaan_ayah || '',
+            penghasilan_ayah: foundMahasantri.penghasilan_ayah || '',
+            nama_wali: foundMahasantri.nama_wali || '',
+            nik_wali: foundMahasantri.nik_wali || '',
+            tanggal_lahir_wali: foundMahasantri.tanggal_lahir_wali || '',
+            pendidikan_wali: foundMahasantri.pendidikan_wali || '',
+            pekerjaan_wali: foundMahasantri.pekerjaan_wali || '',
+            penghasilan_wali: foundMahasantri.penghasilan_wali || '',
+            nama_ibu: foundMahasantri.nama_ibu || '',
+            nik_ibu: foundMahasantri.nik_ibu || '',
+            tanggal_lahir_ibu: foundMahasantri.tanggal_lahir_ibu || '',
+            pendidikan_ibu: foundMahasantri.pendidikan_ibu || '',
+            pekerjaan_ibu: foundMahasantri.pekerjaan_ibu || '',
+            penghasilan_ibu: foundMahasantri.penghasilan_ibu || '',
+            avatar: foundMahasantri.avatar || ''
           };
           updateSession(updatedUser);
         }
@@ -212,12 +297,14 @@ export default function DashboardMahasantri({ currentTab = 'beranda' }: Dashboar
   const handleUpdateProfile = async (updatedData: any) => {
     if (user) {
       try {
+        const targetId = user.mahasantriId || user.id;
         await api.post('updateMahasantri', {
-          id: user.id,
+          id: targetId,
           data: updatedData
         });
         const updatedUser = { ...user, ...updatedData };
         updateSession(updatedUser);
+        await fetchStudentData();
       } catch (error: any) {
         toast.error('Gagal menyimpan profil: ' + error.message);
       }
@@ -290,6 +377,13 @@ export default function DashboardMahasantri({ currentTab = 'beranda' }: Dashboar
           user={user}
           onUpdateProfile={handleUpdateProfile}
           onLogout={handleLogout}
+        />
+      )}
+
+      {activeTab === 'pengaturan' && (
+        <PengaturanView 
+          user={user}
+          onUpdateProfile={handleUpdateProfile}
         />
       )}
 

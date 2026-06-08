@@ -47,7 +47,7 @@ function getSpreadsheet() {
 
 const SHEET_SCHEMAS = {
   'USERS': ['id', 'nama', 'username', 'password', 'role', 'status'],
-  'MAHASANTRI': ['id', 'nim', 'nama', 'jenis_kelamin', 'kelas', 'semester', 'status'],
+  'MAHASANTRI': ['id', 'nim', 'nama', 'jenis_kelamin', 'kelas', 'semester', 'status', 'program', 'tahun_masuk', 'tempat_lahir', 'tanggal_lahir', 'kewarganegaraan', 'agama', 'nik', 'nisn', 'no_hp', 'email', 'jenis_tinggal', 'jalan', 'rt_rw', 'dukuh', 'kelurahan', 'kecamatan', 'kabupaten', 'provinsi', 'kode_pos', 'nama_ayah', 'nik_ayah', 'tanggal_lahir_ayah', 'pendidikan_ayah', 'pekerjaan_ayah', 'penghasilan_ayah', 'nama_wali', 'nik_wali', 'tanggal_lahir_wali', 'pendidikan_wali', 'pekerjaan_wali', 'penghasilan_wali', 'nama_ibu', 'nik_ibu', 'tanggal_lahir_ibu', 'pendidikan_ibu', 'pekerjaan_ibu', 'penghasilan_ibu', 'avatar'],
   'PENGAJAR': ['id', 'nama', 'mapel', 'status'],
   'MATAKULIAH': ['id', 'kode', 'nama_mk', 'program', 'kelas', 'pengajar'],
   'KELAS': ['id', 'program', 'nama_kelas'],
@@ -352,6 +352,7 @@ function login(usernameOrEmail, password) {
         m.nama && m.nama.toString().toLowerCase().trim() === user.nama.toString().toLowerCase().trim()
       );
       if (mRecord) {
+        user.mahasantriId = mRecord.id ? mRecord.id.toString() : '';
         user.nim = mRecord.nim ? mRecord.nim.toString() : '';
         user.kelas = mRecord.kelas ? mRecord.kelas.toString() : '';
         user.semester = mRecord.semester ? mRecord.semester.toString() : '';

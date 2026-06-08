@@ -6,7 +6,7 @@ import { Pen, Trash2, Plus, Search, Megaphone, CheckCircle2, AlertTriangle, Pape
 import Swal from 'sweetalert2';
 import { formatToIndonesianDate, getTodayIndonesianDate } from '../../utils/time';
 
-const KATEGORI_OPTIONS = ['Akademik', 'Asrama', 'Ujian', 'Administrasi', 'Umum'];
+const KATEGORI_OPTIONS = ['Akademik', 'Asrama', 'Keuangan', 'Administrasi', 'Umum'];
 
 export default function PengumumanList() {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -190,7 +190,7 @@ export default function PengumumanList() {
                   <tr key={item.id} className="hover:bg-slate-50/50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`px-2.5 py-1 rounded-full text-xs font-semibold uppercase tracking-wider ${
-                        item.kategori === 'Ujian' ? 'bg-rose-50 text-rose-700 border border-rose-100' :
+                        item.kategori === 'Keuangan' ? 'bg-rose-50 text-rose-700 border border-rose-100' :
                         item.kategori === 'Asrama' ? 'bg-blue-50 text-blue-700 border border-blue-100' :
                         item.kategori === 'Akademik' ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' :
                         item.kategori === 'Administrasi' ? 'bg-amber-50 text-amber-700 border border-amber-100' :
