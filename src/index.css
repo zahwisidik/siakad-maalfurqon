@@ -10,3 +10,16 @@
     cursor: pointer;
   }
 }
+
+/* Style all standard form inputs, selects, and textareas inside a disabled fieldset to be read-only */
+fieldset[disabled] input,
+fieldset[disabled] select,
+fieldset[disabled] textarea,
+fieldset[disabled] .relative input {
+  background-color: #f8fafc !important; /* bg-slate-50 */
+  color: #64748b !important; /* text-slate-500 */
+  cursor: not-allowed !important;
+  border-color: #e2e8f0 !important; /* border-slate-200 */
+  pointer-events: none;
+}
+

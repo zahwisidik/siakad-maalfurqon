@@ -338,7 +338,16 @@ export default function ProfilView({ user, onUpdateProfile, onLogout }: ProfilVi
           <div className="p-5 border-b border-slate-100 bg-slate-50/50">
             <div className="flex flex-col gap-1 pb-4">
               <h2 className="text-lg font-extrabold text-slate-800 tracking-tight">Manajemen Profil Mandiri</h2>
-              <p className="text-xs text-slate-500">Isi dan lengkapi rincian data Anda secara berkala sesuai dokumen resmi.</p>
+              <p className="text-xs text-slate-500">Rincian data resmi mahasantri sesuai dokumen lembaga.</p>
+            </div>
+
+            {/* Read-Only Alert Banner */}
+            <div className="bg-amber-50 border border-amber-200 rounded-xl p-3.5 flex gap-2.5 text-xs text-amber-800 items-start mb-4">
+              <ShieldAlert className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+              <div>
+                <p className="font-extrabold">Data Akademik Terkunci</p>
+                <p className="text-amber-700 mt-0.5">Khusus rincian Akademik dideklarasikan secara permanen oleh lembaga (Read-Only). Sedangkan tab Identitas, Alamat, dan Wali tetap dapat Anda perbarui secara mandiri.</p>
+              </div>
             </div>
 
             {/* Custom Tab Navigation Slider */}
@@ -404,82 +413,78 @@ export default function ProfilView({ user, onUpdateProfile, onLogout }: ProfilVi
             
             {/* 1. DATA AKADEMIK TAB */}
             {activeTab === 'akademik' && (
-              <form onSubmit={(e) => handleSaveCategory(e, 'akademik')} className="space-y-5">
-                <div className="flex items-center gap-1.5 text-slate-500 border-b border-slate-100 pb-2">
-                  <GraduationCap className="w-4 h-4 text-emerald-600" />
-                  <span className="text-xs uppercase tracking-wider font-extrabold text-slate-700">Rincian Data Akademik</span>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-semibold">
-                  <div className="space-y-1.5">
-                    <label className="block text-slate-500 uppercase text-[10px] tracking-wider">Nama Mahasantri</label>
-                    <input 
-                      type="text" 
-                      value={nama}
-                      onChange={(e) => setNama(e.target.value)}
-                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 font-bold focus:outline-none focus:ring-1 focus:ring-emerald-505"
-                      placeholder="Masukkan nama resmi lengkap"
-                    />
+              <form onSubmit={(e) => e.preventDefault()} className="space-y-5">
+                <fieldset disabled className="space-y-5">
+                  <div className="flex items-center gap-1.5 text-slate-500 border-b border-slate-100 pb-2">
+                    <GraduationCap className="w-4 h-4 text-emerald-600" />
+                    <span className="text-xs uppercase tracking-wider font-extrabold text-slate-700">Rincian Data Akademik</span>
                   </div>
 
-                  <div className="space-y-1.5">
-                    <label className="block text-slate-500 uppercase text-[10px] tracking-wider">Nomor Induk Mahasantri (NIM)</label>
-                    <input 
-                      type="text" 
-                      value={nim}
-                      onChange={(e) => setNim(e.target.value)}
-                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 font-bold font-mono focus:outline-none focus:ring-1 focus:ring-emerald-505"
-                      placeholder="Masukkan NIM resmi"
-                    />
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-semibold">
+                    <div className="space-y-1.5">
+                      <label className="block text-slate-500 uppercase text-[10px] tracking-wider">Nama Mahasantri</label>
+                      <input 
+                        type="text" 
+                        value={nama}
+                        onChange={(e) => setNama(e.target.value)}
+                        className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 font-bold focus:outline-none focus:ring-1 focus:ring-emerald-505"
+                        placeholder="Masukkan nama resmi lengkap"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="block text-slate-500 uppercase text-[10px] tracking-wider">Nomor Induk Mahasantri (NIM)</label>
+                      <input 
+                        type="text" 
+                        value={nim}
+                        onChange={(e) => setNim(e.target.value)}
+                        className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 font-bold font-mono focus:outline-none focus:ring-1 focus:ring-emerald-505"
+                        placeholder="Masukkan NIM resmi"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="block text-slate-500 uppercase text-[10px] tracking-wider">Program Studi</label>
+                      <input 
+                        type="text" 
+                        value={program}
+                        onChange={(e) => setProgram(e.target.value)}
+                        className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 font-bold focus:outline-none focus:ring-1 focus:ring-emerald-505"
+                        placeholder="Contoh: Takhasus Tafsir / Syariah"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="block text-slate-500 uppercase text-[10px] tracking-wider">Tahun Masuk</label>
+                      <input 
+                        type="text" 
+                        value={tahunMasuk}
+                        onChange={(e) => setTahunMasuk(e.target.value)}
+                        className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 font-bold font-mono focus:outline-none focus:ring-1 focus:ring-emerald-505"
+                        placeholder="Contoh: 2024"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5 sm:col-span-2">
+                      <label className="block text-slate-500 uppercase text-[10px] tracking-wider">Status Mahasantri Kerja</label>
+                      <select
+                        value={status}
+                        onChange={(e) => setStatus(e.target.value)}
+                        className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 font-bold focus:outline-none focus:ring-1 focus:ring-emerald-505"
+                      >
+                        <option value="Aktif">Aktif</option>
+                        <option value="Cuti">Cuti</option>
+                        <option value="Tidak Aktif">Tidak Aktif</option>
+                        <option value="Lulus">Lulus</option>
+                      </select>
+                    </div>
                   </div>
 
-                  <div className="space-y-1.5">
-                    <label className="block text-slate-500 uppercase text-[10px] tracking-wider">Program Studi</label>
-                    <input 
-                      type="text" 
-                      value={program}
-                      onChange={(e) => setProgram(e.target.value)}
-                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 font-bold focus:outline-none focus:ring-1 focus:ring-emerald-505"
-                      placeholder="Contoh: Takhasus Tafsir / Syariah"
-                    />
+                  <div className="flex items-center gap-2 pt-4 border-t border-slate-100 text-[11px] text-slate-400 font-bold">
+                    <ShieldAlert className="w-4 h-4 text-slate-450" />
+                    <span>Seluruh data akademik di atas telah diverifikasi dan dikunci oleh pihak pengelola.</span>
                   </div>
-
-                  <div className="space-y-1.5">
-                    <label className="block text-slate-500 uppercase text-[10px] tracking-wider">Tahun Masuk</label>
-                    <input 
-                      type="text" 
-                      value={tahunMasuk}
-                      onChange={(e) => setTahunMasuk(e.target.value)}
-                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 font-bold font-mono focus:outline-none focus:ring-1 focus:ring-emerald-505"
-                      placeholder="Contoh: 2024"
-                    />
-                  </div>
-
-                  <div className="space-y-1.5 sm:col-span-2">
-                    <label className="block text-slate-500 uppercase text-[10px] tracking-wider">Status Mahasantri Kerja</label>
-                    <select
-                      value={status}
-                      onChange={(e) => setStatus(e.target.value)}
-                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 font-bold focus:outline-none focus:ring-1 focus:ring-emerald-505"
-                    >
-                      <option value="Aktif">Aktif</option>
-                      <option value="Cuti">Cuti</option>
-                      <option value="Tidak Aktif">Tidak Aktif</option>
-                      <option value="Lulus">Lulus</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div className="flex justify-end pt-4 border-t border-slate-100">
-                  <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-2.5 px-6 rounded-xl transition-all flex items-center gap-2 cursor-pointer shadow-sm"
-                  >
-                    {isSubmitting ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                    Simpan Data Akademik
-                  </button>
-                </div>
+                </fieldset>
               </form>
             )}
 
@@ -491,127 +496,127 @@ export default function ProfilView({ user, onUpdateProfile, onLogout }: ProfilVi
                   <span className="text-xs uppercase tracking-wider font-extrabold text-slate-700">Identitas Kontak & Pribadi</span>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-semibold">
-                  
-                  <div className="space-y-1.5">
-                    <label className="block text-slate-500 uppercase text-[10px] tracking-wider">Tempat Lahir</label>
-                    <input 
-                      type="text" 
-                      value={tempatLahir}
-                      onChange={(e) => setTempatLahir(e.target.value)}
-                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-emerald-505"
-                      placeholder="Contoh: Magelang"
-                    />
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className="block text-slate-500 uppercase text-[10px] tracking-wider">Tanggal Lahir</label>
-                    <input 
-                      type="date" 
-                      value={tanggalLahir}
-                      onChange={(e) => setTanggalLahir(e.target.value)}
-                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-emerald-505 font-mono"
-                    />
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className="block text-slate-500 uppercase text-[10px] tracking-wider">Jenis Kelamin</label>
-                    <select
-                      value={jenisKelamin}
-                      onChange={(e) => setJenisKelamin(e.target.value)}
-                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-emerald-505"
-                    >
-                      <option value="">-- Pilih Jenis Kelamin --</option>
-                      <option value="laki-laki">Laki-laki</option>
-                      <option value="perempuan">Perempuan</option>
-                    </select>
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className="block text-slate-500 uppercase text-[10px] tracking-wider">Kewarganegaraan</label>
-                    <input 
-                      type="text" 
-                      value={kewarganegaraan}
-                      onChange={(e) => setKewarganegaraan(e.target.value)}
-                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-emerald-505"
-                      placeholder="Contoh: WNI / Indonesia"
-                    />
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className="block text-slate-500 uppercase text-[10px] tracking-wider">Agama</label>
-                    <select
-                      value={agama}
-                      onChange={(e) => setAgama(e.target.value)}
-                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-emerald-505"
-                    >
-                      <option value="">-- Pilih Agama --</option>
-                      <option value="Islam">Islam</option>
-                    </select>
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className="block text-slate-500 uppercase text-[10px] tracking-wider">Nomor Induk Kependudukan (NIK)</label>
-                    <input 
-                      type="text" 
-                      value={nik}
-                      onChange={(e) => setNik(e.target.value)}
-                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 font-mono focus:outline-none focus:ring-1 focus:ring-emerald-505"
-                      placeholder="16 Digit NIK KTP/KK"
-                    />
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className="block text-slate-500 uppercase text-[10px] tracking-wider">NISN (Nomor Induk Siswa Nasional)</label>
-                    <input 
-                      type="text" 
-                      value={nisn}
-                      onChange={(e) => setNisn(e.target.value)}
-                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 font-mono focus:outline-none focus:ring-1 focus:ring-emerald-505"
-                      placeholder="Masukkan NISN jika ada"
-                    />
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className="block text-slate-500 uppercase text-[10px] tracking-wider">No Handphone / WA</label>
-                    <div className="relative">
-                      <Phone className="absolute left-3 top-2.5 w-4 h-4 text-slate-400" />
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-semibold">
+                    
+                    <div className="space-y-1.5">
+                      <label className="block text-slate-500 uppercase text-[10px] tracking-wider">Tempat Lahir</label>
                       <input 
                         type="text" 
-                        value={phone}
-                        onChange={(e) => setPhone(e.target.value)}
-                        className="w-full bg-white border border-slate-200 rounded-xl pl-9 pr-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-emerald-505 font-mono"
-                        placeholder="Contoh: 0812XXXXXXXX"
+                        value={tempatLahir}
+                        onChange={(e) => setTempatLahir(e.target.value)}
+                        className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-emerald-505"
+                        placeholder="Contoh: Magelang"
                       />
                     </div>
-                  </div>
 
-                  <div className="space-y-1.5">
-                    <label className="block text-slate-500 uppercase text-[10px] tracking-wider">Alamat Email</label>
-                    <div className="relative">
-                      <Mail className="absolute left-3 top-2.5 w-4 h-4 text-slate-400" />
+                    <div className="space-y-1.5">
+                      <label className="block text-slate-500 uppercase text-[10px] tracking-wider">Tanggal Lahir</label>
                       <input 
-                        type="email" 
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        className="w-full bg-white border border-slate-200 rounded-xl pl-9 pr-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-emerald-505"
-                        placeholder="contoh@domain.com"
+                        type="date" 
+                        value={tanggalLahir}
+                        onChange={(e) => setTanggalLahir(e.target.value)}
+                        className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-emerald-505 font-mono"
                       />
                     </div>
-                  </div>
 
-                  <div className="space-y-1.5">
-                    <label className="block text-slate-500 uppercase text-[10px] tracking-wider">Jenis Tinggal</label>
-                    <input 
-                      type="text" 
-                      value={jenisTinggal}
-                      onChange={(e) => setJenisTinggal(e.target.value)}
-                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-emerald-505"
-                      placeholder="Contoh: Asrama Mandiri, Kos, Rumah Ortu"
-                    />
-                  </div>
+                    <div className="space-y-1.5">
+                      <label className="block text-slate-500 uppercase text-[10px] tracking-wider">Jenis Kelamin</label>
+                      <select
+                        value={jenisKelamin}
+                        onChange={(e) => setJenisKelamin(e.target.value)}
+                        className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-emerald-505"
+                      >
+                        <option value="">-- Pilih Jenis Kelamin --</option>
+                        <option value="laki-laki">Laki-laki</option>
+                        <option value="perempuan">Perempuan</option>
+                      </select>
+                    </div>
 
-                </div>
+                    <div className="space-y-1.5">
+                      <label className="block text-slate-500 uppercase text-[10px] tracking-wider">Kewarganegaraan</label>
+                      <input 
+                        type="text" 
+                        value={kewarganegaraan}
+                        onChange={(e) => setKewarganegaraan(e.target.value)}
+                        className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-emerald-505"
+                        placeholder="Contoh: WNI / Indonesia"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="block text-slate-500 uppercase text-[10px] tracking-wider">Agama</label>
+                      <select
+                        value={agama}
+                        onChange={(e) => setAgama(e.target.value)}
+                        className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-emerald-505"
+                      >
+                        <option value="">-- Pilih Agama --</option>
+                        <option value="Islam">Islam</option>
+                      </select>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="block text-slate-500 uppercase text-[10px] tracking-wider">Nomor Induk Kependudukan (NIK)</label>
+                      <input 
+                        type="text" 
+                        value={nik}
+                        onChange={(e) => setNik(e.target.value)}
+                        className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 font-mono focus:outline-none focus:ring-1 focus:ring-emerald-505"
+                        placeholder="16 Digit NIK KTP/KK"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="block text-slate-500 uppercase text-[10px] tracking-wider">NISN (Nomor Induk Siswa Nasional)</label>
+                      <input 
+                        type="text" 
+                        value={nisn}
+                        onChange={(e) => setNisn(e.target.value)}
+                        className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 font-mono focus:outline-none focus:ring-1 focus:ring-emerald-505"
+                        placeholder="Masukkan NISN jika ada"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="block text-slate-500 uppercase text-[10px] tracking-wider">No Handphone / WA</label>
+                      <div className="relative">
+                        <Phone className="absolute left-3 top-2.5 w-4 h-4 text-slate-400" />
+                        <input 
+                          type="text" 
+                          value={phone}
+                          onChange={(e) => setPhone(e.target.value)}
+                          className="w-full bg-white border border-slate-200 rounded-xl pl-9 pr-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-emerald-505 font-mono"
+                          placeholder="Contoh: 0812XXXXXXXX"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="block text-slate-500 uppercase text-[10px] tracking-wider">Alamat Email</label>
+                      <div className="relative">
+                        <Mail className="absolute left-3 top-2.5 w-4 h-4 text-slate-400" />
+                        <input 
+                          type="email" 
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          className="w-full bg-white border border-slate-200 rounded-xl pl-9 pr-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-emerald-505"
+                          placeholder="contoh@domain.com"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="block text-slate-500 uppercase text-[10px] tracking-wider">Jenis Tinggal</label>
+                      <input 
+                        type="text" 
+                        value={jenisTinggal}
+                        onChange={(e) => setJenisTinggal(e.target.value)}
+                        className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-emerald-505"
+                        placeholder="Contoh: Asrama Mandiri, Kos, Rumah Ortu"
+                      />
+                    </div>
+
+                  </div>
 
                 <div className="flex justify-end pt-4 border-t border-slate-100">
                   <button
@@ -634,97 +639,97 @@ export default function ProfilView({ user, onUpdateProfile, onLogout }: ProfilVi
                   <span className="text-xs uppercase tracking-wider font-extrabold text-slate-700">Alamat Lengkap Domisili</span>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-semibold">
-                  
-                  <div className="space-y-1.5 sm:col-span-2">
-                    <label className="block text-slate-500 uppercase text-[10px] tracking-wider">Alamat Jalan</label>
-                    <input 
-                      type="text" 
-                      value={jalan}
-                      onChange={(e) => setJalan(e.target.value)}
-                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-emerald-505"
-                      placeholder="Nama Jalan, Blok, No Rumah"
-                    />
-                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-semibold">
+                    
+                    <div className="space-y-1.5 sm:col-span-2">
+                      <label className="block text-slate-500 uppercase text-[10px] tracking-wider">Alamat Jalan</label>
+                      <input 
+                        type="text" 
+                        value={jalan}
+                        onChange={(e) => setJalan(e.target.value)}
+                        className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-emerald-505"
+                        placeholder="Nama Jalan, Blok, No Rumah"
+                      />
+                    </div>
 
-                  <div className="space-y-1.5">
-                    <label className="block text-slate-500 uppercase text-[10px] tracking-wider">RT / RW</label>
-                    <input 
-                      type="text" 
-                      value={rtRw}
-                      onChange={(e) => setRtRw(e.target.value)}
-                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-emerald-505 font-mono"
-                      placeholder="RT 03 / RW 04"
-                    />
-                  </div>
+                    <div className="space-y-1.5">
+                      <label className="block text-slate-500 uppercase text-[10px] tracking-wider">RT / RW</label>
+                      <input 
+                        type="text" 
+                        value={rtRw}
+                        onChange={(e) => setRtRw(e.target.value)}
+                        className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-emerald-505 font-mono"
+                        placeholder="RT 03 / RW 04"
+                      />
+                    </div>
 
-                  <div className="space-y-1.5">
-                    <label className="block text-slate-500 uppercase text-[10px] tracking-wider">Dukuh / Dusun</label>
-                    <input 
-                      type="text" 
-                      value={dukuh}
-                      onChange={(e) => setDukuh(e.target.value)}
-                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-emerald-505"
-                      placeholder="Contoh: Krajan"
-                    />
-                  </div>
+                    <div className="space-y-1.5">
+                      <label className="block text-slate-500 uppercase text-[10px] tracking-wider">Dukuh / Dusun</label>
+                      <input 
+                        type="text" 
+                        value={dukuh}
+                        onChange={(e) => setDukuh(e.target.value)}
+                        className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-emerald-505"
+                        placeholder="Contoh: Krajan"
+                      />
+                    </div>
 
-                  <div className="space-y-1.5">
-                    <label className="block text-slate-500 uppercase text-[10px] tracking-wider">Kelurahan / Desa</label>
-                    <input 
-                      type="text" 
-                      value={kelurahan}
-                      onChange={(e) => setKelurahan(e.target.value)}
-                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-emerald-505"
-                      placeholder="Contoh: Secang"
-                    />
-                  </div>
+                    <div className="space-y-1.5">
+                      <label className="block text-slate-500 uppercase text-[10px] tracking-wider">Kelurahan / Desa</label>
+                      <input 
+                        type="text" 
+                        value={kelurahan}
+                        onChange={(e) => setKelurahan(e.target.value)}
+                        className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-emerald-505"
+                        placeholder="Contoh: Secang"
+                      />
+                    </div>
 
-                  <div className="space-y-1.5">
-                    <label className="block text-slate-500 uppercase text-[10px] tracking-wider">Kecamatan</label>
-                    <input 
-                      type="text" 
-                      value={kecamatan}
-                      onChange={(e) => setKecamatan(e.target.value)}
-                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-emerald-505"
-                      placeholder="Contoh: Grabag"
-                    />
-                  </div>
+                    <div className="space-y-1.5">
+                      <label className="block text-slate-500 uppercase text-[10px] tracking-wider">Kecamatan</label>
+                      <input 
+                        type="text" 
+                        value={kecamatan}
+                        onChange={(e) => setKecamatan(e.target.value)}
+                        className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-emerald-505"
+                        placeholder="Contoh: Grabag"
+                      />
+                    </div>
 
-                  <div className="space-y-1.5">
-                    <label className="block text-slate-500 uppercase text-[10px] tracking-wider">Kabupaten / Kota</label>
-                    <input 
-                      type="text" 
-                      value={kabupaten}
-                      onChange={(e) => setKabupaten(e.target.value)}
-                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-emerald-505"
-                      placeholder="Contoh: Magelang"
-                    />
-                  </div>
+                    <div className="space-y-1.5">
+                      <label className="block text-slate-500 uppercase text-[10px] tracking-wider">Kabupaten / Kota</label>
+                      <input 
+                        type="text" 
+                        value={kabupaten}
+                        onChange={(e) => setKabupaten(e.target.value)}
+                        className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-emerald-505"
+                        placeholder="Contoh: Magelang"
+                      />
+                    </div>
 
-                  <div className="space-y-1.5">
-                    <label className="block text-slate-500 uppercase text-[10px] tracking-wider">Provinsi</label>
-                    <input 
-                      type="text" 
-                      value={provinsi}
-                      onChange={(e) => setProvinsi(e.target.value)}
-                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-emerald-505"
-                      placeholder="Contoh: Jawa Tengah"
-                    />
-                  </div>
+                    <div className="space-y-1.5">
+                      <label className="block text-slate-500 uppercase text-[10px] tracking-wider">Provinsi</label>
+                      <input 
+                        type="text" 
+                        value={provinsi}
+                        onChange={(e) => setProvinsi(e.target.value)}
+                        className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-emerald-505"
+                        placeholder="Contoh: Jawa Tengah"
+                      />
+                    </div>
 
-                  <div className="space-y-1.5 sm:col-span-2">
-                    <label className="block text-slate-500 uppercase text-[10px] tracking-wider">Kode Pos</label>
-                    <input 
-                      type="text" 
-                      value={kodePos}
-                      onChange={(e) => setKodePos(e.target.value)}
-                      className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-emerald-505 font-mono"
-                      placeholder="Contoh: 56195"
-                    />
-                  </div>
+                    <div className="space-y-1.5 sm:col-span-2">
+                      <label className="block text-slate-500 uppercase text-[10px] tracking-wider">Kode Pos</label>
+                      <input 
+                        type="text" 
+                        value={kodePos}
+                        onChange={(e) => setKodePos(e.target.value)}
+                        className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-emerald-505 font-mono"
+                        placeholder="Contoh: 56195"
+                      />
+                    </div>
 
-                </div>
+                  </div>
 
                 <div className="flex justify-end pt-4 border-t border-slate-100">
                   <button
@@ -747,287 +752,287 @@ export default function ProfilView({ user, onUpdateProfile, onLogout }: ProfilVi
                   <span className="text-xs uppercase tracking-wider font-extrabold text-slate-700">Rincian Data Keluarga Wali</span>
                 </div>
 
-                {/* Sub Tab selection between Ayah, Ibu, Wali */}
-                <div className="flex border border-slate-200 rounded-xl overflow-hidden text-xs">
-                  <button
-                    type="button"
-                    onClick={() => setActiveParentTab('ayah')}
-                    className={`flex-1 py-2 font-bold cursor-pointer transition-colors ${
-                      activeParentTab === 'ayah' ? 'bg-slate-800 text-white' : 'bg-slate-50 hover:bg-slate-100 text-slate-600'
-                    }`}
-                  >
-                    AYAH
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setActiveParentTab('ibu')}
-                    className={`flex-1 py-2 font-bold cursor-pointer transition-colors ${
-                      activeParentTab === 'ibu' ? 'bg-slate-800 text-white' : 'bg-slate-50 hover:bg-slate-100 text-slate-600'
-                    }`}
-                  >
-                    IBU
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setActiveParentTab('wali')}
-                    className={`flex-1 py-2 font-bold cursor-pointer transition-colors ${
-                      activeParentTab === 'wali' ? 'bg-slate-800 text-white' : 'bg-slate-50 hover:bg-slate-100 text-slate-600'
-                    }`}
-                  >
-                    WALI
-                  </button>
-                </div>
+                  {/* Sub Tab selection between Ayah, Ibu, Wali */}
+                  <div className="flex border border-slate-200 rounded-xl overflow-hidden text-xs">
+                    <button
+                      type="button"
+                      onClick={() => setActiveParentTab('ayah')}
+                      className={`flex-1 py-2 font-bold cursor-pointer transition-colors ${
+                        activeParentTab === 'ayah' ? 'bg-slate-800 text-white' : 'bg-slate-50 hover:bg-slate-100 text-slate-600'
+                      }`}
+                    >
+                      AYAH
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setActiveParentTab('ibu')}
+                      className={`flex-1 py-2 font-bold cursor-pointer transition-colors ${
+                        activeParentTab === 'ibu' ? 'bg-slate-800 text-white' : 'bg-slate-50 hover:bg-slate-100 text-slate-600'
+                      }`}
+                    >
+                      IBU
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setActiveParentTab('wali')}
+                      className={`flex-1 py-2 font-bold cursor-pointer transition-colors ${
+                        activeParentTab === 'wali' ? 'bg-slate-800 text-white' : 'bg-slate-50 hover:bg-slate-100 text-slate-600'
+                      }`}
+                    >
+                      WALI
+                    </button>
+                  </div>
 
-                <div className="border border-slate-150 rounded-2xl p-5 bg-slate-50/20 space-y-4">
-                  
-                  {/* AYAH SUB-FORM */}
-                  {activeParentTab === 'ayah' && (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-semibold">
-                      <div className="space-y-1.5 sm:col-span-2">
-                        <label className="block text-slate-500 uppercase text-[10px] tracking-wider">Nama Ayah</label>
-                        <input 
-                          type="text" 
-                          value={namaAyah}
-                          onChange={(e) => setNamaAyah(e.target.value)}
-                          className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none"
-                          placeholder="Nama lengkap Ayah Kandung"
-                        />
+                  <div className="border border-slate-150 rounded-2xl p-5 bg-slate-50/20 space-y-4">
+                    
+                    {/* AYAH SUB-FORM */}
+                    {activeParentTab === 'ayah' && (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-semibold">
+                        <div className="space-y-1.5 sm:col-span-2">
+                          <label className="block text-slate-500 uppercase text-[10px] tracking-wider">Nama Ayah</label>
+                          <input 
+                            type="text" 
+                            value={namaAyah}
+                            onChange={(e) => setNamaAyah(e.target.value)}
+                            className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none"
+                            placeholder="Nama lengkap Ayah Kandung"
+                          />
+                        </div>
+
+                        <div className="space-y-1.5 font-mono">
+                          <label className="block text-slate-500 uppercase text-[10px] tracking-wider font-sans">NIK Ayah</label>
+                          <input 
+                            type="text" 
+                            value={nikAyah}
+                            onChange={(e) => setNikAyah(e.target.value)}
+                            className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none"
+                            placeholder="16 Digit NIK"
+                          />
+                        </div>
+
+                        <div className="space-y-1.5 font-mono">
+                          <label className="block text-slate-500 uppercase text-[10px] tracking-wider font-sans">Tanggal Lahir Ayah</label>
+                          <input 
+                            type="date" 
+                            value={tanggalLahirAyah}
+                            onChange={(e) => setTanggalLahirAyah(e.target.value)}
+                            className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none"
+                          />
+                        </div>
+
+                        <div className="space-y-1.5">
+                          <label className="block text-slate-500 uppercase text-[10px] tracking-wider">Pendidikan Ayah</label>
+                          <select
+                            value={pendidikanAyah}
+                            onChange={(e) => setPendidikanAyah(e.target.value)}
+                            className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none"
+                          >
+                            <option value="">-- Pilih Pendidikan --</option>
+                            <option value="SD">SD / Sederajat</option>
+                            <option value="SMP">SMP / Sederajat</option>
+                            <option value="SMA">SMA / Sederajat</option>
+                            <option value="Diploma">Diploma (D1-D4)</option>
+                            <option value="Sarjana S1">Sarjana (S1)</option>
+                            <option value="Magister S2">Magister (S2)</option>
+                            <option value="Doktor S3">Doktor (S3)</option>
+                            <option value="Tidak Sekolah">Tidak Sekolah</option>
+                          </select>
+                        </div>
+
+                        <div className="space-y-1.5">
+                          <label className="block text-slate-500 uppercase text-[10px] tracking-wider">Pekerjaan Ayah</label>
+                          <input 
+                            type="text" 
+                            value={pekerjaanAyah}
+                            onChange={(e) => setPekerjaanAyah(e.target.value)}
+                            className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none"
+                            placeholder="PNS, Karyawan, Sawah, Dagang dll"
+                          />
+                        </div>
+
+                        <div className="space-y-1.5 sm:col-span-2">
+                          <label className="block text-slate-500 uppercase text-[10px] tracking-wider">Penghasilan Ayah</label>
+                          <select
+                            value={penghasilanAyah}
+                            onChange={(e) => setPenghasilanAyah(e.target.value)}
+                            className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none font-sans"
+                          >
+                            <option value="">-- Pilih Range Penghasilan bulanan --</option>
+                            <option value="< Rp 1.000.000">&lt; Rp 1.000.000</option>
+                            <option value="Rp 1.000.000 - Rp 2.000.000">Rp 1.000.000 - Rp 2.000.000</option>
+                            <option value="Rp 2.000.000 - Rp 5.000.000">Rp 2.000.000 - Rp 5.000.000</option>
+                            <option value="> Rp 5.000.000">&gt; Rp 5.000.000</option>
+                            <option value="Tidak ada/ Tidak Bekerja">Tidak Ada Penghasilan tetap / Tidak Bekerja</option>
+                          </select>
+                        </div>
                       </div>
+                    )}
 
-                      <div className="space-y-1.5 font-mono">
-                        <label className="block text-slate-500 uppercase text-[10px] tracking-wider font-sans">NIK Ayah</label>
-                        <input 
-                          type="text" 
-                          value={nikAyah}
-                          onChange={(e) => setNikAyah(e.target.value)}
-                          className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none"
-                          placeholder="16 Digit NIK"
-                        />
+                    {/* IBU SUB-FORM */}
+                    {activeParentTab === 'ibu' && (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-semibold">
+                        <div className="space-y-1.5 sm:col-span-2">
+                          <label className="block text-slate-500 uppercase text-[10px] tracking-wider">Nama Ibu</label>
+                          <input 
+                            type="text" 
+                            value={namaIbu}
+                            onChange={(e) => setNamaIbu(e.target.value)}
+                            className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none"
+                            placeholder="Nama lengkap Ibu Kandung"
+                          />
+                        </div>
+
+                        <div className="space-y-1.5 font-mono">
+                          <label className="block text-slate-500 uppercase text-[10px] tracking-wider font-sans">NIK Ibu</label>
+                          <input 
+                            type="text" 
+                            value={nikIbu}
+                            onChange={(e) => setNikIbu(e.target.value)}
+                            className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none"
+                            placeholder="16 Digit NIK"
+                          />
+                        </div>
+
+                        <div className="space-y-1.5 font-mono">
+                          <label className="block text-slate-500 uppercase text-[10px] tracking-wider font-sans">Tanggal Lahir Ibu</label>
+                          <input 
+                            type="date" 
+                            value={tanggalLahirIbu}
+                            onChange={(e) => setTanggalLahirIbu(e.target.value)}
+                            className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none"
+                          />
+                        </div>
+
+                        <div className="space-y-1.5">
+                          <label className="block text-slate-500 uppercase text-[10px] tracking-wider">Pendidikan Ibu</label>
+                          <select
+                            value={pendidikanIbu}
+                            onChange={(e) => setPendidikanIbu(e.target.value)}
+                            className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none"
+                          >
+                            <option value="">-- Pilih Pendidikan --</option>
+                            <option value="SD">SD / Sederajat</option>
+                            <option value="SMP">SMP / Sederajat</option>
+                            <option value="SMA">SMA / Sederajat</option>
+                            <option value="Diploma">Diploma (D1-D4)</option>
+                            <option value="Sarjana S1">Sarjana (S1)</option>
+                            <option value="Magister S2">Magister (S2)</option>
+                            <option value="Doktor S3">Doktor (S3)</option>
+                            <option value="Tidak Sekolah">Tidak Sekolah</option>
+                          </select>
+                        </div>
+
+                        <div className="space-y-1.5">
+                          <label className="block text-slate-500 uppercase text-[10px] tracking-wider">Pekerjaan Ibu</label>
+                          <input 
+                            type="text" 
+                            value={pekerjaanIbu}
+                            onChange={(e) => setPekerjaanIbu(e.target.value)}
+                            className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none"
+                            placeholder="IRT, PNS, Dagang, Tani dll"
+                          />
+                        </div>
+
+                        <div className="space-y-1.5 sm:col-span-2">
+                          <label className="block text-slate-500 uppercase text-[10px] tracking-wider">Penghasilan Ibu</label>
+                          <select
+                            value={penghasilanIbu}
+                            onChange={(e) => setPekerjaanIbu(e.target.value)}
+                            className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none font-sans"
+                          >
+                            <option value="">-- Pilih Range Penghasilan bulanan --</option>
+                            <option value="< Rp 1.000.000">&lt; Rp 1.000.000</option>
+                            <option value="Rp 1.000.000 - Rp 2.000.000">Rp 1.000.000 - Rp 2.000.000</option>
+                            <option value="Rp 2.000.000 - Rp 5.000.000">Rp 2.000.000 - Rp 5.000.000</option>
+                            <option value="> Rp 5.000.000">&gt; Rp 5.000.000</option>
+                            <option value="Tidak ada/ Tidak Bekerja">Tidak Ada Penghasilan tetap / Tidak Bekerja</option>
+                          </select>
+                        </div>
                       </div>
+                    )}
 
-                      <div className="space-y-1.5 font-mono">
-                        <label className="block text-slate-500 uppercase text-[10px] tracking-wider font-sans">Tanggal Lahir Ayah</label>
-                        <input 
-                          type="date" 
-                          value={tanggalLahirAyah}
-                          onChange={(e) => setTanggalLahirAyah(e.target.value)}
-                          className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none"
-                        />
+                    {/* WALI SUB-FORM */}
+                    {activeParentTab === 'wali' && (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-semibold">
+                        <div className="space-y-1.5 sm:col-span-2">
+                          <label className="block text-slate-500 uppercase text-[10px] tracking-wider">Nama Wali (Optional)</label>
+                          <input 
+                            type="text" 
+                            value={namaWali}
+                            onChange={(e) => setNamaWali(e.target.value)}
+                            className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none"
+                            placeholder="Tulis nama wali jika ada"
+                          />
+                        </div>
+
+                        <div className="space-y-1.5 font-mono">
+                          <label className="block text-slate-500 uppercase text-[10px] tracking-wider font-sans">NIK Wali</label>
+                          <input 
+                            type="text" 
+                            value={nikWali}
+                            onChange={(e) => setNikWali(e.target.value)}
+                            className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none"
+                            placeholder="16 Digit NIK Wali"
+                          />
+                        </div>
+
+                        <div className="space-y-1.5 font-mono">
+                          <label className="block text-slate-500 uppercase text-[10px] tracking-wider font-sans">Tanggal Lahir Wali</label>
+                          <input 
+                            type="date" 
+                            value={tanggalLahirWali}
+                            onChange={(e) => setTanggalLahirWali(e.target.value)}
+                            className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none"
+                          />
+                        </div>
+
+                        <div className="space-y-1.5">
+                          <label className="block text-slate-500 uppercase text-[10px] tracking-wider">Pendidikan Wali</label>
+                          <select
+                            value={pendidikanWali}
+                            onChange={(e) => setPendidikanWali(e.target.value)}
+                            className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none"
+                          >
+                            <option value="">-- Pilih Pendidikan --</option>
+                            <option value="SD">SD / Sederajat</option>
+                            <option value="SMP">SMP / Sederajat</option>
+                            <option value="SMA">SMA / Sederajat</option>
+                            <option value="Diploma">Diploma (D1-D4)</option>
+                            <option value="Sarjana S1">Sarjana (S1)</option>
+                            <option value="Magister S2">Magister (S2)</option>
+                            <option value="Doktor S3">Doktor (S3)</option>
+                          </select>
+                        </div>
+
+                        <div className="space-y-1.5">
+                          <label className="block text-slate-500 uppercase text-[10px] tracking-wider">Pekerjaan Wali</label>
+                          <input 
+                            type="text" 
+                            value={pekerjaanWali}
+                            onChange={(e) => setPekerjaanWali(e.target.value)}
+                            className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none"
+                            placeholder="Tulis pekerjaan Wali"
+                          />
+                        </div>
+
+                        <div className="space-y-1.5 sm:col-span-2">
+                          <label className="block text-slate-500 uppercase text-[10px] tracking-wider">Penghasilan Wali</label>
+                          <select
+                            value={penghasilanWali}
+                            onChange={(e) => setPenghasilanWali(e.target.value)}
+                            className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none font-sans"
+                          >
+                            <option value="">-- Pilih Range Penghasilan bulanan --</option>
+                            <option value="< Rp 1.000.000">&lt; Rp 1.000.000</option>
+                            <option value="Rp 1.000.000 - Rp 2.000.000">Rp 1.000.000 - Rp 2.000.000</option>
+                            <option value="Rp 2.000.000 - Rp 5.000.000">Rp 2.000.000 - Rp 5.000.000</option>
+                            <option value="> Rp 5.000.000">&gt; Rp 5.000.000</option>
+                          </select>
+                        </div>
                       </div>
+                    )}
 
-                      <div className="space-y-1.5">
-                        <label className="block text-slate-500 uppercase text-[10px] tracking-wider">Pendidikan Ayah</label>
-                        <select
-                          value={pendidikanAyah}
-                          onChange={(e) => setPendidikanAyah(e.target.value)}
-                          className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none"
-                        >
-                          <option value="">-- Pilih Pendidikan --</option>
-                          <option value="SD">SD / Sederajat</option>
-                          <option value="SMP">SMP / Sederajat</option>
-                          <option value="SMA">SMA / Sederajat</option>
-                          <option value="Diploma">Diploma (D1-D4)</option>
-                          <option value="Sarjana S1">Sarjana (S1)</option>
-                          <option value="Magister S2">Magister (S2)</option>
-                          <option value="Doktor S3">Doktor (S3)</option>
-                          <option value="Tidak Sekolah">Tidak Sekolah</option>
-                        </select>
-                      </div>
-
-                      <div className="space-y-1.5">
-                        <label className="block text-slate-500 uppercase text-[10px] tracking-wider">Pekerjaan Ayah</label>
-                        <input 
-                          type="text" 
-                          value={pekerjaanAyah}
-                          onChange={(e) => setPekerjaanAyah(e.target.value)}
-                          className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none"
-                          placeholder="PNS, Karyawan, Sawah, Dagang dll"
-                        />
-                      </div>
-
-                      <div className="space-y-1.5 sm:col-span-2">
-                        <label className="block text-slate-500 uppercase text-[10px] tracking-wider">Penghasilan Ayah</label>
-                        <select
-                          value={penghasilanAyah}
-                          onChange={(e) => setPenghasilanAyah(e.target.value)}
-                          className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none font-sans"
-                        >
-                          <option value="">-- Pilih Range Penghasilan bulanan --</option>
-                          <option value="< Rp 1.000.000">&lt; Rp 1.000.000</option>
-                          <option value="Rp 1.000.000 - Rp 2.000.000">Rp 1.000.000 - Rp 2.000.000</option>
-                          <option value="Rp 2.000.000 - Rp 5.000.000">Rp 2.000.000 - Rp 5.000.000</option>
-                          <option value="> Rp 5.000.000">&gt; Rp 5.000.000</option>
-                          <option value="Tidak ada/ Tidak Bekerja">Tidak Ada Penghasilan tetap / Tidak Bekerja</option>
-                        </select>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* IBU SUB-FORM */}
-                  {activeParentTab === 'ibu' && (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-semibold">
-                      <div className="space-y-1.5 sm:col-span-2">
-                        <label className="block text-slate-500 uppercase text-[10px] tracking-wider">Nama Ibu</label>
-                        <input 
-                          type="text" 
-                          value={namaIbu}
-                          onChange={(e) => setNamaIbu(e.target.value)}
-                          className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none"
-                          placeholder="Nama lengkap Ibu Kandung"
-                        />
-                      </div>
-
-                      <div className="space-y-1.5 font-mono">
-                        <label className="block text-slate-500 uppercase text-[10px] tracking-wider font-sans">NIK Ibu</label>
-                        <input 
-                          type="text" 
-                          value={nikIbu}
-                          onChange={(e) => setNikIbu(e.target.value)}
-                          className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none"
-                          placeholder="16 Digit NIK"
-                        />
-                      </div>
-
-                      <div className="space-y-1.5 font-mono">
-                        <label className="block text-slate-500 uppercase text-[10px] tracking-wider font-sans">Tanggal Lahir Ibu</label>
-                        <input 
-                          type="date" 
-                          value={tanggalLahirIbu}
-                          onChange={(e) => setTanggalLahirIbu(e.target.value)}
-                          className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none"
-                        />
-                      </div>
-
-                      <div className="space-y-1.5">
-                        <label className="block text-slate-500 uppercase text-[10px] tracking-wider">Pendidikan Ibu</label>
-                        <select
-                          value={pendidikanIbu}
-                          onChange={(e) => setPendidikanIbu(e.target.value)}
-                          className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none"
-                        >
-                          <option value="">-- Pilih Pendidikan --</option>
-                          <option value="SD">SD / Sederajat</option>
-                          <option value="SMP">SMP / Sederajat</option>
-                          <option value="SMA">SMA / Sederajat</option>
-                          <option value="Diploma">Diploma (D1-D4)</option>
-                          <option value="Sarjana S1">Sarjana (S1)</option>
-                          <option value="Magister S2">Magister (S2)</option>
-                          <option value="Doktor S3">Doktor (S3)</option>
-                          <option value="Tidak Sekolah">Tidak Sekolah</option>
-                        </select>
-                      </div>
-
-                      <div className="space-y-1.5">
-                        <label className="block text-slate-500 uppercase text-[10px] tracking-wider">Pekerjaan Ibu</label>
-                        <input 
-                          type="text" 
-                          value={pekerjaanIbu}
-                          onChange={(e) => setPekerjaanIbu(e.target.value)}
-                          className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none"
-                          placeholder="IRT, PNS, Dagang, Tani dll"
-                        />
-                      </div>
-
-                      <div className="space-y-1.5 sm:col-span-2">
-                        <label className="block text-slate-500 uppercase text-[10px] tracking-wider">Penghasilan Ibu</label>
-                        <select
-                          value={penghasilanIbu}
-                          onChange={(e) => setPenghasilanIbu(e.target.value)}
-                          className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none font-sans"
-                        >
-                          <option value="">-- Pilih Range Penghasilan bulanan --</option>
-                          <option value="< Rp 1.000.000">&lt; Rp 1.000.000</option>
-                          <option value="Rp 1.000.000 - Rp 2.000.000">Rp 1.000.000 - Rp 2.000.000</option>
-                          <option value="Rp 2.000.000 - Rp 5.000.000">Rp 2.000.000 - Rp 5.000.000</option>
-                          <option value="> Rp 5.000.000">&gt; Rp 5.000.000</option>
-                          <option value="Tidak ada/ Tidak Bekerja">Tidak Ada Penghasilan tetap / Tidak Bekerja</option>
-                        </select>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* WALI SUB-FORM */}
-                  {activeParentTab === 'wali' && (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-semibold">
-                      <div className="space-y-1.5 sm:col-span-2">
-                        <label className="block text-slate-500 uppercase text-[10px] tracking-wider">Nama Wali (Optional)</label>
-                        <input 
-                          type="text" 
-                          value={namaWali}
-                          onChange={(e) => setNamaWali(e.target.value)}
-                          className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none"
-                          placeholder="Tulis nama wali jika ada"
-                        />
-                      </div>
-
-                      <div className="space-y-1.5 font-mono">
-                        <label className="block text-slate-500 uppercase text-[10px] tracking-wider font-sans">NIK Wali</label>
-                        <input 
-                          type="text" 
-                          value={nikWali}
-                          onChange={(e) => setNikWali(e.target.value)}
-                          className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none"
-                          placeholder="16 Digit NIK Wali"
-                        />
-                      </div>
-
-                      <div className="space-y-1.5 font-mono">
-                        <label className="block text-slate-500 uppercase text-[10px] tracking-wider font-sans">Tanggal Lahir Wali</label>
-                        <input 
-                          type="date" 
-                          value={tanggalLahirWali}
-                          onChange={(e) => setTanggalLahirWali(e.target.value)}
-                          className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none"
-                        />
-                      </div>
-
-                      <div className="space-y-1.5">
-                        <label className="block text-slate-500 uppercase text-[10px] tracking-wider">Pendidikan Wali</label>
-                        <select
-                          value={pendidikanWali}
-                          onChange={(e) => setPendidikanWali(e.target.value)}
-                          className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none"
-                        >
-                          <option value="">-- Pilih Pendidikan --</option>
-                          <option value="SD">SD / Sederajat</option>
-                          <option value="SMP">SMP / Sederajat</option>
-                          <option value="SMA">SMA / Sederajat</option>
-                          <option value="Diploma">Diploma (D1-D4)</option>
-                          <option value="Sarjana S1">Sarjana (S1)</option>
-                          <option value="Magister S2">Magister (S2)</option>
-                          <option value="Doktor S3">Doktor (S3)</option>
-                        </select>
-                      </div>
-
-                      <div className="space-y-1.5">
-                        <label className="block text-slate-500 uppercase text-[10px] tracking-wider">Pekerjaan Wali</label>
-                        <input 
-                          type="text" 
-                          value={pekerjaanWali}
-                          onChange={(e) => setPekerjaanWali(e.target.value)}
-                          className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none"
-                          placeholder="Tulis pekerjaan Wali"
-                        />
-                      </div>
-
-                      <div className="space-y-1.5 sm:col-span-2">
-                        <label className="block text-slate-500 uppercase text-[10px] tracking-wider">Penghasilan Wali</label>
-                        <select
-                          value={penghasilanWali}
-                          onChange={(e) => setPenghasilanWali(e.target.value)}
-                          className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none font-sans"
-                        >
-                          <option value="">-- Pilih Range Penghasilan bulanan --</option>
-                          <option value="< Rp 1.000.000">&lt; Rp 1.000.000</option>
-                          <option value="Rp 1.000.000 - Rp 2.000.000">Rp 1.000.000 - Rp 2.000.000</option>
-                          <option value="Rp 2.000.000 - Rp 5.000.000">Rp 2.000.000 - Rp 5.000.000</option>
-                          <option value="> Rp 5.000.000">&gt; Rp 5.000.000</option>
-                        </select>
-                      </div>
-                    </div>
-                  )}
-
-                </div>
+                  </div>
 
                 <div className="flex justify-end pt-4 border-t border-slate-100">
                   <button
